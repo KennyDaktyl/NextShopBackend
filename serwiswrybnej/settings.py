@@ -14,7 +14,8 @@ else:
 
 INSTALLED_APPS = [
     "web.apps.WebConfig",
-    "account", 
+    "account",
+    "rest_framework", 
     "django.contrib.sites",
     "django.contrib.admin",
     "django.contrib.auth",

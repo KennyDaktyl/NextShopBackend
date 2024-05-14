@@ -1,4 +1,4 @@
-from datetime import timezone
+from datetime import datetime, timedelta
 
 from django.db import models
 from django.db.models import Min
@@ -32,16 +32,19 @@ class Product(models.Model):
     @property
     def min_price_last_30(self):
         _, min_last_30 = self.current_and_min_price()
+        print(self.current_and_min_price())
         return min_last_30
 
     def current_and_min_price(self):
         current_price_obj = self.productprice_set.latest("created_date")
         current_price = current_price_obj.price
 
-        thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
+        a = datetime.now()
+        b = a - timedelta(days=30)
+
+        thirty_days_ago = datetime.now() - timedelta(days=30)
         if current_price_obj.created_date < thirty_days_ago:
             return current_price, current_price
-
         min_price = (
             self.productprice_set.exclude(pk=current_price_obj.pk)
             .filter(created_date__gte=thirty_days_ago)

@@ -1,3 +1,7 @@
+.vscode/
+.idea/
+*.iml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -148,4 +152,3 @@ dmypy.json
 .pytype/
 
 cython_debug/
-
