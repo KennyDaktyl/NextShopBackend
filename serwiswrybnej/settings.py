@@ -1,3 +1,4 @@
+from datetime import timedelta
 import os
 from pathlib import Path
 
@@ -11,6 +12,7 @@ else:
     DEBUG = False
     ALLOWED_HOSTS = ["serwiswrybnej.pl"]
 
+SITE_ID = 1
 
 INSTALLED_APPS = [
     "web.apps.WebConfig",
@@ -23,6 +25,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'drf_yasg',
+    'djoser'
 ]
 
 MIDDLEWARE = [
@@ -81,6 +85,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
@@ -115,3 +121,48 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 if os.environ.get("ENVIRONMENT") in ["production", "staging", "dev"]:
     EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "").lower() == "true"
     EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "").lower() == "true"
+
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('JWT',),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_TOKEN_CLASSES': (
+        'rest_framework_simplejwt.tokens.AccessToken',
+    )
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+DJOSER = {
+    'LOGIN_FIELD': 'username',
+    'USER_CREATE_PASSWORD_RETYPE': True,
+    'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
+    'PASSWORD_CHANGED_EMAIL_CONFIRMATION': True,
+    'SET_USERNAME_RETYPE': True,
+    'SET_PASSWORD_RETYPE': True,
+    'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
+    'USERNAME_RESET_CONFIRM_URL': 'email/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': 'activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
+    'SEND_CONFIRMATION_EMAIL': True,
+    'SERIALIZERS': {
+        'user_create': 'web.accounts.serializers.UserCreateSerializer',
+        'user': 'web.accounts.serializers.UserCreateSerializer',
+        'current_user': 'web.accounts.serializers.UserCreateSerializer',
+        'user_delete': 'djoser.serializers.UserDeleteSerializer'
+    },
+}

@@ -31,11 +31,12 @@ class ProductPrice(models.Model):
 
 class PriceGroup(models.Model):
     name = models.CharField(verbose_name="Grupa cenowa", max_length=100)
-    discount_rate = models.DecimalField(
-        verbose_name="Przyznany rabat", max_digits=5, decimal_places=2
-    )
+    discount_rate = models.IntegerField(verbose_name="Przyznany rabat w %", default=0)
 
     class Meta:
         verbose_name = "Grupa cenowa"
         verbose_name_plural = "Grupy cenowe"
         ordering = ["name"]
+
+    def __str__(self):
+        return self.name + f" - {self.discount_rate}%"

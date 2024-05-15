@@ -4,13 +4,32 @@ from django.db import models
 from django.db.models import Min
 from django.utils.text import slugify
 
+from web.models.categories import Category
+
 
 class Product(models.Model):
-    name = models.CharField("Nazwa", max_length=255)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        verbose_name="Kategoria",
+        db_index=True,
+        related_name="products",
+    )
+    name = models.CharField(
+        verbose_name="Nazwa", max_length=255, db_index=True
+    )
     slug = models.SlugField(
         "Slug", max_length=255, unique=True, blank=True, null=True
     )
-    description = models.TextField("Opis", blank=True, null=True)
+    qty = models.IntegerField(
+        verbose_name="Ilość", default=0
+    )
+    description = models.TextField(
+        verbose_name="Opis produktu", blank=True, null=True
+    )
+    is_active = models.BooleanField(
+        verbose_name="Czy aktywny", default=True
+    )
 
     class Meta:
         verbose_name = "Produkt"
@@ -38,9 +57,6 @@ class Product(models.Model):
     def current_and_min_price(self):
         current_price_obj = self.productprice_set.latest("created_date")
         current_price = current_price_obj.price
-
-        a = datetime.now()
-        b = a - timedelta(days=30)
 
         thirty_days_ago = datetime.now() - timedelta(days=30)
         if current_price_obj.created_date < thirty_days_ago:
