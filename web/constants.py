@@ -1,6 +1,5 @@
 from django.utils.translation import gettext_lazy as _
 
-
 PROFILE_STATUS = (
     (0, _("Klient")),
     (1, _("Konto firmowe")),

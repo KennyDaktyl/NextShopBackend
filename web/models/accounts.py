@@ -6,7 +6,11 @@ from web.models.prices import PriceGroup
 
 class Profile(models.Model):
     user = models.OneToOneField(
-        "auth.User", verbose_name="User", on_delete=models.CASCADE
+        "auth.User",
+        verbose_name="User",
+        on_delete=models.CASCADE,
+        db_index=True,
+        related_name="profile",
     )
     status = models.IntegerField("Status", choices=PROFILE_STATUS, default=0)
     mobile = models.CharField("Mobile", max_length=15, blank=True, null=True)
@@ -31,7 +35,12 @@ class Profile(models.Model):
     newsletter = models.BooleanField("Newsletter", default=False)
 
     price_group = models.ForeignKey(
-        PriceGroup, on_delete=models.SET_NULL, null=True, blank=True
+        PriceGroup,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_index=True,
+        related_name="profiles",
     )
 
     def __str__(self):

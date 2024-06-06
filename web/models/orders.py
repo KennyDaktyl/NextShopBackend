@@ -1,9 +1,7 @@
+from django.db import models
 from django.utils import timezone
 
-from django.db import models
-from django.utils.text import slugify
-
-from web.constants import PAYMENT_METHOD, ORDER_STATUS
+from web.constants import ORDER_STATUS, PAYMENT_METHOD
 
 
 class Order(models.Model):
@@ -12,8 +10,12 @@ class Order(models.Model):
         default=timezone.now,
         db_index=True,
     )
-    updated_date = models.DateTimeField(verbose_name="Data aktualizacji", auto_now=True)
-    order_number = models.CharField(verbose_name="Numer zamówienia", max_length=255)
+    updated_date = models.DateTimeField(
+        verbose_name="Data aktualizacji", auto_now=True
+    )
+    order_number = models.CharField(
+        verbose_name="Numer zamówienia", max_length=255
+    )
     status = models.IntegerField("Status", choices=ORDER_STATUS, default=0)
     client = models.ForeignKey(
         "auth.User",
@@ -45,12 +47,14 @@ class Order(models.Model):
     discount = models.DecimalField(
         max_digits=10, verbose_name="Rabat", decimal_places=2
     )
-    info = models.TextField(
-        verbose_name="Komentarz", null=True, blank=True
+    info = models.TextField(verbose_name="Komentarz", null=True, blank=True)
+    delivery_method = models.ForeignKey(
+        "Shipment", on_delete=models.CASCADE, verbose_name="Sposób dostawy"
     )
-    delivery_method = models.ForeignKey("Shipment", on_delete=models.CASCADE, verbose_name="Sposób dostawy")
     # Payment
-    payment_method = models.IntegerField("Status", choices=PAYMENT_METHOD, default=0)
+    payment_method = models.IntegerField(
+        "Status", choices=PAYMENT_METHOD, default=0
+    )
     payment_date = models.DateTimeField(
         verbose_name="Data płatności",
         null=True,
@@ -62,14 +66,25 @@ class Order(models.Model):
         null=True,
         blank=True,
     )
-    order_code = models.CharField(verbose_name="Kod płatności", max_length=255, null=True, blank=True)
-    
+    order_code = models.CharField(
+        verbose_name="Kod płatności", max_length=255, null=True, blank=True
+    )
+
     # Invoice
     invoice = models.BooleanField(verbose_name="Faktura", default=False)
-    email_notification = models.BooleanField(verbose_name="Czy wysyłac email", default=True)
+    email_notification = models.BooleanField(
+        verbose_name="Czy wysyłac email", default=True
+    )
 
-    overriden_invoice_number = models.CharField(verbose_name="Nadpisz numer faktury", max_length=255, null=True, blank=True)
-    overriden_invoice_date = models.DateField(verbose_name="Nadpisz datę faktury", null=True, blank=True)
+    overriden_invoice_number = models.CharField(
+        verbose_name="Nadpisz numer faktury",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    overriden_invoice_date = models.DateField(
+        verbose_name="Nadpisz datę faktury", null=True, blank=True
+    )
 
     class Meta:
         verbose_name = "Zamówienie"
@@ -78,7 +93,7 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.price} zł"
-    
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(
@@ -95,7 +110,9 @@ class OrderItem(models.Model):
         db_index=True,
         related_name="items",
     )
-    name = models.CharField(verbose_name="Nazwa", max_length=255, db_index=True)
+    name = models.CharField(
+        verbose_name="Nazwa", max_length=255, db_index=True
+    )
     qty = models.IntegerField(verbose_name="Ilość", default=1)
     price = models.DecimalField(
         max_digits=10, verbose_name="Cena", decimal_places=2
@@ -110,6 +127,8 @@ class OrderItem(models.Model):
 
     def __str__(self):
         if self.discount:
-            return self.name + f" {self.qty} x {self.price} zł ({self.discount}% rabatu)"
+            return (
+                self.name
+                + f" {self.qty} x {self.price} zł ({self.discount}% rabatu)"
+            )
         return self.name + f" {self.qty} x {self.price} zł"
-    

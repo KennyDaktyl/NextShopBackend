@@ -1,10 +1,12 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.db import models
 from django.db.models import Min
+from django.utils import timezone
 from django.utils.text import slugify
 
 from web.models.categories import Category
+from web.models.prices import ProductPrice
 
 
 class Product(models.Model):
@@ -21,15 +23,11 @@ class Product(models.Model):
     slug = models.SlugField(
         "Slug", max_length=255, unique=True, blank=True, null=True
     )
-    qty = models.IntegerField(
-        verbose_name="Ilość", default=0
-    )
+    qty = models.IntegerField(verbose_name="Ilość", default=0)
     description = models.TextField(
         verbose_name="Opis produktu", blank=True, null=True
     )
-    is_active = models.BooleanField(
-        verbose_name="Czy aktywny", default=True
-    )
+    is_active = models.BooleanField(verbose_name="Czy aktywny", default=True)
 
     class Meta:
         verbose_name = "Produkt"
@@ -45,28 +43,21 @@ class Product(models.Model):
 
     @property
     def current_price(self):
-        current, _ = self.current_and_min_price()
-        return current
+        try:
+            latest_price = self.prices.latest("created_date")
+            return latest_price.price
+        except ProductPrice.DoesNotExist:
+            return None
 
     @property
     def min_price_last_30(self):
-        _, min_last_30 = self.current_and_min_price()
-        print(self.current_and_min_price())
-        return min_last_30
-
-    def current_and_min_price(self):
-        current_price_obj = self.productprice_set.latest("created_date")
-        current_price = current_price_obj.price
-
-        thirty_days_ago = datetime.now() - timedelta(days=30)
-        if current_price_obj.created_date < thirty_days_ago:
-            return current_price, current_price
-        min_price = (
-            self.productprice_set.exclude(pk=current_price_obj.pk)
-            .filter(created_date__gte=thirty_days_ago)
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        current_price = self.current_price
+        min_price_query = (
+            self.prices.filter(created_date__gte=thirty_days_ago)
+            .exclude(price=current_price)
             .aggregate(min_price=Min("price"))["min_price"]
         )
-        if min_price is None:
-            return current_price, current_price
-
-        return current_price, min_price
+        return (
+            min_price_query if min_price_query is not None else current_price
+        )

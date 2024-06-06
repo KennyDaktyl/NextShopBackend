@@ -1,15 +1,15 @@
 from django.db import models
 from django.utils import timezone
 
-from web.models.products import Product
 
 
 class ProductPrice(models.Model):
     product = models.ForeignKey(
-        Product,
+        "Product",
         verbose_name="Produkt",
         on_delete=models.CASCADE,
         db_index=True,
+        related_name="prices",
     )
     price = models.DecimalField(
         max_digits=10, verbose_name="Cena", decimal_places=2
@@ -31,7 +31,9 @@ class ProductPrice(models.Model):
 
 class PriceGroup(models.Model):
     name = models.CharField(verbose_name="Grupa cenowa", max_length=100)
-    discount_rate = models.IntegerField(verbose_name="Przyznany rabat w %", default=0)
+    discount_rate = models.IntegerField(
+        verbose_name="Przyznany rabat w %", default=0
+    )
 
     class Meta:
         verbose_name = "Grupa cenowa"
