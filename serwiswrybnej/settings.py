@@ -7,7 +7,33 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 if os.environ.get("ENVIRONMENT") == "local":
     DEBUG = True
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = ["*"]
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOW_HEADERS = [
+        'authorization',
+        'content-type',
+        'x-requested-with',
+        'accept',
+        'origin',
+        'user-agent',
+        'access-control-allow-origin',
+    ]
+    CORS_EXPOSE_HEADERS = [
+        'Content-Type',
+        'X-CSRFToken',
+    ]
+    CORS_ALLOW_METHODS = [
+        'GET',
+        'OPTIONS',
+        'POST',
+        'PUT',
+        'PATCH',
+        'DELETE',
+    ]
 else:
     DEBUG = False
     ALLOWED_HOSTS = ["serwiswrybnej.pl"]
@@ -16,7 +42,6 @@ SITE_ID = 1
 
 INSTALLED_APPS = [
     "web.apps.WebConfig",
-    "account",
     "rest_framework", 
     "django.contrib.sites",
     "django.contrib.admin",
@@ -26,7 +51,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'drf_yasg',
-    'djoser'
+    'djoser',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -37,6 +63,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = "serwiswrybnej.urls"
@@ -123,19 +151,9 @@ if os.environ.get("ENVIRONMENT") in ["production", "staging", "dev"]:
     EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "").lower() == "true"
 
 
-SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('JWT',),
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'AUTH_TOKEN_CLASSES': (
-        'rest_framework_simplejwt.tokens.AccessToken',
-    )
-}
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -145,6 +163,34 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': False,
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=60),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}
+
 
 DJOSER = {
     'LOGIN_FIELD': 'username',
@@ -156,13 +202,17 @@ DJOSER = {
     'PASSWORD_RESET_CONFIRM_RETYPE': True,
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     'USERNAME_RESET_CONFIRM_URL': 'email/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL': 'activate/{uid}/{token}',
+    'ACTIVATION_URL': 'auth/{uid}/{token}',
+    'ACTIVATION_EXPIRATION_DAYS': 3,
     'SEND_ACTIVATION_EMAIL': True,
     'SEND_CONFIRMATION_EMAIL': True,
     'SERIALIZERS': {
-        'user_create': 'web.accounts.serializers.UserCreateSerializer',
-        'user': 'web.accounts.serializers.UserCreateSerializer',
-        'current_user': 'web.accounts.serializers.UserCreateSerializer',
+        'user_create': 'web.accounts.serializers.UserSerializer',
+        'user': 'web.accounts.serializers.LoginSerializer',
+        'current_user': 'web.accounts.serializers.LoginSerializer',
         'user_delete': 'djoser.serializers.UserDeleteSerializer'
+    },
+    'PERMISSIONS': {
+        'user_create': ['rest_framework.permissions.AllowAny'],
     },
 }

@@ -1,12 +1,13 @@
 from django.contrib.auth import authenticate, login
+
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .serializers import LoginSerializer, UserSerializer
 
-
+            
 class UserLoginView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = LoginSerializer
@@ -39,3 +40,14 @@ class UserRegistrationView(GenericAPIView):
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileView(GenericAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        serializer = UserSerializer(user)
+        print(request.headers)
+        return Response(serializer.data)

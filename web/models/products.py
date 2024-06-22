@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.conf import settings
 from django.db import models
 from django.db.models import Min
 from django.utils import timezone
@@ -27,6 +28,7 @@ class Product(models.Model):
     description = models.TextField(
         verbose_name="Opis produktu", blank=True, null=True
     )
+    image = models.ImageField("verobse_name", upload_to="products", blank=True)
     is_active = models.BooleanField(verbose_name="Czy aktywny", default=True)
 
     class Meta:
@@ -40,6 +42,11 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def get_full_image_url(self, request):
+        if self.image:
+            return request.build_absolute_uri(settings.MEDIA_URL + self.image.url)
+        return ''
 
     @property
     def current_price(self):

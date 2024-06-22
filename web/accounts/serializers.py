@@ -1,25 +1,37 @@
-from django.contrib.auth import authenticate
+# serializers.py
 from django.contrib.auth.models import User
-from djoser.serializers import UserCreateSerializer
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer, TokenCreateSerializer
 from rest_framework import serializers
+from web.models.accounts import Profile
+from django.contrib.auth import authenticate
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-class UserCreateSerializer(UserCreateSerializer):
-    class Meta(UserCreateSerializer.Meta):
+class UserCreateSerializer(BaseUserCreateSerializer):
+    class Meta(BaseUserCreateSerializer.Meta):
         model = User
-        fields = ("username", "password")
+        fields = ("username", "email", "password", "re_password")
 
+    def create(self, validated_data):
+        print("UserCreateSerializer create method called")
+        print(validated_data)
+        user = User.objects.create_user(**validated_data)
+        Profile.objects.create(user=user)
+        return user
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
-    password = serializers.CharField()
+    password = serializers.CharField(style={'input_type': 'password'}, trim_whitespace=False)
 
     def validate(self, data):
         username = data.get("username")
         password = data.get("password")
 
+        print("LoginSerializer validate method called")
         if username and password:
-            user = authenticate(username=username, password=password)
+            user = authenticate(request=self.context.get('request'), username=username, password=password)
             if user:
                 if user.is_active:
                     data["user"] = user
@@ -34,13 +46,29 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(msg)
         return data
 
-
-class UserSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
+        model = Profile
+        fields = "__all__"
+        
+class UserSerializer(BaseUserCreateSerializer):
+    profile = ProfileSerializer()
+
+    class Meta(BaseUserCreateSerializer.Meta):
         model = User
-        fields = ["username", "email", "password"]
+        fields = ["id", "username", "email", "profile"]
         extra_kwargs = {"password": {"write_only": True}}
 
-    def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
-        return user
+
+class TokenCreateSerializer(TokenCreateSerializer):
+
+    def validate(self, attrs):
+        refresh = attrs.get("refresh")
+        access = attrs.get("access")
+        logger.info("UserCreateSerializer create method called")
+
+        if not refresh or not access:
+            msg = "Both refresh and access tokens are required"
+            raise serializers.ValidationError(msg)
+
+        return attrs

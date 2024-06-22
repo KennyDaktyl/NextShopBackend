@@ -1,4 +1,7 @@
-from rest_framework import generics, permissions, status
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from web.models.orders import Order, OrderItem
@@ -7,27 +10,26 @@ from .serializers import (CreateOrderSerializer, OrderItemSerializer,
                           OrderSerializer)
 
 
-class OrderListView(generics.ListAPIView):
+class OrderListView(ListAPIView):
     serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
         return Order.objects.filter(client=user)
 
 
-class CreateOrderView(generics.CreateAPIView):
+class CreateOrderView(CreateAPIView):
     serializer_class = CreateOrderSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
         serializer.save(client=self.request.user)
 
 
-class OrderDetailsView(generics.RetrieveAPIView):
-    queryset = Order.objects.all()
+class OrderDetailsView(RetrieveAPIView):
     serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
@@ -37,7 +39,7 @@ class OrderDetailsView(generics.RetrieveAPIView):
             return Order.objects.none()
 
 
-class AddOrderItems(generics.CreateAPIView):
+class AddOrderItems(CreateAPIView):
     serializer_class = OrderItemSerializer
 
     def post(self, request, *args, **kwargs):
@@ -67,7 +69,7 @@ class AddOrderItems(generics.CreateAPIView):
             )
 
 
-class UpdateOrderItem(generics.UpdateAPIView):
+class UpdateOrderItem(UpdateAPIView):
     serializer_class = OrderItemSerializer
 
     def get_queryset(self):
@@ -84,7 +86,7 @@ class UpdateOrderItem(generics.UpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class DeleteOrderItem(generics.DestroyAPIView):
+class DeleteOrderItem(DestroyAPIView):
     serializer_class = OrderItemSerializer
 
     def get_queryset(self):
@@ -92,7 +94,7 @@ class DeleteOrderItem(generics.DestroyAPIView):
 
     def get_object(self):
         queryset = self.get_queryset()
-        obj = generics.get_object_or_404(
+        obj = get_object_or_404(
             queryset, order_id=self.kwargs.get("pk")
         )
         return obj
