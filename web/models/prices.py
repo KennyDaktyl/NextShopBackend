@@ -2,7 +2,6 @@ from django.db import models
 from django.utils import timezone
 
 
-
 class ProductPrice(models.Model):
     product = models.ForeignKey(
         "Product",

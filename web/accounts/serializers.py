@@ -1,10 +1,13 @@
 # serializers.py
-from django.contrib.auth.models import User
-from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer, TokenCreateSerializer
-from rest_framework import serializers
-from web.models.accounts import Profile
-from django.contrib.auth import authenticate
 import logging
+
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from djoser.serializers import TokenCreateSerializer
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from rest_framework import serializers
+
+from web.models.accounts import Profile
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +24,12 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         Profile.objects.create(user=user)
         return user
 
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
-    password = serializers.CharField(style={'input_type': 'password'}, trim_whitespace=False)
+    password = serializers.CharField(
+        style={"input_type": "password"}, trim_whitespace=False
+    )
 
     def validate(self, data):
         username = data.get("username")
@@ -31,7 +37,11 @@ class LoginSerializer(serializers.Serializer):
 
         print("LoginSerializer validate method called")
         if username and password:
-            user = authenticate(request=self.context.get('request'), username=username, password=password)
+            user = authenticate(
+                request=self.context.get("request"),
+                username=username,
+                password=password,
+            )
             if user:
                 if user.is_active:
                     data["user"] = user
@@ -46,11 +56,13 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(msg)
         return data
 
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = "__all__"
-        
+
+
 class UserSerializer(BaseUserCreateSerializer):
     profile = ProfileSerializer()
 

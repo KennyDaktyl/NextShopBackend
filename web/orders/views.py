@@ -1,7 +1,9 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.generics import (CreateAPIView, DestroyAPIView,
+                                     ListAPIView, RetrieveAPIView,
+                                     UpdateAPIView)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from web.models.orders import Order, OrderItem
@@ -94,9 +96,7 @@ class DeleteOrderItem(DestroyAPIView):
 
     def get_object(self):
         queryset = self.get_queryset()
-        obj = get_object_or_404(
-            queryset, order_id=self.kwargs.get("pk")
-        )
+        obj = get_object_or_404(queryset, order_id=self.kwargs.get("pk"))
         return obj
 
     def delete(self, request, *args, **kwargs):

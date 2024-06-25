@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.db import models
 from django.db.models import Min
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -42,11 +43,13 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     def get_full_image_url(self, request):
         if self.image:
-            return request.build_absolute_uri(settings.MEDIA_URL + self.image.url)
-        return ''
+            return request.build_absolute_uri(
+                settings.MEDIA_URL + self.image.url
+            )
+        return ""
 
     @property
     def current_price(self):
@@ -68,3 +71,8 @@ class Product(models.Model):
         return (
             min_price_query if min_price_query is not None else current_price
         )
+
+    def get_absolute_url(self):
+        category_path = self.category.get_full_path()
+        return f"{category_path}/{self.slug}"
+    

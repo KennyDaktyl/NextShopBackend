@@ -1,6 +1,7 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin 
+
 from web.models.accounts import Profile
 from web.models.carts import Cart, CartItem
 from web.models.categories import Category
@@ -11,16 +12,25 @@ from web.models.shipments import Shipment
 
 
 class CustomUserAdmin(BaseUserAdmin):
-    list_display = ('id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined')
-    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
-    search_fields = ('username', 'email', 'first_name', 'last_name')
-    ordering = ('-id',)  
-    readonly_fields = ('date_joined',)
+    list_display = (
+        "id",
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "is_staff",
+        "date_joined",
+    )
+    list_filter = ("is_staff", "is_superuser", "is_active", "groups")
+    search_fields = ("username", "email", "first_name", "last_name")
+    ordering = ("-id",)
+    readonly_fields = ("date_joined",)
+
 
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
-    
-    
+
+
 @admin.register(PriceGroup)
 class PriceGroupAdmin(admin.ModelAdmin):
     list_display = [f.name for f in PriceGroup._meta.fields]
