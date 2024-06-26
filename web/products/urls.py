@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (MenuItemsView, ProductDetailView, ProductListView,
-                    ProductsByCategorySlugView)
+                    ProductsByCategorySlugView, CategoryMetaDataView)
 
 urlpatterns = [
     path("", ProductListView.as_view(), name="product-list"),
@@ -14,6 +14,11 @@ urlpatterns = [
         "category/<slug:slug>/",
         ProductsByCategorySlugView.as_view(),
         name="products-by-category",
+    ),
+    path(
+        "category-meta/<slug:slug>/",
+        CategoryMetaDataView.as_view(),
+        name="category-meta",
     ),
     path(
         "<slug:slug>/",

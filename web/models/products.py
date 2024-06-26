@@ -38,7 +38,8 @@ class Product(models.Model):
         ordering = ["name"]
 
     def save(self):
-        self.slug = slugify(self.name.replace("ł", "l").replace("Ł", "L"))
+        name_slug = slugify(self.name.replace("ł", "l").replace("Ł", "L"))
+        self.slug = f"{name_slug}-id-{self.id}"
         return super().save()
 
     def __str__(self):

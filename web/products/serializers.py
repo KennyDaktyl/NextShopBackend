@@ -15,16 +15,18 @@ class CategorySerializer(serializers.ModelSerializer):
             "id",
             "name",
             "slug",
+            "description",
             "has_parent",
             "is_parent",
             "get_products_count",
+            "has_children",
             "full_path",
             "back_link",
         )
 
     def get_is_parent(self, obj):
         return obj.children.exists()
-
+    
     def get_full_path(self, obj):
         return obj.get_full_path()
 
@@ -32,8 +34,27 @@ class CategorySerializer(serializers.ModelSerializer):
         return obj.get_back_link()
 
 
+class CategoryMetaDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = (
+            "name",
+            "description",
+        )
+        
+
+class ProductCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = (
+            "id",
+            "name",
+            "slug",
+        )
+        
+        
 class ProductSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
+    category = ProductCategorySerializer()
     current_price = serializers.DecimalField(
         max_digits=10, decimal_places=2, read_only=True
     )
