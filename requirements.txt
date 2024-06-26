@@ -8,6 +8,7 @@ cryptography==42.0.8
 defusedxml==0.8.0rc2
 Django==5.0.6
 django-appconf==1.0.6
+django-cors-headers==4.3.1
 django-templated-mail==1.1.1
 django-user-accounts==3.3.2
 djangorestframework==3.15.1
@@ -23,6 +24,7 @@ mypy-extensions==1.0.0
 oauthlib==3.2.2
 packaging==24.0
 pathspec==0.12.1
+pillow==10.3.0
 platformdirs==4.2.2
 psycopg2==2.9.9
 pycodestyle==2.11.1
