@@ -19,6 +19,15 @@ class Product(models.Model):
         db_index=True,
         related_name="products",
     )
+    prev_category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        verbose_name="Poprzednia kategoria",
+        db_index=True,
+        related_name="prev_products",
+        null=True,
+        blank=True,
+    )
     name = models.CharField(
         verbose_name="Nazwa", max_length=255, db_index=True
     )
@@ -38,6 +47,10 @@ class Product(models.Model):
         ordering = ["name"]
 
     def save(self):
+        if self.pk:
+            old_product = Product.objects.get(pk=self.pk)
+            if old_product.category != self.category:
+                self.prev_category = old_product.category
         name_slug = slugify(self.name.replace("ł", "l").replace("Ł", "L"))
         self.slug = f"{name_slug}-id-{self.id}"
         return super().save()
@@ -74,6 +87,5 @@ class Product(models.Model):
         )
 
     def get_absolute_url(self):
-        category_path = self.category.get_full_path()
-        return f"{category_path}/{self.slug}"
+        return f"/produkt/{self.slug}"
     

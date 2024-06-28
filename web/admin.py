@@ -69,6 +69,12 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductPriceInline]
     list_display = [f.name for f in Product._meta.fields]
     search_fields = ["name", "pk"]
+    
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if 'parent' in form.base_fields:
+            form.base_fields['parent'].queryset = Category.objects.filter(children__isnull=True)
+        return form
 
 
 admin.register(ProductPrice)

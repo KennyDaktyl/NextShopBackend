@@ -29,7 +29,7 @@ class ProductListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Product.objects.filter(is_active=True)
         return queryset
-
+    
 
 class MenuItemsView(generics.RetrieveAPIView):
     serializer_class = CategorySerializer

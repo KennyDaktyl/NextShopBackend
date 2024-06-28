@@ -216,3 +216,33 @@ DJOSER = {
         'user_create': ['rest_framework.permissions.AllowAny'],
     },
 }
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'django.log',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'DEBUG',
+    },
+    'loggers': {
+        # 'django': {
+        #     'handlers': ['console', 'file'],
+        #     'level': 'DEBUG',
+        #     'propagate': True,
+        # },
+        'web': { 
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
