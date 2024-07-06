@@ -7,3 +7,5 @@ class WebConfig(AppConfig):
     
     def ready(self):
         import web.products.signals
+        import web.images.signals
+        import web.categories.signals

@@ -5,9 +5,10 @@ from django.contrib.auth.models import User
 from web.models.accounts import Profile
 from web.models.carts import Cart, CartItem
 from web.models.categories import Category
+from web.models.images import Photo, Thumbnail
 from web.models.orders import Order, OrderItem
 from web.models.prices import PriceGroup, ProductPrice
-from web.models.products import Product
+from web.models.products import Brand, Material, Product, ProductVariant, Size, Tag
 from web.models.shipments import Shipment
 
 
@@ -217,3 +218,47 @@ class OrderItemAdmin(admin.ModelAdmin):
             },
         ),
     )
+
+
+@admin.register(Thumbnail)
+class ThumbnailAdmin(admin.ModelAdmin):
+    list_display = ('id', 'width', 'height', 'product', 'category', 'photo', 'image')
+    search_fields = ('size', 'product__name', 'category__name', 'photo__description')
+    list_filter = ('width_expected', 'height_expected', 'main')
+
+
+@admin.register(Photo)
+class PhotoAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'order', 'product', 'variant', 'category', 'image')
+    search_fields = ('product_name', 'category_name', 'photo_name')
+    
+
+@admin.register(Brand)
+class BrandAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+    search_fields = ('name',)
+    
+
+@admin.register(Size)
+class SizeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+    search_fields = ('name',)
+
+
+@admin.register(Material)
+class MaterialAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+    search_fields = ('name',)
+    
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+    search_fields = ('name',)
+
+
+@admin.register(ProductVariant)
+class ProductVariantAdmin(admin.ModelAdmin):
+    list_display = ('id', 'product', 'name', 'size', 'material', 'qty')
+    search_fields = ('product__name', 'size__name', 'material__name')
+    list_filter = ('size', 'material')
