@@ -27,3 +27,19 @@ ORDER_STATUS = (
     (10, _("Zrealizowane")),
     (11, _("Anulowane")),
 )
+
+VARIANT_COLORS = (
+    (0, _("Brak koloru")),
+    (1, _("Biały")),
+    (2, _("Szary")),
+    (3, _("Czerwony")),
+    (4, _("Niebieski")),
+    (5, _("Zielony")),
+    (6, _("Żółty")),
+    (7, _("Pomarańczowy")),
+    (8, _("Brązowy")),
+    (9, _("Różowy")),
+    (10, _("Fioletowy")),
+    (11, _("Beżowy")),
+    (12, _("Czarny")),
+)
