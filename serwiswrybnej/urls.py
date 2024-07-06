@@ -36,6 +36,8 @@ urlpatterns = [
     # path('login/', UserLoginView.as_view(), name='user-login'),
     # path('register/', UserRegistrationView.as_view(), name='user-registration'),
 
+    # Categories
+    path("api/categories/", include("web.categories.urls")),
     # Products
     path("api/products/", include("web.products.urls")),
     path("api/orders/", include("web.orders.urls")),
