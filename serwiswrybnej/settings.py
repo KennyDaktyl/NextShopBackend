@@ -9,11 +9,11 @@ if os.environ.get("ENVIRONMENT") == "local":
     DEBUG = True
     ALLOWED_HOSTS = ["*"]
     CORS_ALLOWED_ORIGINS = [
--        "http://localhost:3000",
--        "http://127.0.0.1:3000",
-+        "http://localhost:3010",
-+        "http://127.0.0.1:3010",
-+        "http://51.75.64.242:3010"
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3010",
+        "http://127.0.0.1:3010",
+        "http://51.75.64.242:3010"
     ]
 
     CORS_ALLOW_ALL_ORIGINS = True
