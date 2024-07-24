@@ -1,3 +1,4 @@
+import os
 from web.models.categories import Category
 
 import requests
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender=Category)
 @receiver(post_delete, sender=Category)
 def revalidate_product_cache(sender, instance, **kwargs):
-    next_js_url = 'http://localhost:3000/api/webhooks/revalidate'
+    next_js_url = os.environ.get("EMAIL_HOST") + "/api/webhooks/revalidate"
     try:
         tags = []
         main_products_tag = 'products'
