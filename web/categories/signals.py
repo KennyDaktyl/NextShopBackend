@@ -21,8 +21,10 @@ def revalidate_product_cache(sender, instance, **kwargs):
         
         current_category = instance
         while current_category:
-            menu_items_category = f'products-{current_category.slug}'
-            tags.append(menu_items_category)
+            products_category = f'products-{current_category.slug}'
+            tags.append(products_category)
+            menu_items = f"menu-items-{current_category.slug}"
+            tags.append(menu_items)
             current_category = current_category.parent
         
         response = requests.post(next_js_url, json={"tags": tags})
