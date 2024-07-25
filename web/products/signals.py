@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender=Product)
 @receiver(post_delete, sender=Product)
 def revalidate_product_cache(sender, instance, **kwargs):
-    next_js_url = os.environ.get("EMAIL_HOST") + "/api/webhooks/revalidate"
+    next_js_url = os.environ.get("NEXTJS_BASE_URL") + "/api/webhooks/revalidate"
     try:
         tags = []
         main_products_tag = 'products'
@@ -46,7 +46,7 @@ def revalidate_product_cache(sender, instance, **kwargs):
 @receiver(post_save, sender=ProductVariant)
 @receiver(post_delete, sender=ProductVariant)
 def revalidate_product_cache(sender, instance, **kwargs):
-    next_js_url = os.environ.get("EMAIL_HOST") + "/api/webhooks/revalidate"
+    next_js_url = os.environ.get("NEXTJS_BASE_URL") + "/api/webhooks/revalidate"
     try:
         tags = []
         main_products_tag = 'products'
