@@ -7,14 +7,16 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 
 CORS_ALLOWED_ORIGINS = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:3010",
-        "http://127.0.0.1:3010",
-        "http://51.75.64.242:3010",
-        "new-serwiswrybnej-api.resto-app.pl"
-    ]
-
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3010",
+    "http://127.0.0.1:3010",
+    "http://51.75.64.242:3010",
+    "https://new-serwiswrybnej-api.resto-app.pl"
+]
+CSRF_TRUSTED_ORIGINS = [
+    "https://new-serwiswrybnej-api.resto-app.pl"
+]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_HEADERS = [
     'authorization',
