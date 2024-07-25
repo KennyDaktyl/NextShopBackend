@@ -5,42 +5,46 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
-if os.environ.get("ENVIRONMENT") == "local":
-    DEBUG = True
-    ALLOWED_HOSTS = ["*"]
-    CORS_ALLOWED_ORIGINS = [
+
+CORS_ALLOWED_ORIGINS = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:3010",
         "http://127.0.0.1:3010",
-        "http://51.75.64.242:3010"
+        "http://51.75.64.242:3010",
+        "new-serwiswrybnej-api.resto-app.pl"
     ]
 
-    CORS_ALLOW_ALL_ORIGINS = True
-    CORS_ALLOW_HEADERS = [
-        'authorization',
-        'content-type',
-        'x-requested-with',
-        'accept',
-        'origin',
-        'user-agent',
-        'access-control-allow-origin',
-    ]
-    CORS_EXPOSE_HEADERS = [
-        'Content-Type',
-        'X-CSRFToken',
-    ]
-    CORS_ALLOW_METHODS = [
-        'GET',
-        'OPTIONS',
-        'POST',
-        'PUT',
-        'PATCH',
-        'DELETE',
-    ]
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_HEADERS = [
+    'authorization',
+    'content-type',
+    'x-requested-with',
+    'accept',
+    'origin',
+    'user-agent',
+    'access-control-allow-origin',
+]
+CORS_EXPOSE_HEADERS = [
+    'Content-Type',
+    'X-CSRFToken',
+]
+CORS_ALLOW_METHODS = [
+    'GET',
+    'OPTIONS',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+]
+    
+if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
+    DEBUG = True
+    ALLOWED_HOSTS = ["*"]
+   
 else:
     DEBUG = False
-    ALLOWED_HOSTS = ["serwiswrybnej.pl", "51.75.64.242"]
+    ALLOWED_HOSTS = ["serwiswrybnej.pl", "51.75.64.242", "new-serwiswrybnej-api.resto-app.pl"]
 
 SITE_ID = 1
 
