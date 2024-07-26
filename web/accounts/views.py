@@ -48,5 +48,4 @@ class UserProfileView(GenericAPIView):
     def get(self, request):
         user = request.user
         serializer = UserSerializer(user)
-        print(request.headers)
         return Response(serializer.data)

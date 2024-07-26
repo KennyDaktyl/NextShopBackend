@@ -33,10 +33,11 @@ class SizeSerializer(serializers.ModelSerializer):
 class ProductVariantSerializer(serializers.ModelSerializer):
     color = serializers.SerializerMethodField()
     images = ThumbnailSerializer(many=True)
-
+    tags = TagSerializer(many=True)
+    
     class Meta:
         model = ProductVariant
-        fields = ['id', 'product', 'name', 'slug', 'color', 'size', 'qty', 'images']
+        fields = ['id', 'product', 'name', 'slug', 'color', 'size', 'qty', 'images', 'tags', "is_main"]
 
     def get_color(self, obj):
         return obj.get_color_display()
@@ -81,6 +82,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             "size",
             "current_price",
             "min_price_last_30",
+            "show_variant_label",
+            "variant_label"
         )
     
     def get_color(self, obj):
@@ -113,7 +116,9 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             "current_price",
             "min_price_last_30",
             "absolute_url",
-            "variants"
+            "variants",
+            "show_variant_label",
+            "variant_label"
         )
 
     # def get_full_image_url(self, obj):

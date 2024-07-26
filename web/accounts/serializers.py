@@ -18,8 +18,6 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         fields = ("username", "email", "password", "re_password")
 
     def create(self, validated_data):
-        print("UserCreateSerializer create method called")
-        print(validated_data)
         user = User.objects.create_user(**validated_data)
         Profile.objects.create(user=user)
         return user
@@ -35,7 +33,6 @@ class LoginSerializer(serializers.Serializer):
         username = data.get("username")
         password = data.get("password")
 
-        print("LoginSerializer validate method called")
         if username and password:
             user = authenticate(
                 request=self.context.get("request"),
