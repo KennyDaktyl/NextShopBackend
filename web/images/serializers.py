@@ -11,7 +11,6 @@ class ThumbnailSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, obj):
         request = self.context.get('request')
-        print(obj.image)
         if obj.image:
             return request.build_absolute_uri(obj.image.url)
         return None

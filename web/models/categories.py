@@ -108,7 +108,7 @@ class Category(models.Model):
 
     @property
     def has_children(self):
-        return True if self.children.filter(is_active=True).exists() else False
+        return self.children.filter(is_active=True).exists()
     
     def get_full_image_url(self, request):
         if self.image:

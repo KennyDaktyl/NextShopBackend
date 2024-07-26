@@ -2,7 +2,7 @@ from datetime import timedelta
 import os
 
 from django.conf import settings
-from django.db import models
+from django.db import IntegrityError, models
 from django.db.models import Min
 from django.dispatch import receiver
 from django.urls import reverse
@@ -100,6 +100,9 @@ class Product(models.Model):
     image = models.ImageField(verbose_name="Zdjęcie główne", upload_to="products", blank=True)
     is_active = models.BooleanField(verbose_name="Czy aktywny", default=True)
     thumbnails = models.JSONField(default=dict, blank=True, null=True)
+    
+    variant_label = models.CharField(verbose_name="Etykieta wariantu", max_length=255, blank=True, null=True)
+    show_variant_label = models.BooleanField(verbose_name="Pokazuj etykietę wariantu", default=False)
 
     class Meta:
         verbose_name = "Produkt"
@@ -126,21 +129,41 @@ class Product(models.Model):
 
             if old_product.name != self.name:
                 old_name = old_product.name
-
-        if is_new_instance or old_name != self.name:
-            self.slug = f"{slugify(self.name.replace('ł', 'l').replace('Ł', 'L'))}-id-{self.id}"
-
         
         if old_image and old_image != self.image:
             thumbs = self.product_thumbnails.filter(main=True)
             if thumbs:
                 thumbs.delete()
-
-        if is_new_instance or old_image != self.image and self.image:
-            self.thumbnails = generate_thumbnails(self, True, False, "product", self.image)
-
         super().save(*args, **kwargs)
         
+        if is_new_instance or old_name != self.name or self.slug is None:
+            self.slug = f"{slugify(self.name.replace('ł', 'l').replace('Ł', 'L'))}-id-{self.id}"
+        
+        if is_new_instance or old_image != self.image and self.image:
+            if self.image:
+                self.thumbnails = generate_thumbnails(self, True, False, "product", self.image)
+            
+        if is_new_instance:
+            if self.show_variant_label:
+                try:
+                    # Sprawdzanie, czy ProductVariant już istnieje
+                    variant = ProductVariant()
+                    variant.product = self
+                    variant.name = "Domyślny"
+                    variant.slug="domyslny"
+                    variant.color=self.color
+                    variant.qty=self.qty
+                    variant.is_main=True
+                    variant.image=self.image
+                    variant.thumbnails=self.thumbnails
+                    variant.save()
+                except IntegrityError as e:
+                    # Logowanie błędu dla lepszego zrozumienia problemu
+                    print(f"IntegrityError podczas tworzenia ProductVariant: {e}")
+                    raise
+                
+        super().save(*args, **kwargs)
+            
         
     def __str__(self):
         return self.name
@@ -175,6 +198,8 @@ class Product(models.Model):
 
     @property
     def images(self):
+        if self.show_variant_label:
+            return self.product_thumbnails.filter(width_expected=650, height_expected=650, main=False)
         return self.product_thumbnails.filter(width_expected=650, height_expected=650)
     
     @property
@@ -192,7 +217,7 @@ class Product(models.Model):
 class ProductVariant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
     name = models.CharField(max_length=255, verbose_name='Nazwa wariantu')
-    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
+    slug = models.SlugField(max_length=255, blank=True, null=True)
     order = models.IntegerField(verbose_name='Kolejność', default=1)
     color = models.IntegerField(verbose_name='Kolor wariantu', choices=VARIANT_COLORS, default=0)
     size = models.ForeignKey('Size', verbose_name='Rozmiar', on_delete=models.CASCADE, blank=True, null=True)
@@ -200,12 +225,13 @@ class ProductVariant(models.Model):
     qty = models.IntegerField(verbose_name='Ilość', default=0)
     image = models.ImageField(verbose_name='Zdjęcie wariantu', upload_to='variants', blank=True)
     thumbnails = models.JSONField(default=dict, blank=True, null=True)
+    tags = models.ManyToManyField('Tag', verbose_name="Tagi", blank=True)
     is_main = models.BooleanField(verbose_name='Czy główny', default=False)
 
     class Meta:
         verbose_name = 'Wariant produktu'
         verbose_name_plural = 'Warianty produktów'
-        ordering = ['name']
+        ordering = ['-is_main', 'order', 'name']
 
     def save(self, *args, **kwargs):
         is_new_instance = not self.pk
@@ -225,12 +251,14 @@ class ProductVariant(models.Model):
         if is_new_instance or old_image != self.image and self.image:
             if is_new_instance:
                 super().save(*args, **kwargs)
-            file_name = self.product.slug + "-wariant-" + self.name
-            self.thumbnails = generate_thumbnails(self, False, self.order, 'variant', self.image, file_name=file_name)
+            if self.image:
+                file_name = self.product.slug + "-wariant-" + self.name
+                self.thumbnails = generate_thumbnails(self, False, self.order, 'variant', self.image, file_name=file_name)
         if old_name != self.name:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
-
+        
+        
     def __str__(self):
         return f'{self.product.name} - {self.name}'
     

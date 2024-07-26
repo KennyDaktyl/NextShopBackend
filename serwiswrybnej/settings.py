@@ -157,8 +157,7 @@ SERVER_EMAIL = os.environ.get("EMAIL_HOST")
 DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_USER")
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 if os.environ.get("ENVIRONMENT") in ["production", "staging", "dev"]:
-    EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "").lower() == "true"
-    EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "").lower() == "true"
+    EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "").lower() == "false"
 
 
 REST_FRAMEWORK = {

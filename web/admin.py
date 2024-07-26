@@ -65,16 +65,20 @@ class ProductPriceInline(admin.TabularInline):
     extra = 1
 
 
+class ProductVariantInline(admin.TabularInline):
+    model = ProductVariant
+    extra = 1
+    
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    inlines = [ProductPriceInline]
+    inlines = [ProductVariantInline, ProductPriceInline]
     list_display = [f.name for f in Product._meta.fields]
     search_fields = ["name", "pk"]
     
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
-        if 'parent' in form.base_fields:
-            form.base_fields['parent'].queryset = Category.objects.filter(children__isnull=True)
+        if 'category' in form.base_fields:
+            form.base_fields['category'].queryset = Category.objects.filter(children__isnull=True)
         return form
 
 
@@ -222,7 +226,7 @@ class OrderItemAdmin(admin.ModelAdmin):
 
 @admin.register(Thumbnail)
 class ThumbnailAdmin(admin.ModelAdmin):
-    list_display = ('id', 'width', 'height', 'product', 'category', 'photo', 'image')
+    list_display = ('id', 'width', 'height', 'product', 'category', 'product_variant', 'photo', 'image')
     search_fields = ('size', 'product__name', 'category__name', 'photo__description')
     list_filter = ('width_expected', 'height_expected', 'main')
 
