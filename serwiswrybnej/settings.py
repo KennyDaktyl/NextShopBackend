@@ -43,10 +43,65 @@ CORS_ALLOW_METHODS = [
 if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
     DEBUG = True
     ALLOWED_HOSTS = ["*"]
-   
+    CORS_ALLOW_CREDENTIALS = True
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",  # Twoja domena frontendowa
+        "http://127.0.0.1:3000",  # Dodaj to, jeśli testujesz lokalnie
+    ]
+
+    SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+    SESSION_COOKIE_AGE = 86400
+    SESSION_COOKIE_NAME = 'sessionid'
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    CSRF_COOKIE_SECURE = False  
 else:
     DEBUG = False
     ALLOWED_HOSTS = ["serwiswrybnej.pl", "51.75.64.242", "new-serwiswrybnej-api.resto-app.pl"]
+    SESSION_COOKIE_SAMESITE = "Lax"  
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_AGE = 86400
+    SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+        
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3010",
+        "http://127.0.0.1:3010",
+        "http://51.75.64.242:3010",
+        "https://new-serwiswrybnej-api.resto-app.pl"
+    ]
+
+    CSRF_TRUSTED_ORIGINS = [
+        "https://new-serwiswrybnej-api.resto-app.pl"
+    ]
+
+    CORS_ALLOW_CREDENTIALS = True
+
+    CORS_ALLOW_HEADERS = [
+        'authorization',
+        'content-type',
+        'x-requested-with',
+        'accept',
+        'origin',
+        'user-agent',
+        'access-control-allow-origin',
+    ]
+
+    CORS_EXPOSE_HEADERS = [
+        'Content-Type',
+        'X-CSRFToken',
+    ]
+
+    CORS_ALLOW_METHODS = [
+        'GET',
+        'OPTIONS',
+        'POST',
+        'PUT',
+        'PATCH',
+        'DELETE',
+    ]
 
 SITE_ID = 1
 
@@ -75,6 +130,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    "serwiswrybnej.middleware.LogRequestMiddleware"
 ]
 
 ROOT_URLCONF = "serwiswrybnej.urls"
@@ -255,3 +311,4 @@ LOGGING = {
         },
     },
 }
+
