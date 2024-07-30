@@ -38,6 +38,8 @@ urlpatterns = [
 
     # Categories
     path("api/categories/", include("web.categories.urls")),
+    # Carts
+    path('api/carts/', include("web.carts.urls")),
     # Products
     path("api/products/", include("web.products.urls")),
     path("api/orders/", include("web.orders.urls")),
