@@ -9,7 +9,11 @@ from web.models.products import Product
 from web.products.serializers import ProductListItemSerializer
 from web.products.views import ProductPagination
 
-from .serializers import CategoryMetaDataSerializer, CategorySerializer, ProductsByCategorySerializer
+from .serializers import (
+    CategoryMetaDataSerializer,
+    CategorySerializer,
+    ProductsByCategorySerializer,
+)
 
 
 class MenuItemsView(generics.RetrieveAPIView):
@@ -35,9 +39,11 @@ class MenuItemsView(generics.RetrieveAPIView):
         subcategories = Category.objects.filter(
             parent=category, is_active=True
         )
-        context = {'request': request}
+        context = {"request": request}
         category_data = CategorySerializer(category, context=context).data
-        subcategories_data = CategorySerializer(subcategories, many=True, context=context).data
+        subcategories_data = CategorySerializer(
+            subcategories, many=True, context=context
+        ).data
         custom_response = {
             "name": category_data["name"],
             "slug": category_data["slug"],
@@ -61,7 +67,6 @@ class CategoryMetaDataView(generics.RetrieveAPIView):
         operation_description="Retrieve details of a category",
         responses={200: CategoryMetaDataSerializer()},
     )
-
     def get_object(self):
         slug = self.kwargs["slug"]
         category = get_object_or_404(Category, slug=slug, is_active=True)
@@ -83,7 +88,7 @@ class ProductsByCategorySlugView(generics.ListAPIView):
         responses={200: ProductListItemSerializer(many=True)},
     )
     def get_queryset(self):
-        slug = self.kwargs['slug']
+        slug = self.kwargs["slug"]
         category = get_object_or_404(Category, slug=slug, is_active=True)
 
         if category.has_children:
@@ -92,26 +97,35 @@ class ProductsByCategorySlugView(generics.ListAPIView):
         else:
             all_categories = [category]
 
-        products = Product.objects.filter(category__in=all_categories, is_active=True)
+        products = Product.objects.filter(
+            category__in=all_categories, is_active=True
+        )
         return products
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
-        category = get_object_or_404(Category, slug=self.kwargs['slug'], is_active=True)
+        category = get_object_or_404(
+            Category, slug=self.kwargs["slug"], is_active=True
+        )
 
         if page is not None:
-            serializer = self.get_serializer(page, many=True, context={'request': request})
+            serializer = self.get_serializer(
+                page, many=True, context={"request": request}
+            )
             paginated_response = self.get_paginated_response(serializer.data)
         else:
-            serializer = self.get_serializer(queryset, many=True, context={'request': request})
+            serializer = self.get_serializer(
+                queryset, many=True, context={"request": request}
+            )
             paginated_response = {
-                'count': len(queryset),
-                'next': None,
-                'previous': None,
-                'results': serializer.data,
+                "count": len(queryset),
+                "next": None,
+                "previous": None,
+                "results": serializer.data,
             }
-        
-        paginated_response.data['category'] = ProductsByCategorySerializer(category).data
+
+        paginated_response.data["category"] = ProductsByCategorySerializer(
+            category
+        ).data
         return Response(paginated_response.data)
-    

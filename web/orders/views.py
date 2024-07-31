@@ -1,15 +1,22 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.generics import (CreateAPIView, DestroyAPIView,
-                                     ListAPIView, RetrieveAPIView,
-                                     UpdateAPIView)
+from rest_framework.generics import (
+    CreateAPIView,
+    DestroyAPIView,
+    ListAPIView,
+    RetrieveAPIView,
+    UpdateAPIView,
+)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from web.models.orders import Order, OrderItem
 
-from .serializers import (CreateOrderSerializer, OrderItemSerializer,
-                          OrderSerializer)
+from .serializers import (
+    CreateOrderSerializer,
+    OrderItemSerializer,
+    OrderSerializer,
+)
 
 
 class OrderListView(ListAPIView):

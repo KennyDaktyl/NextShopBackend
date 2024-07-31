@@ -12,34 +12,32 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3010",
     "http://127.0.0.1:3010",
     "http://51.75.64.242:3010",
-    "https://new-serwiswrybnej-api.resto-app.pl"
+    "https://new-serwiswrybnej-api.resto-app.pl",
 ]
-CSRF_TRUSTED_ORIGINS = [
-    "https://new-serwiswrybnej-api.resto-app.pl"
-]
+CSRF_TRUSTED_ORIGINS = ["https://new-serwiswrybnej-api.resto-app.pl"]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_HEADERS = [
-    'authorization',
-    'content-type',
-    'x-requested-with',
-    'accept',
-    'origin',
-    'user-agent',
-    'access-control-allow-origin',
+    "authorization",
+    "content-type",
+    "x-requested-with",
+    "accept",
+    "origin",
+    "user-agent",
+    "access-control-allow-origin",
 ]
 CORS_EXPOSE_HEADERS = [
-    'Content-Type',
-    'X-CSRFToken',
+    "Content-Type",
+    "X-CSRFToken",
 ]
 CORS_ALLOW_METHODS = [
-    'GET',
-    'OPTIONS',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
+    "GET",
+    "OPTIONS",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
 ]
-    
+
 if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
     DEBUG = True
     ALLOWED_HOSTS = ["*"]
@@ -49,65 +47,67 @@ if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
         "http://127.0.0.1:3000",  # Dodaj to, jeśli testujesz lokalnie
     ]
 
-    SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+    SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
     SESSION_COOKIE_AGE = 86400
-    SESSION_COOKIE_NAME = 'sessionid'
+    SESSION_COOKIE_NAME = "sessionid"
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
-    CSRF_COOKIE_SECURE = False  
+    CSRF_COOKIE_SECURE = False
 else:
     DEBUG = False
-    ALLOWED_HOSTS = ["serwiswrybnej.pl", "51.75.64.242", "new-serwiswrybnej-api.resto-app.pl"]
-    SESSION_COOKIE_SAMESITE = "Lax"  
+    ALLOWED_HOSTS = [
+        "serwiswrybnej.pl",
+        "51.75.64.242",
+        "new-serwiswrybnej-api.resto-app.pl",
+    ]
+    SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_AGE = 86400
-    SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
-        
+    SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:3010",
         "http://127.0.0.1:3010",
         "http://51.75.64.242:3010",
-        "https://new-serwiswrybnej-api.resto-app.pl"
+        "https://new-serwiswrybnej-api.resto-app.pl",
     ]
 
-    CSRF_TRUSTED_ORIGINS = [
-        "https://new-serwiswrybnej-api.resto-app.pl"
-    ]
+    CSRF_TRUSTED_ORIGINS = ["https://new-serwiswrybnej-api.resto-app.pl"]
 
     CORS_ALLOW_CREDENTIALS = True
 
     CORS_ALLOW_HEADERS = [
-        'authorization',
-        'content-type',
-        'x-requested-with',
-        'accept',
-        'origin',
-        'user-agent',
-        'access-control-allow-origin',
+        "authorization",
+        "content-type",
+        "x-requested-with",
+        "accept",
+        "origin",
+        "user-agent",
+        "access-control-allow-origin",
     ]
 
     CORS_EXPOSE_HEADERS = [
-        'Content-Type',
-        'X-CSRFToken',
+        "Content-Type",
+        "X-CSRFToken",
     ]
 
     CORS_ALLOW_METHODS = [
-        'GET',
-        'OPTIONS',
-        'POST',
-        'PUT',
-        'PATCH',
-        'DELETE',
+        "GET",
+        "OPTIONS",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
     ]
 
 SITE_ID = 1
 
 INSTALLED_APPS = [
     "web.apps.WebConfig",
-    "rest_framework", 
+    "rest_framework",
     "django.contrib.sites",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -115,9 +115,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'drf_yasg',
-    'djoser',
-    'corsheaders'
+    "drf_yasg",
+    "djoser",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -128,9 +128,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    "serwiswrybnej.middleware.LogRequestMiddleware"
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
 ]
 
 ROOT_URLCONF = "serwiswrybnej.urls"
@@ -180,7 +179,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
@@ -217,98 +215,90 @@ if os.environ.get("ENVIRONMENT") in ["production", "staging", "dev"]:
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
     ),
 }
 
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-)
+AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': False,
-
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
-    'VERIFYING_KEY': None,
-    'AUDIENCE': None,
-    'ISSUER': None,
-
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
-
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    'TOKEN_TYPE_CLAIM': 'token_type',
-
-    'JTI_CLAIM': 'jti',
-
-    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=60),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": False,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "VERIFYING_KEY": None,
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "JTI_CLAIM": "jti",
+    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=60),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
 
 
 DJOSER = {
-    'LOGIN_FIELD': 'username',
-    'USER_CREATE_PASSWORD_RETYPE': True,
-    'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
-    'PASSWORD_CHANGED_EMAIL_CONFIRMATION': True,
-    'SET_USERNAME_RETYPE': True,
-    'SET_PASSWORD_RETYPE': True,
-    'PASSWORD_RESET_CONFIRM_RETYPE': True,
-    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
-    'USERNAME_RESET_CONFIRM_URL': 'email/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL': 'auth/{uid}/{token}',
-    'ACTIVATION_EXPIRATION_DAYS': 3,
-    'SEND_ACTIVATION_EMAIL': True,
-    'SEND_CONFIRMATION_EMAIL': True,
-    'SERIALIZERS': {
-        'user_create': 'web.accounts.serializers.UserSerializer',
-        'user': 'web.accounts.serializers.LoginSerializer',
-        'current_user': 'web.accounts.serializers.LoginSerializer',
-        'user_delete': 'djoser.serializers.UserDeleteSerializer'
+    "LOGIN_FIELD": "username",
+    "USER_CREATE_PASSWORD_RETYPE": True,
+    "USERNAME_CHANGED_EMAIL_CONFIRMATION": True,
+    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+    "SET_USERNAME_RETYPE": True,
+    "SET_PASSWORD_RETYPE": True,
+    "PASSWORD_RESET_CONFIRM_RETYPE": True,
+    "PASSWORD_RESET_CONFIRM_URL": "password/reset/confirm/{uid}/{token}",
+    "USERNAME_RESET_CONFIRM_URL": "email/reset/confirm/{uid}/{token}",
+    "ACTIVATION_URL": "auth/{uid}/{token}",
+    "ACTIVATION_EXPIRATION_DAYS": 3,
+    "SEND_ACTIVATION_EMAIL": True,
+    "SEND_CONFIRMATION_EMAIL": True,
+    "SERIALIZERS": {
+        "user_create": "web.accounts.serializers.UserSerializer",
+        "user": "web.accounts.serializers.LoginSerializer",
+        "current_user": "web.accounts.serializers.LoginSerializer",
+        "user_delete": "djoser.serializers.UserDeleteSerializer",
     },
-    'PERMISSIONS': {
-        'user_create': ['rest_framework.permissions.AllowAny'],
+    "PERMISSIONS": {
+        "user_create": ["rest_framework.permissions.AllowAny"],
     },
 }
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
         },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': 'django.log',
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "django.log",
         },
     },
-    'root': {
-        'handlers': ['console', 'file'],
-        'level': 'DEBUG',
+    "root": {
+        "handlers": ["console", "file"],
+        "level": "DEBUG",
     },
-    'loggers': {
+    "loggers": {
         # 'django': {
         #     'handlers': ['console', 'file'],
         #     'level': 'DEBUG',
         #     'propagate': True,
         # },
-        'web': { 
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': False,
+        "web": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
+            "propagate": False,
         },
     },
 }
-

@@ -1,4 +1,5 @@
 import os
+
 from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
@@ -40,14 +41,14 @@ class Category(models.Model):
         is_new_instance = not self.pk
         old_image = None
         old_name = None
-        
+
         if self.pk:
             if not self.image:
                 self.thumbnails = {}
             old_category = Category.objects.get(pk=self.pk)
             old_name = old_category.name
             old_image = old_category.image
-            
+
             if old_category.image and old_category.image != self.image:
                 old_image = old_category.image
 
@@ -55,16 +56,39 @@ class Category(models.Model):
                 old_name = old_category.name
 
         if is_new_instance or old_name != self.name:
-            self.slug = slugify(self.name.replace('ł', 'l').replace('Ł', 'L').replace('ą', 'a').replace('ę', 'e').replace('ś', 's').replace('ć', 'c').replace('ń', 'n').replace('ó', 'o').replace('ż', 'z').replace('ź', 'z').replace('Ą', 'A').replace('Ę', 'E').replace('Ś', 'S').replace('Ć', 'C').replace('Ń', 'N').replace('Ó', 'O').replace('Ż', 'Z').replace('Ź', 'Z').replace(' ', '-').replace('---', '-'))
-            
+            self.slug = slugify(
+                self.name.replace("ł", "l")
+                .replace("Ł", "L")
+                .replace("ą", "a")
+                .replace("ę", "e")
+                .replace("ś", "s")
+                .replace("ć", "c")
+                .replace("ń", "n")
+                .replace("ó", "o")
+                .replace("ż", "z")
+                .replace("ź", "z")
+                .replace("Ą", "A")
+                .replace("Ę", "E")
+                .replace("Ś", "S")
+                .replace("Ć", "C")
+                .replace("Ń", "N")
+                .replace("Ó", "O")
+                .replace("Ż", "Z")
+                .replace("Ź", "Z")
+                .replace(" ", "-")
+                .replace("---", "-")
+            )
+
         if old_image and old_image != self.image:
             thumbs = self.category_thumbnails.filter(main=True)
             if thumbs:
                 thumbs.delete()
 
         if is_new_instance or old_image != self.image and self.image:
-            self.thumbnails = generate_thumbnails(self, True, False, "category", self.image)
-            
+            self.thumbnails = generate_thumbnails(
+                self, True, False, "category", self.image
+            )
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -109,17 +133,19 @@ class Category(models.Model):
     @property
     def has_children(self):
         return self.children.filter(is_active=True).exists()
-    
+
     def get_full_image_url(self, request):
         if self.image:
             return request.build_absolute_uri(
                 settings.MEDIA_URL + self.image.url
             )
         return ""
-    
+
     @property
     def image_list_item(self):
-        return self.category_thumbnails.filter(width_expected=350, height_expected=350, main=True).first()
+        return self.category_thumbnails.filter(
+            width_expected=350, height_expected=350, main=True
+        ).first()
 
     def get_descendants(self):
         descendants = set()
@@ -152,7 +178,7 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
         return False
 
     except Category.DoesNotExist:
-        return False  
+        return False
 
 
 @receiver(models.signals.post_delete, sender=Category)

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from web.models.products import Product
 
-from .serializers import ProductListItemSerializer, ProductDetailsSerializer
+from .serializers import ProductDetailsSerializer, ProductListItemSerializer
 
 
 class ProductPagination(PageNumberPagination):
@@ -27,7 +27,7 @@ class ProductListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Product.objects.filter(is_active=True)
         return queryset
-    
+
 
 class ProductDetailsView(generics.RetrieveAPIView):
     queryset = Product.objects.filter(is_active=True)
@@ -49,4 +49,3 @@ class ProductDetailsView(generics.RetrieveAPIView):
                 {"message": "Product not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-            

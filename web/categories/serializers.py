@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from web.images.serializers import ThumbnailSerializer
 from web.models.categories import Category
 
@@ -27,16 +28,16 @@ class CategorySerializer(serializers.ModelSerializer):
 
     def get_is_parent(self, obj):
         return obj.children.exists()
-    
+
     def get_full_path(self, obj):
         return obj.get_full_path()
 
     def get_back_link(self, obj):
         return obj.get_back_link()
-    
+
     def get_absolute_url(self, obj):
         return obj.get_absolute_url()
-    
+
 
 class CategoryMetaDataSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,22 +46,18 @@ class CategoryMetaDataSerializer(serializers.ModelSerializer):
             "name",
             "description",
         )
-        
-        
+
+
 class ProductCategorySerializer(serializers.ModelSerializer):
     full_path = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
-        fields = (
-            "id",
-            "name",
-            "slug",
-            "full_path"
-        )
-    
+        fields = ("id", "name", "slug", "full_path")
+
     def get_full_path(self, obj):
         return obj.get_full_path()
-        
+
 
 class ProductsByCategorySerializer(serializers.ModelSerializer):
     is_parent = serializers.SerializerMethodField()
@@ -84,12 +81,12 @@ class ProductsByCategorySerializer(serializers.ModelSerializer):
 
     def get_is_parent(self, obj):
         return obj.children.exists()
-    
+
     def get_full_path(self, obj):
         return obj.get_full_path()
 
     def get_back_link(self, obj):
         return obj.get_back_link()
-    
+
     def get_absolute_url(self, obj):
         return obj.get_absolute_url()
