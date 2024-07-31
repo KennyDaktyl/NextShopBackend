@@ -2,7 +2,14 @@ from rest_framework import serializers
 
 from web.categories.serializers import ProductCategorySerializer
 from web.images.serializers import ThumbnailSerializer
-from web.models.products import Brand, Material, Product, ProductVariant, Size, Tag
+from web.models.products import (
+    Brand,
+    Material,
+    Product,
+    ProductVariant,
+    Size,
+    Tag,
+)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -15,45 +22,55 @@ class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ("id", "name")
-        
+
 
 class MaterialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Material
         fields = ("id", "name")
-        
-        
+
+
 class SizeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Size
         fields = ("id", "name")
-    
 
 
 class ProductVariantSerializer(serializers.ModelSerializer):
     color = serializers.SerializerMethodField()
     images = ThumbnailSerializer(many=True)
     tags = TagSerializer(many=True)
-    
+
     class Meta:
         model = ProductVariant
-        fields = ['id', 'product', 'name', 'slug', 'color', 'size', 'qty', 'images', 'tags', "is_main"]
+        fields = [
+            "id",
+            "product",
+            "name",
+            "slug",
+            "color",
+            "size",
+            "qty",
+            "images",
+            "tags",
+            "is_main",
+        ]
 
     def get_color(self, obj):
         return obj.get_color_display()
-    
+
 
 class ProductListVariantSerializer(serializers.ModelSerializer):
     color = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductVariant
-        fields = ['name', 'slug', 'color', 'size']
+        fields = ["name", "slug", "color", "size"]
 
     def get_color(self, obj):
         return obj.get_color_display()
-    
-     
+
+
 class ProductDetailsSerializer(serializers.ModelSerializer):
     images = ThumbnailSerializer(many=True)
     variants = ProductVariantSerializer(many=True)
@@ -63,7 +80,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     material = MaterialSerializer()
     size = SizeSerializer()
     color = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Product
         fields = (
@@ -83,13 +100,13 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             "current_price",
             "min_price_last_30",
             "show_variant_label",
-            "variant_label"
+            "variant_label",
         )
-    
+
     def get_color(self, obj):
         return obj.get_color_display()
-        
-    
+
+
 class ProductListItemSerializer(serializers.ModelSerializer):
     category = ProductCategorySerializer()
     current_price = serializers.DecimalField(
@@ -102,7 +119,7 @@ class ProductListItemSerializer(serializers.ModelSerializer):
     absolute_url = serializers.SerializerMethodField()
     image_list_item = ThumbnailSerializer()
     variants = ProductListVariantSerializer(many=True)
-    
+
     class Meta:
         model = Product
         fields = (
@@ -118,7 +135,7 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             "absolute_url",
             "variants",
             "show_variant_label",
-            "variant_label"
+            "variant_label",
         )
 
     # def get_full_image_url(self, obj):
