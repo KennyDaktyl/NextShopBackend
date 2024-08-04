@@ -9,11 +9,8 @@ from web.models.products import Product
 from web.products.serializers import ProductListItemSerializer
 from web.products.views import ProductPagination
 
-from .serializers import (
-    CategoryMetaDataSerializer,
-    CategorySerializer,
-    ProductsByCategorySerializer,
-)
+from .serializers import (CategoryMetaDataSerializer, CategorySerializer,
+                          ProductsByCategorySerializer)
 
 
 class MenuItemsView(generics.RetrieveAPIView):

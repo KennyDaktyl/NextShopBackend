@@ -2,14 +2,8 @@ from rest_framework import serializers
 
 from web.categories.serializers import ProductCategorySerializer
 from web.images.serializers import ThumbnailSerializer
-from web.models.products import (
-    Brand,
-    Material,
-    Product,
-    ProductVariant,
-    Size,
-    Tag,
-)
+from web.models.products import (Brand, Material, Product, ProductVariant,
+                                 Size, Tag)
 
 
 class TagSerializer(serializers.ModelSerializer):
