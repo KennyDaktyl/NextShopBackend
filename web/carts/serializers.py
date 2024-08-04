@@ -11,5 +11,6 @@ class CartItemSerializer(serializers.Serializer):
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
     variant = serializers.CharField(allow_null=True, required=False)
     quantity = serializers.IntegerField()
+    available_quantity = serializers.IntegerField()
     image = ThumbnailSerializer()
     url = serializers.CharField()

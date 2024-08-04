@@ -65,3 +65,24 @@ class Cart:
         for item in self.get_items():
             total_price += float(item["price"]) * float(item["quantity"])
         return total_price
+
+    def get_product_quantity(self, product_id, variant=None):
+        cart_items = self.request.session["cart"]["cart_items"]
+        total_quantity = 0
+        variant_id = variant.id if variant else None
+        for item in cart_items:
+            if (
+                item["id"] == int(product_id)
+                and item.get("variant") == variant_id
+            ):
+                total_quantity += item["quantity"]
+        return total_quantity
+
+    def remove_item(self, item_id):
+        cart_items = self.request.session["cart"]["cart_items"]
+        for item in cart_items:
+            if item["item_id"] == item_id:
+                cart_items.remove(item)
+                self.save_session()
+                return
+        return

@@ -3,8 +3,10 @@ import uuid
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from web.carts.cart import Cart
 from web.models.products import Product
@@ -26,6 +28,15 @@ class CartCreateView(GenericAPIView):
         variant = None
         if variant_id:
             variant = get_object_or_404(Variant, id=variant_id)
+            available_quantity = variant.qty
+        else:
+            available_quantity = product.qty
+
+        if quantity > available_quantity:
+            return Response(
+                {"error": "Requested quantity exceeds available stock"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         image = product.item_image if variant is None else variant.item_image
 
@@ -36,6 +47,7 @@ class CartCreateView(GenericAPIView):
             "price": str(product.current_price),
             "variant": variant.name if variant else None,
             "quantity": quantity,
+            "available_quantity": available_quantity,
             "image": image,
             "url": product.get_absolute_url(),
         }
@@ -80,6 +92,16 @@ class CartUpdateView(GenericAPIView):
         variant = None
         if variant_id:
             variant = get_object_or_404(Variant, id=variant_id)
+            available_quantity = variant.qty
+        else:
+            available_quantity = product.qty
+        existing_quantity = cart.get_product_quantity(product_id, variant)
+
+        if quantity + existing_quantity > available_quantity:
+            return Response(
+                {"error": "Brak wystarczającej ilości towaru na magazynie"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         image = product.item_image if variant is None else variant.item_image
 
@@ -90,6 +112,7 @@ class CartUpdateView(GenericAPIView):
             "price": str(product.current_price),
             "variant": variant.name if variant else None,
             "quantity": quantity,
+            "available_quantity": available_quantity,
             "image": image,
             "url": product.get_absolute_url(),
         }
@@ -149,9 +172,23 @@ class UpdateCartItemQtyView(GenericAPIView):
         return JsonResponse({"message": "Item qty updated"}, status=200)
 
 
+class RemoveItemView(GenericAPIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        body = request.data
+
+        cart = Cart(request)
+        item_id = body.get("item_id")
+
+        cart.remove_item(item_id)
+        return JsonResponse({"message": "Item removed"}, status=200)
+
+
 create_cart = CartCreateView.as_view()
 update_cart = CartUpdateView.as_view()
 cart_items = GetCartItemsView.as_view()
 update_item_qty = UpdateCartItemQtyView.as_view()
 total_price = TotalPriceView.as_view()
 remove_cart = CartDeleteView.as_view()
+remove_item = RemoveItemView.as_view()

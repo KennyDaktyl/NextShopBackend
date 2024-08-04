@@ -8,14 +8,8 @@ from web.models.categories import Category
 from web.models.images import Photo, Thumbnail
 from web.models.orders import Order, OrderItem
 from web.models.prices import PriceGroup, ProductPrice
-from web.models.products import (
-    Brand,
-    Material,
-    Product,
-    ProductVariant,
-    Size,
-    Tag,
-)
+from web.models.products import (Brand, Material, Product, ProductVariant,
+                                 Size, Tag)
 from web.models.shipments import Shipment
 
 
