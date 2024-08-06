@@ -8,8 +8,8 @@ from web.models.categories import Category
 from web.models.images import Photo, Thumbnail
 from web.models.orders import Order, OrderItem
 from web.models.prices import PriceGroup, ProductPrice
-from web.models.products import (Brand, Material, Product, ProductVariant,
-                                 Size, Tag)
+from web.models.products import (Brand, Material, Product, ProductOption,
+                                 ProductOptionItem, ProductVariant, Size, Tag)
 from web.models.shipments import Shipment
 
 
@@ -69,6 +69,18 @@ class ProductPriceInline(admin.TabularInline):
 class ProductVariantInline(admin.TabularInline):
     model = ProductVariant
     extra = 1
+
+
+@admin.register(ProductOption)
+class ProductOptionAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in ProductOption._meta.fields]
+    search_fields = ["name", "pk"]
+
+
+@admin.register(ProductOptionItem)
+class ProductOptionItemAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in ProductOptionItem._meta.fields]
+    search_fields = ["name", "pk"]
 
 
 @admin.register(Product)
