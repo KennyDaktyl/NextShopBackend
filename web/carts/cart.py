@@ -31,9 +31,11 @@ class Cart:
     def add_product(self, cart_item):
         cart_items = self.request.session["cart"]["cart_items"]
         for item in cart_items:
-            if item["id"] == cart_item["id"] and item.get(
-                "variant"
-            ) == cart_item.get("variant"):
+            if (
+                item["id"] == cart_item["id"]
+                and item.get("variant") == cart_item.get("variant")
+                and item["selected_option"] == cart_item.get("selected_option")
+            ):
                 item["quantity"] += cart_item["quantity"]
                 self.save_session()
                 return
@@ -49,7 +51,7 @@ class Cart:
     def update_item_qty(self, item_id, qty):
         cart_items = self.request.session["cart"]["cart_items"]
         for item in cart_items:
-            if item["item_id"] == item_id:
+            if uuid.UUID(item["item_id"]) == item_id:
                 item["quantity"] = qty
                 self.save_session()
                 return
@@ -81,7 +83,7 @@ class Cart:
     def remove_item(self, item_id):
         cart_items = self.request.session["cart"]["cart_items"]
         for item in cart_items:
-            if item["item_id"] == item_id:
+            if uuid.UUID(item["item_id"]) == item_id:
                 cart_items.remove(item)
                 self.save_session()
                 return

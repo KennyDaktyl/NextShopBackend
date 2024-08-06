@@ -2,8 +2,8 @@ from rest_framework import serializers
 
 from web.categories.serializers import ProductCategorySerializer
 from web.images.serializers import ThumbnailSerializer
-from web.models.products import (Brand, Material, Product, ProductVariant,
-                                 Size, Tag)
+from web.models.products import (Brand, Material, Product, ProductOption,
+                                 ProductOptionItem, ProductVariant, Size, Tag)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -65,6 +65,25 @@ class ProductListVariantSerializer(serializers.ModelSerializer):
         return obj.get_color_display()
 
 
+class ProductOptionItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductOptionItem
+        fields = ["id", "name"]
+
+
+class ProductOptionItemsSerializer(serializers.ModelSerializer):
+    options = ProductOptionItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ProductOptionItem
+        fields = ["id", "name", "options"]
+
+
+class SelectedOptionSerializer(serializers.Serializer):
+    option_id = serializers.IntegerField()
+    value_id = serializers.IntegerField()
+
+
 class ProductDetailsSerializer(serializers.ModelSerializer):
     images = ThumbnailSerializer(many=True)
     variants = ProductVariantSerializer(many=True)
@@ -74,6 +93,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     material = MaterialSerializer()
     size = SizeSerializer()
     color = serializers.SerializerMethodField()
+    product_option = ProductOptionItemsSerializer()
 
     class Meta:
         model = Product
@@ -95,6 +115,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             "min_price_last_30",
             "show_variant_label",
             "variant_label",
+            "product_option",
         )
 
     def get_color(self, obj):

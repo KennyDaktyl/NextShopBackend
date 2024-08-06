@@ -62,6 +62,38 @@ class Material(models.Model):
         ordering = ["name"]
 
 
+class ProductOption(models.Model):
+    name = models.CharField(verbose_name="Nazwa opcji", max_length=255)
+
+    class Meta:
+        verbose_name = "Opcja produktu"
+        verbose_name_plural = "Opcje produktu"
+
+    def __str__(self):
+        return self.name
+
+
+class ProductOptionItem(models.Model):
+    feature = models.ForeignKey(
+        ProductOption,
+        verbose_name="Opcja produktu",
+        on_delete=models.CASCADE,
+        related_name="options",
+    )
+    name = models.CharField(
+        verbose_name="Nazwa elementu opcji", max_length=255
+    )
+    order = models.IntegerField(verbose_name="Kolejność", default=1)
+
+    class Meta:
+        verbose_name = "Opcje element"
+        verbose_name_plural = "Opcje elementy"
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return f"{self.feature.name} - {self.name}"
+
+
 class Product(models.Model):
     category = models.ForeignKey(
         Category,
@@ -132,6 +164,13 @@ class Product(models.Model):
     )
     show_variant_label = models.BooleanField(
         verbose_name="Pokazuj etykietę wariantu", default=False
+    )
+    product_option = models.ForeignKey(
+        ProductOption,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="product_options",
     )
 
     class Meta:
