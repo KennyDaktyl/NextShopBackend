@@ -24,6 +24,9 @@ def revalidate_product_cache_product(sender, instance, **kwargs):
         product_details_tag = f"product-{instance.slug}"
         tags.append(product_details_tag)
 
+        first_page_tag = "first-page"
+        tags.append(first_page_tag)
+
         product_category = instance.category
         while product_category:
             menu_items_category = f"menu-items-{product_category.slug}"
@@ -63,6 +66,9 @@ def revalidate_product_cache_variant(sender, instance, **kwargs):
 
         product_details_tag = f"product-{instance.product.slug}"
         tags.append(product_details_tag)
+
+        first_page_tag = "first-page"
+        tags.append(first_page_tag)
 
         product_category = instance.product.category
         while product_category:

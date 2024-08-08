@@ -2,13 +2,14 @@ from rest_framework import serializers
 
 from web.images.serializers import ThumbnailSerializer
 from web.models.categories import Category
+from web.products.serializers import ProductListItemSerializer
 
 
 class CategorySerializer(serializers.ModelSerializer):
     is_parent = serializers.SerializerMethodField()
     full_path = serializers.SerializerMethodField()
     back_link = serializers.SerializerMethodField()
-    image_list_item = ThumbnailSerializer()
+    image = ThumbnailSerializer()
 
     class Meta:
         model = Category
@@ -23,7 +24,7 @@ class CategorySerializer(serializers.ModelSerializer):
             "has_children",
             "full_path",
             "back_link",
-            "image_list_item",
+            "image",
         )
 
     def get_is_parent(self, obj):
@@ -39,6 +40,31 @@ class CategorySerializer(serializers.ModelSerializer):
         return obj.get_absolute_url()
 
 
+class CategoryListOnFirstPageSerializer(serializers.ModelSerializer):
+    full_path = serializers.SerializerMethodField()
+    image = ThumbnailSerializer()
+    products_on_first_page = ProductListItemSerializer(many=True)
+
+    class Meta:
+        model = Category
+        fields = (
+            "id",
+            "name",
+            "slug",
+            "description",
+            "full_path",
+            "image",
+            "products_on_first_page",
+        )
+
+    def get_full_path(self, obj):
+        return obj.get_full_path()
+
+
+class CategoriesOnFirstPageSerializer(serializers.Serializer):
+    categories = CategoryListOnFirstPageSerializer(many=True)
+
+
 class CategoryMetaDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -46,17 +72,6 @@ class CategoryMetaDataSerializer(serializers.ModelSerializer):
             "name",
             "description",
         )
-
-
-class ProductCategorySerializer(serializers.ModelSerializer):
-    full_path = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Category
-        fields = ("id", "name", "slug", "full_path")
-
-    def get_full_path(self, obj):
-        return obj.get_full_path()
 
 
 class ProductsByCategorySerializer(serializers.ModelSerializer):

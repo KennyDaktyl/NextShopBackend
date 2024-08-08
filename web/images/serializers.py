@@ -4,16 +4,16 @@ from web.models.images import Thumbnail
 
 
 class ThumbnailSerializer(serializers.ModelSerializer):
-    image_url = serializers.SerializerMethodField()
+    url = serializers.SerializerMethodField()
 
     class Meta:
         model = Thumbnail
-        fields = ["id", "width", "height", "image_url", "alt", "title"]
+        fields = ["id", "width", "height", "url", "alt", "title"]
 
-    def get_image_url(self, obj):
+    def get_url(self, obj):
         request = self.context.get("request")
         if isinstance(obj, dict):
-            return request.build_absolute_uri(obj["image_url"])
-        if obj.image:
-            return request.build_absolute_uri(obj.image.url)
+            return request.build_absolute_uri(obj["url"])
+        if obj.oryg_image:
+            return request.build_absolute_uri(obj.oryg_image.url)
         return None

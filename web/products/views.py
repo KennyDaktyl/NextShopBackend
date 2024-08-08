@@ -1,3 +1,4 @@
+from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.pagination import PageNumberPagination
@@ -26,6 +27,16 @@ class ProductListView(generics.ListAPIView):
     )
     def get_queryset(self):
         queryset = Product.objects.filter(is_active=True)
+        search_query = self.request.query_params.get("search", None)
+        if search_query:
+            search_terms = search_query.split()
+            query = Q()
+            for term in search_terms:
+                print(f"Searching for term: {term}")
+                query &= Q(name__icontains=term) | Q(
+                    description__icontains=term
+                )
+            queryset = queryset.filter(query)
         return queryset
 
 
