@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
-from web.categories.serializers import ProductCategorySerializer
 from web.images.serializers import ThumbnailSerializer
-from web.models.products import (Brand, Material, Product, ProductOption,
+from web.models.products import (Brand, Category, Material, Product,
                                  ProductOptionItem, ProductVariant, Size, Tag)
 
 
@@ -84,6 +83,17 @@ class SelectedOptionSerializer(serializers.Serializer):
     value_id = serializers.IntegerField()
 
 
+class ProductCategorySerializer(serializers.ModelSerializer):
+    full_path = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = ("id", "name", "slug", "full_path")
+
+    def get_full_path(self, obj):
+        return obj.get_full_path()
+
+
 class ProductDetailsSerializer(serializers.ModelSerializer):
     images = ThumbnailSerializer(many=True)
     variants = ProductVariantSerializer(many=True)
@@ -132,7 +142,7 @@ class ProductListItemSerializer(serializers.ModelSerializer):
     )
     # full_image_url = serializers.SerializerMethodField()
     absolute_url = serializers.SerializerMethodField()
-    image_list_item = ThumbnailSerializer()
+    image = ThumbnailSerializer()
     variants = ProductListVariantSerializer(many=True)
 
     class Meta:
@@ -143,8 +153,7 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             "slug",
             "category",
             "description",
-            "qty",
-            "image_list_item",
+            "image",
             "current_price",
             "min_price_last_30",
             "absolute_url",
@@ -152,12 +161,6 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             "show_variant_label",
             "variant_label",
         )
-
-    # def get_full_image_url(self, obj):
-    #     request = self.context.get("request")
-    #     if obj.image:
-    #         return request.build_absolute_uri(obj.image.url)
-    #     return None
 
     def get_absolute_url(self, obj):
         return obj.get_absolute_url()

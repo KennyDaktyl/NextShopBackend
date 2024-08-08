@@ -1,4 +1,5 @@
 import logging
+import os
 
 import requests
 from django.db.models.signals import post_delete, post_save
@@ -12,7 +13,9 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender=Thumbnail)
 @receiver(post_delete, sender=Thumbnail)
 def revalidate_product_cache(sender, instance, **kwargs):
-    next_js_url = "http://localhost:3000/api/webhooks/revalidate"
+    next_js_url = (
+        os.environ.get("NEXTJS_BASE_URL") + "/api/webhooks/revalidate"
+    )
     try:
         tags = []
         if instance.product:

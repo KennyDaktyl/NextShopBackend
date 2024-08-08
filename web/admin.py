@@ -5,12 +5,20 @@ from django.contrib.auth.models import User
 from web.models.accounts import Profile
 from web.models.carts import Cart, CartItem
 from web.models.categories import Category
+from web.models.heros import Hero
 from web.models.images import Photo, Thumbnail
 from web.models.orders import Order, OrderItem
 from web.models.prices import PriceGroup, ProductPrice
 from web.models.products import (Brand, Material, Product, ProductOption,
                                  ProductOptionItem, ProductVariant, Size, Tag)
 from web.models.shipments import Shipment
+
+
+@admin.register(Hero)
+class HeroAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in Hero._meta.fields]
+    search_fields = ("name",)
+    list_filter = ["is_active"]
 
 
 class CustomUserAdmin(BaseUserAdmin):
@@ -88,6 +96,7 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductVariantInline, ProductPriceInline]
     list_display = [f.name for f in Product._meta.fields]
     search_fields = ["name", "pk"]
+    list_filter = ["on_first_page"]
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -250,7 +259,8 @@ class ThumbnailAdmin(admin.ModelAdmin):
         "category",
         "product_variant",
         "photo",
-        "image",
+        "hero",
+        "oryg_image",
     )
     search_fields = (
         "product__name",
@@ -269,7 +279,7 @@ class PhotoAdmin(admin.ModelAdmin):
         "product",
         "variant",
         "category",
-        "image",
+        "oryg_image",
     )
     search_fields = ("product_name", "category_name", "photo_name")
 

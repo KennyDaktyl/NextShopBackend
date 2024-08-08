@@ -153,10 +153,13 @@ class Product(models.Model):
         blank=True,
         null=True,
     )
-    image = models.ImageField(
+    oryg_image = models.ImageField(
         verbose_name="Zdjęcie główne", upload_to="products", blank=True
     )
     is_active = models.BooleanField(verbose_name="Czy aktywny", default=True)
+    on_first_page = models.BooleanField(
+        default=False, verbose_name="Na 1 stronie?"
+    )
     thumbnails = models.JSONField(default=dict, blank=True, null=True)
 
     variant_label = models.CharField(
@@ -184,7 +187,7 @@ class Product(models.Model):
         old_name = None
 
         if self.pk:
-            if not self.image:
+            if not self.oryg_image:
                 self.thumbnails = {}
             old_product = Product.objects.get(pk=self.pk)
             old_name = old_product.name
@@ -193,13 +196,13 @@ class Product(models.Model):
             if old_product.category != self.category:
                 self.prev_category = old_product.category
 
-            if old_product.image and old_product.image != self.image:
+            if old_product.image and old_product.image != self.oryg_image:
                 old_image = old_product.image
 
             if old_product.name != self.name:
                 old_name = old_product.name
 
-        if old_image and old_image != self.image:
+        if old_image and old_image != self.oryg_image:
             thumbs = self.product_thumbnails.filter(main=True)
             if thumbs:
                 thumbs.delete()
@@ -208,10 +211,10 @@ class Product(models.Model):
         if is_new_instance or old_name != self.name or self.slug is None:
             self.slug = f"{slugify(self.name.replace('ł', 'l').replace('Ł', 'L'))}-id-{self.id}"
 
-        if is_new_instance or old_image != self.image and self.image:
-            if self.image:
+        if is_new_instance or old_image != self.oryg_image and self.oryg_image:
+            if self.oryg_image:
                 self.thumbnails = generate_thumbnails(
-                    self, True, False, "product", self.image
+                    self, True, False, "product", self.oryg_image
                 )
 
         if is_new_instance:
@@ -225,7 +228,7 @@ class Product(models.Model):
                     variant.color = self.color
                     variant.qty = self.qty
                     variant.is_main = True
-                    variant.image = self.image
+                    variant.image = self.oryg_image
                     variant.thumbnails = self.thumbnails
                     variant.save()
                 except IntegrityError as e:
@@ -241,9 +244,9 @@ class Product(models.Model):
         return self.name
 
     def get_full_image_url(self, request):
-        if self.image:
+        if self.oryg_image:
             return request.build_absolute_uri(
-                settings.MEDIA_URL + self.image.url
+                settings.MEDIA_URL + self.oryg_image.url
             )
         return ""
 
@@ -283,7 +286,7 @@ class Product(models.Model):
         return self.variants.all()
 
     @property
-    def image_list_item(self):
+    def image(self):
         return self.product_thumbnails.filter(
             width_expected=350, height_expected=350, main=True
         ).first()
@@ -323,7 +326,7 @@ class ProductVariant(models.Model):
         null=True,
     )
     qty = models.IntegerField(verbose_name="Ilość", default=0)
-    image = models.ImageField(
+    oryg_image = models.ImageField(
         verbose_name="Zdjęcie wariantu", upload_to="variants", blank=True
     )
     thumbnails = models.JSONField(default=dict, blank=True, null=True)
@@ -345,22 +348,22 @@ class ProductVariant(models.Model):
             old_image = old_variant.image
             old_name = old_variant.name
 
-        if old_image and old_image != self.image:
+        if old_image and old_image != self.oryg_image:
             thumbs = self.variant_thumbnails.all()
             if thumbs:
                 thumbs.delete()
 
-        if is_new_instance or old_image != self.image and self.image:
+        if is_new_instance or old_image != self.oryg_image and self.oryg_image:
             if is_new_instance:
                 super().save(*args, **kwargs)
-            if self.image:
+            if self.oryg_image:
                 file_name = self.product.slug + "-wariant-" + self.name
                 self.thumbnails = generate_thumbnails(
                     self,
                     True,
                     self.order,
                     "variant",
-                    self.image,
+                    self.oryg_image,
                     file_name=file_name,
                 )
         if old_name != self.name:
@@ -389,8 +392,8 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
         return False
 
     try:
-        old_file = Product.objects.get(pk=instance.pk).image
-        new_file = instance.image
+        old_file = Product.objects.get(pk=instance.pk).oryg_image
+        new_file = instance.oryg_image
         if old_file and not old_file == new_file:
             if os.path.isfile(old_file.path):
                 os.remove(old_file.path)
@@ -403,9 +406,9 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
 
 @receiver(models.signals.post_delete, sender=Product)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
-    if instance.image:
-        if os.path.isfile(instance.image.path):
-            os.remove(instance.image.path)
+    if instance.oryg_image:
+        if os.path.isfile(instance.oryg_image.path):
+            os.remove(instance.oryg_image.path)
 
 
 @receiver(models.signals.pre_save, sender=ProductVariant)
@@ -414,8 +417,8 @@ def auto_delete_file_on_change_variant(sender, instance, **kwargs):
         return False
 
     try:
-        old_file = ProductVariant.objects.get(pk=instance.pk).image
-        new_file = instance.image
+        old_file = ProductVariant.objects.get(pk=instance.pk).oryg_image
+        new_file = instance.oryg_image
         if old_file and not old_file == new_file:
             if os.path.isfile(old_file.path):
                 os.remove(old_file.path)
@@ -428,6 +431,6 @@ def auto_delete_file_on_change_variant(sender, instance, **kwargs):
 
 @receiver(models.signals.post_delete, sender=ProductVariant)
 def auto_delete_file_on_delete_variant(sender, instance, **kwargs):
-    if instance.image:
-        if os.path.isfile(instance.image.path):
-            os.remove(instance.image.path)
+    if instance.oryg_image:
+        if os.path.isfile(instance.oryg_image.path):
+            os.remove(instance.oryg_image.path)

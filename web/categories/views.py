@@ -48,7 +48,7 @@ class MenuItemsView(generics.RetrieveAPIView):
             "back_link": category_data["back_link"],
             "has_children": category_data["has_children"],
             "full_path": category_data["full_path"],
-            "image_list_item": category_data["image_list_item"],
+            "image": category_data["image"],
             "items": subcategories_data,
         }
         return Response(custom_response)

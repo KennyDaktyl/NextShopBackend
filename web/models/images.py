@@ -61,7 +61,7 @@ class Photo(models.Model):
         null=True,
         blank=True,
     )
-    image = models.ImageField(upload_to="photos/")
+    oryg_image = models.ImageField(upload_to="photos/")
     alt_text = models.CharField(max_length=255, blank=True, null=True)
     title_text = models.CharField(max_length=255, blank=True, null=True)
     thumbnails = models.JSONField(default=dict, blank=True, null=True)
@@ -87,7 +87,7 @@ class Photo(models.Model):
 
         if self.pk:
             old_photo = Photo.objects.get(pk=self.pk)
-            if old_photo.image != self.image:
+            if old_photo.oryg_image != self.oryg_image:
                 delete_thumbnails(instance, instance_name)
             if old_photo.name != self.name:
                 self.slug = slugify(
@@ -99,7 +99,7 @@ class Photo(models.Model):
                     False,
                     self.order,
                     instance_name,
-                    self.image,
+                    self.oryg_image,
                     self.slug,
                 )
         else:
@@ -111,7 +111,7 @@ class Photo(models.Model):
                 False,
                 self.order,
                 instance_name,
-                self.image,
+                self.oryg_image,
                 self.slug,
             )
 
@@ -153,6 +153,13 @@ class Thumbnail(models.Model):
         null=True,
         blank=True,
     )
+    hero = models.ForeignKey(
+        "Hero",
+        on_delete=models.CASCADE,
+        related_name="hero_thumbnails",
+        null=True,
+        blank=True,
+    )
     width = models.IntegerField(verbose_name="Szerokość")
     height = models.IntegerField(verbose_name="Wysokość")
     width_expected = models.IntegerField(
@@ -161,7 +168,7 @@ class Thumbnail(models.Model):
     height_expected = models.IntegerField(
         verbose_name="Wysokość", null=True, blank=True
     )
-    image = models.ImageField(upload_to="thumbnails/")
+    oryg_image = models.ImageField(upload_to="thumbnails/")
     alt = models.CharField(max_length=255, blank=True, null=True)
     title = models.CharField(max_length=255, blank=True, null=True)
 
@@ -200,9 +207,11 @@ def create_thumbnail(
         thumbnail.category = relation
     elif relation_name == "photo":
         thumbnail.photo = relation
+    elif relation_name == "hero":
+        thumbnail.hero = relation
     else:
         raise ValueError(
-            "Relation must be 'product', 'variant', 'category' or 'photo'."
+            "Relation must be 'product', 'variant', 'category', 'hero' or 'photo'."
         )
 
     # Zmniejszenie obrazu zachowując proporcje
@@ -239,12 +248,14 @@ def create_thumbnail(
     img.convert("RGBA").save(temp_thumb, "WEBP", quality=100, lossless=True)
     temp_thumb.seek(0)
 
-    thumbnail.image.save(filename, ContentFile(temp_thumb.read()), save=False)
+    thumbnail.oryg_image.save(
+        filename, ContentFile(temp_thumb.read()), save=False
+    )
     thumbnail.save()
 
     temp_thumb.close()
 
-    return {f"{new_width}x{new_height}": thumbnail.image.url}
+    return {f"{new_width}x{new_height}": thumbnail.oryg_image.url}
 
 
 def delete_thumbnails(instance, field_name):
@@ -261,10 +272,10 @@ def auto_delete_file_on_delete_image(instance, **kwargs):
     thumbs = Thumbnail.objects.filter(photo=instance)
     if thumbs:
         thumbs.delete()
-    if instance.image:
-        if os.path.isfile(instance.image.path):
+    if instance.oryg_image:
+        if os.path.isfile(instance.oryg_image.path):
             try:
-                os.remove(instance.image.path)
+                os.remove(instance.oryg_image.path)
             except OSError:
                 pass
 
@@ -276,11 +287,11 @@ def auto_delete_file_on_change_image(instance, **kwargs):
 
     try:
         old_photo = Photo.objects.get(pk=instance.pk)
-        old_file = old_photo.image
+        old_file = old_photo.oryg_image
     except Photo.DoesNotExist:
         return False
 
-    new_file = instance.image
+    new_file = instance.oryg_image
     if not old_file == new_file:
         if os.path.isfile(old_file.path):
             try:
@@ -291,10 +302,10 @@ def auto_delete_file_on_change_image(instance, **kwargs):
 
 @receiver(models.signals.post_delete, sender=Thumbnail)
 def auto_delete_file_on_delete(instance, **kwargs):
-    if instance.image:
-        if os.path.isfile(instance.image.path):
+    if instance.oryg_image:
+        if os.path.isfile(instance.oryg_image.path):
             try:
-                os.remove(instance.image.path)
+                os.remove(instance.oryg_image.path)
             except OSError:
                 pass
 
@@ -305,11 +316,11 @@ def auto_delete_file_on_change(instance, **kwargs):
         return False
 
     try:
-        old_file = Thumbnail.objects.get(pk=instance.pk).image
+        old_file = Thumbnail.objects.get(pk=instance.pk).oryg_image
     except Thumbnail.DoesNotExist:
         return False
 
-    new_file = instance.image
+    new_file = instance.oryg_image
     if not old_file == new_file:
         if os.path.isfile(old_file.path):
             try:

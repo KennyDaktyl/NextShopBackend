@@ -11,8 +11,8 @@ from web.models.images import generate_thumbnails
 class Category(models.Model):
     order = models.IntegerField(verbose_name="Kolejność", default=1)
     name = models.CharField(max_length=100, verbose_name="Nazwa kategorii")
-    main = models.BooleanField(
-        verbose_name="Czy kategoria główna", default=False
+    on_first_page = models.BooleanField(
+        verbose_name="Czy widoczna na 1 stronie?", default=False
     )
     slug = models.SlugField(
         unique=True, max_length=255, verbose_name="Slug", null=True, blank=True
@@ -28,7 +28,7 @@ class Category(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Kategoria rodzic",
     )
-    image = models.ImageField(
+    oryg_image = models.ImageField(
         verbose_name="Zdjęcie kategorii", upload_to="categories", blank=True
     )
     is_main = models.BooleanField(
@@ -43,13 +43,13 @@ class Category(models.Model):
         old_name = None
 
         if self.pk:
-            if not self.image:
+            if not self.oryg_image:
                 self.thumbnails = {}
             old_category = Category.objects.get(pk=self.pk)
             old_name = old_category.name
             old_image = old_category.image
 
-            if old_category.image and old_category.image != self.image:
+            if old_category.image and old_category.image != self.oryg_image:
                 old_image = old_category.image
 
             if old_category.name != self.name:
@@ -79,14 +79,14 @@ class Category(models.Model):
                 .replace("---", "-")
             )
 
-        if old_image and old_image != self.image:
+        if old_image and old_image != self.oryg_image:
             thumbs = self.category_thumbnails.filter(main=True)
             if thumbs:
                 thumbs.delete()
 
-        if is_new_instance or old_image != self.image and self.image:
+        if is_new_instance or old_image != self.oryg_image and self.oryg_image:
             self.thumbnails = generate_thumbnails(
-                self, True, False, "category", self.image
+                self, True, False, "category", self.oryg_image
             )
 
         super().save(*args, **kwargs)
@@ -127,6 +127,30 @@ class Category(models.Model):
         return self.products.filter(is_active=True).count()
 
     @property
+    def products_on_first_page(self):
+        products = set(
+            self.products.filter(is_active=True, on_first_page=True)
+        )
+        descendants = self.get_descendants()
+        for descendant in descendants:
+            products.update(
+                descendant.products.filter(is_active=True, on_first_page=True)
+            )
+        return products
+
+    def get_descendants(self):
+        descendants = set()
+
+        def _get_children(category):
+            children = category.children.filter(is_active=True)
+            for child in children:
+                descendants.add(child)
+                _get_children(child)
+
+        _get_children(self)
+        return descendants
+
+    @property
     def has_parent(self):
         return True if self.parent else False
 
@@ -135,14 +159,14 @@ class Category(models.Model):
         return self.children.filter(is_active=True).exists()
 
     def get_full_image_url(self, request):
-        if self.image:
+        if self.oryg_image:
             return request.build_absolute_uri(
-                settings.MEDIA_URL + self.image.url
+                settings.MEDIA_URL + self.oryg_image.url
             )
         return ""
 
     @property
-    def image_list_item(self):
+    def image(self):
         return self.category_thumbnails.filter(
             width_expected=350, height_expected=350, main=True
         ).first()
@@ -169,8 +193,8 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
         return False
 
     try:
-        old_file = Category.objects.get(pk=instance.pk).image
-        new_file = instance.image
+        old_file = Category.objects.get(pk=instance.pk).oryg_image
+        new_file = instance.oryg_image
         if old_file and not old_file == new_file:
             if os.path.isfile(old_file.path):
                 os.remove(old_file.path)
@@ -183,6 +207,6 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
 
 @receiver(models.signals.post_delete, sender=Category)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
-    if instance.image:
-        if os.path.isfile(instance.image.path):
-            os.remove(instance.image.path)
+    if instance.oryg_image:
+        if os.path.isfile(instance.oryg_image.path):
+            os.remove(instance.oryg_image.path)
