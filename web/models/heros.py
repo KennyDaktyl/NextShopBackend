@@ -81,7 +81,7 @@ class Hero(models.Model):
     def image(self):
         return self.hero_thumbnails.filter(
             width_expected=650, height_expected=650
-        ).last()
+        ).first()
 
 
 @receiver(models.signals.pre_save, sender=Hero)
