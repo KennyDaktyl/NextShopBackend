@@ -20,7 +20,7 @@ class CategorySerializer(serializers.ModelSerializer):
             "description",
             "has_parent",
             "is_parent",
-            "get_products_count",
+            "products_count",
             "has_children",
             "full_path",
             "back_link",
@@ -40,9 +40,28 @@ class CategorySerializer(serializers.ModelSerializer):
         return obj.get_absolute_url()
 
 
+class SubcategoryOnFirstPageSerializer(serializers.ModelSerializer):
+    full_path = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Category
+        fields = (
+            "id",
+            "name",
+            "slug",
+            "description",
+            "products_count",
+            "full_path"
+        )
+    
+    def get_full_path(self, obj):
+        return obj.get_full_path()
+    
+    
 class CategoryListOnFirstPageSerializer(serializers.ModelSerializer):
     full_path = serializers.SerializerMethodField()
     image = ThumbnailSerializer()
+    all_subcategories = SubcategoryOnFirstPageSerializer(many=True)
     products_on_first_page = ProductListItemSerializer(many=True)
 
     class Meta:
@@ -52,6 +71,7 @@ class CategoryListOnFirstPageSerializer(serializers.ModelSerializer):
             "name",
             "slug",
             "description",
+            "all_subcategories",
             "full_path",
             "image",
             "products_on_first_page",
@@ -88,7 +108,7 @@ class ProductsByCategorySerializer(serializers.ModelSerializer):
             "description",
             "has_parent",
             "is_parent",
-            "get_products_count",
+            "products_count",
             "has_children",
             "full_path",
             "back_link",

@@ -123,7 +123,7 @@ class Category(models.Model):
         return self.products.filter(is_active=True)
 
     @property
-    def get_products_count(self):
+    def products_count(self):
         return self.products.filter(is_active=True).count()
 
     @property
@@ -138,6 +138,14 @@ class Category(models.Model):
             )
         return products
 
+    @property
+    def all_subcategories(self):
+        subcategories = set()
+        descendants = self.get_descendants()
+        for descendant in descendants:
+            subcategories.add(descendant)
+        return subcategories
+    
     def get_descendants(self):
         descendants = set()
 
