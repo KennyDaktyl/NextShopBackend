@@ -175,6 +175,9 @@ class Product(models.Model):
         blank=True,
         related_name="product_options",
     )
+    free_delivery = models.BooleanField(
+        verbose_name="Darmowa dostawa", default=False
+    )
 
     class Meta:
         verbose_name = "Produkt"
@@ -191,7 +194,7 @@ class Product(models.Model):
                 self.thumbnails = {}
             old_product = Product.objects.get(pk=self.pk)
             old_name = old_product.name
-            old_image = old_product.image
+            old_image = old_product.oryg_image
 
             if old_product.category != self.category:
                 self.prev_category = old_product.category
@@ -220,7 +223,6 @@ class Product(models.Model):
         if is_new_instance:
             if self.show_variant_label:
                 try:
-                    # Sprawdzanie, czy ProductVariant już istnieje
                     variant = ProductVariant()
                     variant.product = self
                     variant.name = "Domyślny"
@@ -232,7 +234,6 @@ class Product(models.Model):
                     variant.thumbnails = self.thumbnails
                     variant.save()
                 except IntegrityError as e:
-                    # Logowanie błędu dla lepszego zrozumienia problemu
                     print(
                         f"IntegrityError podczas tworzenia ProductVariant: {e}"
                     )

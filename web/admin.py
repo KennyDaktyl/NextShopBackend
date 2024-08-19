@@ -5,13 +5,14 @@ from django.contrib.auth.models import User
 from web.models.accounts import Profile
 from web.models.carts import Cart, CartItem
 from web.models.categories import Category
+from web.models.deliveries import Delivery
 from web.models.heros import Hero
 from web.models.images import Photo, Thumbnail
 from web.models.orders import Order, OrderItem
+from web.models.payments import Payment
 from web.models.prices import PriceGroup, ProductPrice
 from web.models.products import (Brand, Material, Product, ProductOption,
                                  ProductOptionItem, ProductVariant, Size, Tag)
-from web.models.shipments import Shipment
 
 
 @admin.register(Hero)
@@ -143,8 +144,15 @@ class ItemAdmin(admin.ModelAdmin):
     list_filter = ("cart__created_date",)
 
 
-@admin.register(Shipment)
-class ShipmentAdmin(admin.ModelAdmin):
+@admin.register(Delivery)
+class DeliveryAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "price", "is_active")
+    search_fields = ("name",)
+    list_filter = ("is_active",)
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "price", "is_active")
     search_fields = ("name",)
     list_filter = ("is_active",)
@@ -260,6 +268,8 @@ class ThumbnailAdmin(admin.ModelAdmin):
         "product_variant",
         "photo",
         "hero",
+        "delivery",
+        "payment",
         "oryg_image",
     )
     search_fields = (

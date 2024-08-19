@@ -5,7 +5,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from web.categories.serializers import CategoryListOnFirstPageSerializer
-from web.front.serializers import HeroSerializer
+from web.front.serializers import ContactEmailSerializer, HeroSerializer
+from web.functions import send_email_by_django
 from web.models.categories import Category
 from web.models.heros import Hero
 
@@ -33,4 +34,26 @@ class FirstPageView(GenericAPIView):
         )
 
 
+class ContactView(GenericAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ContactEmailSerializer
+
+    @swagger_auto_schema(
+        operation_description="Retrieve contact details",
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            title = serializer.validated_data.get("title")
+            email = serializer.validated_data.get("email")
+            message = serializer.validated_data.get("message")
+            send_email_by_django(title, email, message)
+            return Response(
+                {"message": "Email sent successfully"},
+                status=status.HTTP_200_OK,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 first_page_view = FirstPageView.as_view()
+contact_form_email = ContactView.as_view()

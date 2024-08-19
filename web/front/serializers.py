@@ -10,3 +10,9 @@ class HeroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hero
         fields = ("id", "title", "description", "image", "link", "is_active")
+
+
+class ContactEmailSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    email = serializers.EmailField()
+    message = serializers.CharField()

@@ -145,7 +145,7 @@ class Category(models.Model):
         for descendant in descendants:
             subcategories.add(descendant)
         return subcategories
-    
+
     def get_descendants(self):
         descendants = set()
 

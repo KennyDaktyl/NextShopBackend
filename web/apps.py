@@ -7,6 +7,8 @@ class WebConfig(AppConfig):
 
     def ready(self):
         import web.categories.signals
+        import web.deliveries.signals
         import web.front.signals
         import web.images.signals
+        import web.payments.signals
         import web.products.signals
