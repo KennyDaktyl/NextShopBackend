@@ -49,7 +49,10 @@ class Order(models.Model):
     )
     info = models.TextField(verbose_name="Komentarz", null=True, blank=True)
     delivery_method = models.ForeignKey(
-        "Shipment", on_delete=models.CASCADE, verbose_name="Sposób dostawy"
+        "Delivery",
+        on_delete=models.CASCADE,
+        verbose_name="Sposób dostawy",
+        related_name="orders",
     )
     # Payment
     payment_method = models.IntegerField(

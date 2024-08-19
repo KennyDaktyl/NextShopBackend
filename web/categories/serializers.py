@@ -42,7 +42,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class SubcategoryOnFirstPageSerializer(serializers.ModelSerializer):
     full_path = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Category
         fields = (
@@ -51,13 +51,13 @@ class SubcategoryOnFirstPageSerializer(serializers.ModelSerializer):
             "slug",
             "description",
             "products_count",
-            "full_path"
+            "full_path",
         )
-    
+
     def get_full_path(self, obj):
         return obj.get_full_path()
-    
-    
+
+
 class CategoryListOnFirstPageSerializer(serializers.ModelSerializer):
     full_path = serializers.SerializerMethodField()
     image = ThumbnailSerializer()

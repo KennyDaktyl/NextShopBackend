@@ -160,6 +160,20 @@ class Thumbnail(models.Model):
         null=True,
         blank=True,
     )
+    delivery = models.ForeignKey(
+        "Delivery",
+        on_delete=models.CASCADE,
+        related_name="delivery_thumbnails",
+        null=True,
+        blank=True,
+    )
+    payment = models.ForeignKey(
+        "Payment",
+        on_delete=models.CASCADE,
+        related_name="payment_thumbnails",
+        null=True,
+        blank=True,
+    )
     width = models.IntegerField(verbose_name="Szerokość")
     height = models.IntegerField(verbose_name="Wysokość")
     width_expected = models.IntegerField(
@@ -209,9 +223,13 @@ def create_thumbnail(
         thumbnail.photo = relation
     elif relation_name == "hero":
         thumbnail.hero = relation
+    elif relation_name == "delivery":
+        thumbnail.delivery = relation
+    elif relation_name == "payment":
+        thumbnail.payment = relation
     else:
         raise ValueError(
-            "Relation must be 'product', 'variant', 'category', 'hero' or 'photo'."
+            "Relation must be 'product', 'variant', 'category', 'hero', 'delivery', 'payment' or 'photo'."
         )
 
     # Zmniejszenie obrazu zachowując proporcje
