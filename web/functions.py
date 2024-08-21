@@ -14,7 +14,7 @@ def send_email_by_django(title, email, message):
     <html>
         <head></head>
         <body>
-            <h1>Message from: {email}</h1>
+            <p>Message from: <h3>{email}</h3></p>
             <p>{message}</p>
         </body>
     </html>

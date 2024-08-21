@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from web.models.products import Product
 
-from .serializers import ProductDetailsSerializer, ProductListItemSerializer
+from .serializers import ProductDetailsSerializer, ProductListItemSerializer, ProductsPathListSerializer
 
 
 class ProductPagination(PageNumberPagination):
@@ -32,7 +32,6 @@ class ProductListView(generics.ListAPIView):
             search_terms = search_query.split()
             query = Q()
             for term in search_terms:
-                print(f"Searching for term: {term}")
                 query &= Q(name__icontains=term) | Q(
                     description__icontains=term
                 )
@@ -40,6 +39,21 @@ class ProductListView(generics.ListAPIView):
         return queryset
 
 
+class ProductsPathListView(generics.ListAPIView):
+    serializer_class = ProductsPathListSerializer
+    permission_classes = [AllowAny]
+    queryset = Product.objects.filter(is_active=True)
+
+    @swagger_auto_schema(
+        operation_description="Retrieve a list of active product paths",
+        responses={200: ProductsPathListSerializer(many=True)},
+    )
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    
 class ProductDetailsView(generics.RetrieveAPIView):
     queryset = Product.objects.filter(is_active=True)
     serializer_class = ProductDetailsSerializer
@@ -60,3 +74,6 @@ class ProductDetailsView(generics.RetrieveAPIView):
                 {"message": "Product not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+
+products_paths_list = ProductsPathListView.as_view()

@@ -1,13 +1,18 @@
 from django.urls import path
 
 from web.categories.views import (CategoryMetaDataView, MenuItemsView,
-                                  ProductsByCategorySlugView)
+                                  ProductsByCategorySlugView, categories_path_list)
 
 urlpatterns = [
     path(
         "menu-items/<slug:slug>/",
         MenuItemsView.as_view(),
         name="menu-items",
+    ),
+    path(
+        "categories-path-list/",
+        categories_path_list,
+        name="categories-list-path",
     ),
     path(
         "category-products/<slug:slug>/",
