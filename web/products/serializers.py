@@ -94,6 +94,13 @@ class ProductCategorySerializer(serializers.ModelSerializer):
         return obj.get_full_path()
 
 
+class ProductsPathListSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Product
+        fields = ("get_absolute_url",)
+        
+    
 class ProductDetailsSerializer(serializers.ModelSerializer):
     images = ThumbnailSerializer(many=True)
     variants = ProductVariantSerializer(many=True)

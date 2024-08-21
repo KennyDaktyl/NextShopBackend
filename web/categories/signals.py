@@ -24,6 +24,12 @@ def revalidate_product_cache_category(sender, instance, **kwargs):
         first_page_tag = "first-page"
         tags.append(first_page_tag)
 
+        category_meta_tag = "category-meta"
+        tags.append(category_meta_tag)
+        
+        categories_link_path = "categories-path"
+        tags.append(categories_link_path)
+        
         current_category = instance
         while current_category:
             products_category = f"products-{current_category.slug}"

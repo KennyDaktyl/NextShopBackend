@@ -40,6 +40,19 @@ class CategorySerializer(serializers.ModelSerializer):
         return obj.get_absolute_url()
 
 
+class CategoryPathSerializer(serializers.ModelSerializer):
+    full_path = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = (
+            "full_path",
+        )
+
+    def get_full_path(self, obj):
+        return obj.get_full_path()
+    
+
 class SubcategoryOnFirstPageSerializer(serializers.ModelSerializer):
     full_path = serializers.SerializerMethodField()
 
@@ -86,12 +99,19 @@ class CategoriesOnFirstPageSerializer(serializers.Serializer):
 
 
 class CategoryMetaDataSerializer(serializers.ModelSerializer):
+    full_path = serializers.SerializerMethodField()
+    
     class Meta:
         model = Category
         fields = (
             "name",
             "description",
+            "has_children",
+            "full_path",
         )
+    
+    def get_full_path(self, obj):
+        return obj.get_full_path()
 
 
 class ProductsByCategorySerializer(serializers.ModelSerializer):

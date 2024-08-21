@@ -17,6 +17,9 @@ class Hero(models.Model):
         verbose_name="Zdjęcie", upload_to="heros", blank=True, null=True
     )
     link = models.URLField(verbose_name="Link", blank=True, null=True)
+    link_text = models.CharField(
+        max_length=50, verbose_name="Tekst linku", blank=True, null=True
+    )
     order = models.IntegerField(verbose_name="Kolejność", default=1)
     thumbnails = models.JSONField(default=dict, blank=True, null=True)
 

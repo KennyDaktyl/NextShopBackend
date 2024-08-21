@@ -9,8 +9,9 @@ from web.models.products import Product
 from web.products.serializers import ProductListItemSerializer
 from web.products.views import ProductPagination
 
-from .serializers import (CategoryMetaDataSerializer, CategorySerializer,
+from .serializers import (CategoryMetaDataSerializer, CategoryPathSerializer, CategorySerializer,
                           ProductsByCategorySerializer)
+
 
 
 class MenuItemsView(generics.RetrieveAPIView):
@@ -53,6 +54,24 @@ class MenuItemsView(generics.RetrieveAPIView):
         }
         return Response(custom_response)
 
+
+class CategoriesPathListView(generics.ListAPIView):
+    serializer_class = CategoryPathSerializer
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="Retrieve a list of active categories",
+        responses={200: CategorySerializer(many=True)},
+    )
+    def get_queryset(self):
+        return Category.objects.filter(is_active=True)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        context = {"request": request}
+        serializer = self.get_serializer(queryset, many=True, context=context)
+        return Response(serializer.data)
+    
 
 class CategoryMetaDataView(generics.RetrieveAPIView):
     serializer_class = CategoryMetaDataSerializer
@@ -126,3 +145,6 @@ class ProductsByCategorySlugView(generics.ListAPIView):
             category
         ).data
         return Response(paginated_response.data)
+
+
+categories_path_list = CategoriesPathListView.as_view()
