@@ -134,6 +134,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             "variant_label",
             "product_option",
             "free_delivery",
+            "full_path"
         )
 
     def get_color(self, obj):
