@@ -98,7 +98,7 @@ class ProductsPathListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Product
-        fields = ("get_absolute_url",)
+        fields = ("full_path",)
         
     
 class ProductDetailsSerializer(serializers.ModelSerializer):
@@ -150,7 +150,6 @@ class ProductListItemSerializer(serializers.ModelSerializer):
         max_digits=10, decimal_places=2, read_only=True
     )
     # full_image_url = serializers.SerializerMethodField()
-    absolute_url = serializers.SerializerMethodField()
     image = ThumbnailSerializer()
     variants = ProductListVariantSerializer(many=True)
 
@@ -165,11 +164,10 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             "image",
             "current_price",
             "min_price_last_30",
-            "absolute_url",
+            "full_path",
             "variants",
             "show_variant_label",
             "variant_label",
+            "full_path"
         )
 
-    def get_absolute_url(self, obj):
-        return obj.get_absolute_url()

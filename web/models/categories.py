@@ -191,7 +191,8 @@ class Category(models.Model):
         _get_children(self)
         return descendants
 
-    def get_absolute_url(self):
+    @property
+    def full_path(self):
         return f"/produkty/{self.slug}"
 
 

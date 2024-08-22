@@ -68,7 +68,7 @@ class CartCreateView(GenericAPIView):
                 "quantity": quantity,
                 "available_quantity": available_quantity,
                 "image": image,
-                "url": product.get_absolute_url(),
+                "url": product.full_path,
             }
 
             cart_item_serializer = CartItemSerializer(
@@ -155,7 +155,7 @@ class CartUpdateView(GenericAPIView):
                 "quantity": quantity,
                 "available_quantity": available_quantity,
                 "image": image,
-                "url": product.get_absolute_url(),
+                "url": product.full_path,
             }
 
             cart_item_serializer = CartItemSerializer(

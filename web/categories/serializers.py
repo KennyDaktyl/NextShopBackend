@@ -36,8 +36,7 @@ class CategorySerializer(serializers.ModelSerializer):
     def get_back_link(self, obj):
         return obj.get_back_link()
 
-    def get_absolute_url(self, obj):
-        return obj.get_absolute_url()
+  
 
 
 class CategoryPathSerializer(serializers.ModelSerializer):
@@ -143,5 +142,4 @@ class ProductsByCategorySerializer(serializers.ModelSerializer):
     def get_back_link(self, obj):
         return obj.get_back_link()
 
-    def get_absolute_url(self, obj):
-        return obj.get_absolute_url()
+  
