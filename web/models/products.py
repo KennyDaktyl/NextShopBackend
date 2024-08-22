@@ -298,7 +298,8 @@ class Product(models.Model):
             width_expected=350, height_expected=350, main=True
         ).first()
 
-    def get_absolute_url(self):
+    @property
+    def full_path(self):
         return f"/produkt/{self.slug}"
 
 
