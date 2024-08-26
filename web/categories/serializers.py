@@ -18,6 +18,7 @@ class CategorySerializer(serializers.ModelSerializer):
             "name",
             "slug",
             "description",
+            "seo_text",
             "has_parent",
             "is_parent",
             "products_count",
@@ -36,21 +37,17 @@ class CategorySerializer(serializers.ModelSerializer):
     def get_back_link(self, obj):
         return obj.get_back_link()
 
-  
-
 
 class CategoryPathSerializer(serializers.ModelSerializer):
     full_path = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
-        fields = (
-            "full_path",
-        )
+        fields = ("full_path",)
 
     def get_full_path(self, obj):
         return obj.get_full_path()
-    
+
 
 class SubcategoryOnFirstPageSerializer(serializers.ModelSerializer):
     full_path = serializers.SerializerMethodField()
@@ -62,6 +59,7 @@ class SubcategoryOnFirstPageSerializer(serializers.ModelSerializer):
             "name",
             "slug",
             "description",
+            "seo_text",
             "products_count",
             "full_path",
         )
@@ -83,6 +81,7 @@ class CategoryListOnFirstPageSerializer(serializers.ModelSerializer):
             "name",
             "slug",
             "description",
+            "seo_text",
             "all_subcategories",
             "full_path",
             "image",
@@ -99,16 +98,18 @@ class CategoriesOnFirstPageSerializer(serializers.Serializer):
 
 class CategoryMetaDataSerializer(serializers.ModelSerializer):
     full_path = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Category
         fields = (
             "name",
             "description",
+            "seo_text",
+            "seo_text",
             "has_children",
             "full_path",
         )
-    
+
     def get_full_path(self, obj):
         return obj.get_full_path()
 
@@ -125,6 +126,7 @@ class ProductsByCategorySerializer(serializers.ModelSerializer):
             "name",
             "slug",
             "description",
+            "seo_text",
             "has_parent",
             "is_parent",
             "products_count",
@@ -141,5 +143,3 @@ class ProductsByCategorySerializer(serializers.ModelSerializer):
 
     def get_back_link(self, obj):
         return obj.get_back_link()
-
-  

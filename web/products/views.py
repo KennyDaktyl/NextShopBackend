@@ -7,7 +7,11 @@ from rest_framework.response import Response
 
 from web.models.products import Product
 
-from .serializers import ProductDetailsSerializer, ProductListItemSerializer, ProductsPathListSerializer
+from .serializers import (
+    ProductDetailsSerializer,
+    ProductListItemSerializer,
+    ProductsPathListSerializer,
+)
 
 
 class ProductPagination(PageNumberPagination):
@@ -52,8 +56,8 @@ class ProductsPathListView(generics.ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-    
-    
+
+
 class ProductDetailsView(generics.RetrieveAPIView):
     queryset = Product.objects.filter(is_active=True)
     serializer_class = ProductDetailsSerializer

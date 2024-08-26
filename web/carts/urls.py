@@ -1,7 +1,14 @@
 from django.urls import path
 
-from .views import (cart_items, create_cart, remove_cart, remove_item,
-                    total_price, update_cart, update_item_qty)
+from .views import (
+    cart_items,
+    create_cart,
+    remove_cart,
+    remove_item,
+    total_price,
+    update_cart,
+    update_item_qty,
+)
 
 urlpatterns = [
     path("create", create_cart, name="create_cart"),

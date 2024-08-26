@@ -121,6 +121,9 @@ class Product(models.Model):
     description = models.TextField(
         verbose_name="Opis produktu", blank=True, null=True
     )
+    seo_text = models.TextField(
+        verbose_name="Tekst SEO", blank=True, null=True
+    )
     color = models.IntegerField(
         verbose_name="Kolor wariantu", choices=VARIANT_COLORS, default=0
     )

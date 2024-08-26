@@ -9,7 +9,15 @@ class HeroSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Hero
-        fields = ("id", "title", "description", "image", "link", "link_text", "is_active")
+        fields = (
+            "id",
+            "title",
+            "description",
+            "image",
+            "link",
+            "link_text",
+            "is_active",
+        )
 
 
 class ContactEmailSerializer(serializers.Serializer):
