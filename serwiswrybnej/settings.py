@@ -43,8 +43,8 @@ if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
     ALLOWED_HOSTS = ["*"]
     CORS_ALLOW_CREDENTIALS = True
     CORS_ALLOWED_ORIGINS = [
-        "http://localhost:3000",  # Twoja domena frontendowa
-        "http://127.0.0.1:3000",  # Dodaj to, jeśli testujesz lokalnie
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000", 
     ]
 
     SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
@@ -60,6 +60,12 @@ else:
         "51.75.64.242",
         "new-serwiswrybnej-api.resto-app.pl",
     ]
+    
+    SECURE_HSTS_SECONDS = 31536000  
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True  
+    SECURE_HSTS_PRELOAD = True  
+    SECURE_SSL_REDIRECT = True 
+
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
