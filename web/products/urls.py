@@ -14,5 +14,4 @@ urlpatterns = [
         ProductDetailsView.as_view(),
         name="product-details",
     ),
-   
 ]

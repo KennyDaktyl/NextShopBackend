@@ -1,8 +1,16 @@
 from rest_framework import serializers
 
 from web.images.serializers import ThumbnailSerializer
-from web.models.products import (Brand, Category, Material, Product,
-                                 ProductOptionItem, ProductVariant, Size, Tag)
+from web.models.products import (
+    Brand,
+    Category,
+    Material,
+    Product,
+    ProductOptionItem,
+    ProductVariant,
+    Size,
+    Tag,
+)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -95,12 +103,12 @@ class ProductCategorySerializer(serializers.ModelSerializer):
 
 
 class ProductsPathListSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Product
         fields = ("full_path",)
-        
-    
+
+
 class ProductDetailsSerializer(serializers.ModelSerializer):
     images = ThumbnailSerializer(many=True)
     variants = ProductVariantSerializer(many=True)
@@ -122,6 +130,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             "images",
             "variants",
             "description",
+            "seo_text",
             "qty",
             "color",
             "tags",
@@ -134,7 +143,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             "variant_label",
             "product_option",
             "free_delivery",
-            "full_path"
+            "full_path",
         )
 
     def get_color(self, obj):
@@ -161,6 +170,7 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             "slug",
             "category",
             "description",
+            "seo_text",
             "image",
             "current_price",
             "min_price_last_30",
@@ -168,6 +178,5 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             "variants",
             "show_variant_label",
             "variant_label",
-            "full_path"
+            "full_path",
         )
-

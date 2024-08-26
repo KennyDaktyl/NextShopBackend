@@ -9,9 +9,12 @@ from web.models.products import Product
 from web.products.serializers import ProductListItemSerializer
 from web.products.views import ProductPagination
 
-from .serializers import (CategoryMetaDataSerializer, CategoryPathSerializer, CategorySerializer,
-                          ProductsByCategorySerializer)
-
+from .serializers import (
+    CategoryMetaDataSerializer,
+    CategoryPathSerializer,
+    CategorySerializer,
+    ProductsByCategorySerializer,
+)
 
 
 class MenuItemsView(generics.RetrieveAPIView):
@@ -46,6 +49,7 @@ class MenuItemsView(generics.RetrieveAPIView):
             "name": category_data["name"],
             "slug": category_data["slug"],
             "description": category_data["description"],
+            "seo_text": category_data["seo_text"],
             "back_link": category_data["back_link"],
             "has_children": category_data["has_children"],
             "full_path": category_data["full_path"],
@@ -71,7 +75,7 @@ class CategoriesPathListView(generics.ListAPIView):
         context = {"request": request}
         serializer = self.get_serializer(queryset, many=True, context=context)
         return Response(serializer.data)
-    
+
 
 class CategoryMetaDataView(generics.RetrieveAPIView):
     serializer_class = CategoryMetaDataSerializer

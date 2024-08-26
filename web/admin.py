@@ -11,8 +11,16 @@ from web.models.images import Photo, Thumbnail
 from web.models.orders import Order, OrderItem
 from web.models.payments import Payment
 from web.models.prices import PriceGroup, ProductPrice
-from web.models.products import (Brand, Material, Product, ProductOption,
-                                 ProductOptionItem, ProductVariant, Size, Tag)
+from web.models.products import (
+    Brand,
+    Material,
+    Product,
+    ProductOption,
+    ProductOptionItem,
+    ProductVariant,
+    Size,
+    Tag,
+)
 
 
 @admin.register(Hero)

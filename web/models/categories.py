@@ -20,6 +20,9 @@ class Category(models.Model):
     description = models.TextField(
         verbose_name="Opis kategorii", null=True, blank=True
     )
+    seo_text = models.TextField(
+        verbose_name="Tekst SEO", blank=True, null=True
+    )
     parent = models.ForeignKey(
         "self",
         null=True,

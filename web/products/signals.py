@@ -26,7 +26,7 @@ def revalidate_product_cache_product(sender, instance, **kwargs):
 
         first_page_tag = "first-page"
         tags.append(first_page_tag)
-        
+
         products_link_path = "products-path"
         tags.append(products_link_path)
 
