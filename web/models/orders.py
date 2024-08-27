@@ -36,16 +36,16 @@ class Order(models.Model):
         verbose_name="Telefon klienta", max_length=15
     )
     client_address = models.CharField(
-        verbose_name="Adres klienta", max_length=255
+        verbose_name="Adres klienta", max_length=255, null=True, blank=True
     )
     amount = models.DecimalField(
         max_digits=10, verbose_name="Cena", decimal_places=2
     )
     amount_with_discount = models.DecimalField(
-        max_digits=10, verbose_name="Cena z rabatem", decimal_places=2
+        max_digits=10, verbose_name="Cena z rabatem", decimal_places=2, blank=True, null=True
     )
     discount = models.DecimalField(
-        max_digits=10, verbose_name="Rabat", decimal_places=2
+        max_digits=10, verbose_name="Rabat", decimal_places=2, default=0
     )
     info = models.TextField(verbose_name="Komentarz", null=True, blank=True)
     delivery_method = models.ForeignKey(
@@ -55,8 +55,14 @@ class Order(models.Model):
         related_name="orders",
     )
     # Payment
-    payment_method = models.IntegerField(
-        "Status", choices=PAYMENT_METHOD, default=0
+    payment_method = models.ForeignKey(
+        "Payment",
+        on_delete=models.CASCADE,
+        verbose_name="Sposób płatności",
+        related_name="orders",
+    )
+    payment_price = models.DecimalField(
+        max_digits=10, verbose_name="Opłata za płatność", decimal_places=2, default=0
     )
     payment_date = models.DateTimeField(
         verbose_name="Data płatności",
@@ -69,8 +75,28 @@ class Order(models.Model):
         null=True,
         blank=True,
     )
-    order_code = models.CharField(
+    order_code_stripe = models.CharField(
         verbose_name="Kod płatności", max_length=255, null=True, blank=True
+    )
+    
+    #Delivery
+    delivery_method = models.ForeignKey(
+        "Delivery",
+        on_delete=models.CASCADE,
+        verbose_name="Sposób dostawy",
+        related_name="orders",
+    )
+    delivery_price = models.DecimalField(
+        max_digits=10, verbose_name="Opłata za dostwę", decimal_places=2, default=0
+    )
+    inpost_box_id = models.CharField(
+        verbose_name="Id paczkomatu", max_length=255, null=True, blank=True
+    )
+    
+    #Items
+    cart_items = models.JSONField(verbose_name="Produkty w koszyku", null=True)
+    cart_items_price = models.DecimalField(
+        max_digits=10, verbose_name="Cena produktów", decimal_places=2, default=0
     )
 
     # Invoice
@@ -95,7 +121,7 @@ class Order(models.Model):
         ordering = ["-created_date"]
 
     def __str__(self):
-        return f"{self.product.name} - {self.price} zł"
+        return f"{self.order_number} - {self.amount} zł"
 
 
 class OrderItem(models.Model):

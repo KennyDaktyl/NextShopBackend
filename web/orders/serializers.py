@@ -1,5 +1,7 @@
 from rest_framework import serializers
+from decimal import Decimal, InvalidOperation
 
+from web.images.serializers import ThumbnailSerializer
 from web.models.orders import Order, OrderItem
 
 
@@ -30,3 +32,39 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         for order_item_data in order_items_data:
             OrderItem.objects.create(order=order, **order_item_data)
         return order
+
+
+class DecimalField(serializers.Field):
+    def to_representation(self, value):
+        return str(value)  # Można zmienić na float(value) dla większej precyzji
+
+    def to_internal_value(self, data):
+        try:
+            return Decimal(data)
+        except InvalidOperation:
+            self.fail('invalid')
+
+class CartItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField(max_length=255)
+    slug = serializers.CharField(max_length=255)
+    price = DecimalField()  
+    variant = serializers.CharField(max_length=255)
+    selected_option = serializers.CharField(max_length=255)
+    quantity = serializers.IntegerField()
+    image = serializers.DictField()  
+    url = serializers.CharField()
+
+
+class CreateOrderSerializer(serializers.Serializer):
+    client_name = serializers.CharField(max_length=255)
+    client_email = serializers.EmailField()
+    client_phone = serializers.CharField(max_length=15)
+    delivery_price = DecimalField()  
+    payment_price = DecimalField() 
+    cart_items_price = DecimalField()  
+    amount = DecimalField()  
+    delivery_method = serializers.CharField(max_length=10)
+    payment_method = serializers.CharField(max_length=10)
+    cart_items = CartItemSerializer(many=True)
+    inpost_box_id = serializers.CharField(max_length=255, required=False)

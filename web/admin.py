@@ -166,14 +166,11 @@ class PaymentAdmin(admin.ModelAdmin):
     list_filter = ("is_active",)
 
 
-class OrderItemInline(admin.TabularInline):
-    model = OrderItem
-    extra = 1
-
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
+        "id",
         "order_number",
         "status",
         "client",
@@ -217,6 +214,10 @@ class OrderAdmin(admin.ModelAdmin):
                     "info",
                     "delivery_method",
                     "payment_method",
+                    "payment_price",
+                    "delivery_price",
+                    "cart_items_price",
+                    "cart_items",
                 )
             },
         ),
@@ -226,7 +227,7 @@ class OrderAdmin(admin.ModelAdmin):
                 "fields": (
                     "payment_date",
                     "payment_id",
-                    "order_code",
+                    "order_code_stripe",
                     "invoice",
                     "email_notification",
                     "overriden_invoice_number",
@@ -235,33 +236,6 @@ class OrderAdmin(admin.ModelAdmin):
             },
         ),
         ("Timestamps", {"fields": ("created_date", "updated_date")}),
-    )
-
-    inlines = [OrderItemInline]
-
-
-@admin.register(OrderItem)
-class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ("order", "product", "name", "qty", "price", "discount")
-    search_fields = ("name", "order__order_number", "product__name")
-    list_filter = ("order", "product", "price", "discount")
-    readonly_fields = ("order", "product")
-
-    fieldsets = (
-        (
-            None,
-            {
-                "fields": (
-                    "order",
-                    "product",
-                    "name",
-                    "qty",
-                    "price",
-                    "discount",
-                    "info",
-                )
-            },
-        ),
     )
 
 
