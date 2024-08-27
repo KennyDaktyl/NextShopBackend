@@ -350,7 +350,7 @@ class ProductVariant(models.Model):
 
         if self.pk:
             old_variant = ProductVariant.objects.get(pk=self.pk)
-            old_image = old_variant.image
+            old_image = old_variant.oryg_image
             old_name = old_variant.name
 
         if old_image and old_image != self.oryg_image:
