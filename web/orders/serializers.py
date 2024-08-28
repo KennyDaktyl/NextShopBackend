@@ -52,7 +52,7 @@ class CartItemSerializer(serializers.Serializer):
     variant = serializers.CharField(max_length=255, required=False, allow_blank=True, allow_null=True)
     selected_option = serializers.CharField(max_length=255, required=False, allow_blank=True, allow_null=True)
     quantity = serializers.IntegerField()
-    image = serializers.DictField()  
+    image = ThumbnailSerializer(allow_null=True, required=False)  
     url = serializers.CharField()
 
 
