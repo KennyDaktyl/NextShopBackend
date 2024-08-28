@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 from web.constants import ORDER_STATUS, PAYMENT_METHOD
+from web.orders.functions import generate_order_number
 
 
 class Order(models.Model):
@@ -32,7 +33,7 @@ class Order(models.Model):
     client_email = models.EmailField(
         verbose_name="Email klienta", max_length=255
     )
-    client_phone = models.CharField(
+    client_mobile = models.CharField(
         verbose_name="Telefon klienta", max_length=15
     )
     client_address = models.CharField(
@@ -47,7 +48,7 @@ class Order(models.Model):
     discount = models.DecimalField(
         max_digits=10, verbose_name="Rabat", decimal_places=2, default=0
     )
-    info = models.TextField(verbose_name="Komentarz", null=True, blank=True)
+    info = models.TextField(verbose_name="Informacje do zamówienia", null=True, blank=True)
     delivery_method = models.ForeignKey(
         "Delivery",
         on_delete=models.CASCADE,
@@ -123,6 +124,12 @@ class Order(models.Model):
     def __str__(self):
         return f"{self.order_number} - {self.amount} zł"
 
+    def save(self, *args, **kwargs):
+        if not self.order_number:  
+            self.order_number = generate_order_number()
+
+        super().save(*args, **kwargs)
+        
 
 class OrderItem(models.Model):
     order = models.ForeignKey(

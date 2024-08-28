@@ -63,6 +63,10 @@ class CreateOrderView(GenericAPIView):
                 order_serializer.validated_data['payment_method'] = payment_method 
             
             order_serializer.validated_data['cart_items'] = json.dumps(request.data['cart_items'])
+            
+            if request.user.is_authenticated:
+                order_serializer.validated_data['client'] = request.user
+                
             order = Order.objects.create(
                 **order_serializer.validated_data,
             )
