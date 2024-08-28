@@ -18,6 +18,9 @@ class Payment(models.Model):
     payment_on_delivery = models.BooleanField(
         verbose_name="Czy to płatność przy odbiorze?", default=False
     )
+    payment_online = models.BooleanField(
+        verbose_name="Czy to płatność online?", default=False
+    )
     oryg_image = models.ImageField(
         verbose_name="Zdjęcie główne", upload_to="deliveries", blank=True
     )

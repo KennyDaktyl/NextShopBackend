@@ -49,8 +49,8 @@ class CartItemSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
     slug = serializers.CharField(max_length=255)
     price = DecimalField()  
-    variant = serializers.CharField(max_length=255)
-    selected_option = serializers.CharField(max_length=255)
+    variant = serializers.CharField(max_length=255, required=False, allow_blank=True, allow_null=True)
+    selected_option = serializers.CharField(max_length=255, required=False, allow_blank=True, allow_null=True)
     quantity = serializers.IntegerField()
     image = serializers.DictField()  
     url = serializers.CharField()
@@ -59,7 +59,7 @@ class CartItemSerializer(serializers.Serializer):
 class CreateOrderSerializer(serializers.Serializer):
     client_name = serializers.CharField(max_length=255)
     client_email = serializers.EmailField()
-    client_phone = serializers.CharField(max_length=15)
+    client_mobile = serializers.CharField(max_length=15)
     delivery_price = DecimalField()  
     payment_price = DecimalField() 
     cart_items_price = DecimalField()  
@@ -67,4 +67,9 @@ class CreateOrderSerializer(serializers.Serializer):
     delivery_method = serializers.CharField(max_length=10)
     payment_method = serializers.CharField(max_length=10)
     cart_items = CartItemSerializer(many=True)
-    inpost_box_id = serializers.CharField(max_length=255, required=False)
+    inpost_box_id = serializers.CharField(
+        max_length=255, required=False, allow_blank=True, allow_null=True
+    )
+    info = serializers.CharField(
+        max_length=255, required=False, allow_blank=True, allow_null=True
+    )

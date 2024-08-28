@@ -30,6 +30,27 @@ class HeroAdmin(admin.ModelAdmin):
     list_filter = ["is_active"]
 
 
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'profile'
+
+    
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in Profile._meta.fields]
+    search_fields = (
+        "user__username",
+        "user__email",
+        "company",
+        "nip",
+        "address",
+        "city",
+        "postal_code",
+    )
+    list_filter = ["user__is_active", "status", "newsletter"]
+    
+
 class CustomUserAdmin(BaseUserAdmin):
     list_display = (
         "id",
@@ -44,6 +65,7 @@ class CustomUserAdmin(BaseUserAdmin):
     search_fields = ("username", "email", "first_name", "last_name")
     ordering = ("-id",)
     readonly_fields = ("date_joined",)
+    inlines = (ProfileInline,)
 
 
 admin.site.unregister(User)
@@ -63,19 +85,7 @@ class CategoryAdmin(admin.ModelAdmin):
     list_filter = ["is_active", "is_main"]
 
 
-@admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
-    list_display = [f.name for f in Profile._meta.fields]
-    search_fields = (
-        "user__username",
-        "user__email",
-        "company",
-        "nip",
-        "address",
-        "city",
-        "postal_code",
-    )
-    list_filter = ["user__is_active", "status", "newsletter"]
+
 
 
 class ProductPriceInline(admin.TabularInline):
@@ -206,7 +216,7 @@ class OrderAdmin(admin.ModelAdmin):
                     "client",
                     "client_name",
                     "client_email",
-                    "client_phone",
+                    "client_mobile",
                     "client_address",
                     "amount",
                     "amount_with_discount",
