@@ -279,7 +279,7 @@ class Product(models.Model):
     def images(self):
         if self.show_variant_label:
             return self.product_thumbnails.filter(
-                width_expected=650, height_expected=650, main=False
+                width_expected=650, height_expected=650
             )
         return self.product_thumbnails.filter(
             width_expected=650, height_expected=650
@@ -349,6 +349,7 @@ class ProductVariant(models.Model):
         old_name = None
 
         if self.pk:
+            self.thumbnails = {}
             old_variant = ProductVariant.objects.get(pk=self.pk)
             old_image = old_variant.oryg_image
             old_name = old_variant.name
@@ -387,7 +388,7 @@ class ProductVariant(models.Model):
     @property
     def item_image(self):
         return self.variant_thumbnails.filter(
-            width_expected=350, height_expected=350, main=True
+            width_expected=350, height_expected=350, is_variant=True
         ).first()
 
 
