@@ -14,11 +14,31 @@ class Profile(models.Model):
     )
     status = models.IntegerField("Status", choices=PROFILE_STATUS, default=0)
     mobile = models.CharField("Mobile", max_length=15, blank=True, null=True)
+    invoice = models.BooleanField("Faktura", default=False)
     company = models.CharField(
         "Nazwa firmy", max_length=100, blank=True, null=True
     )
+    company_payer = models.TextField(
+        verbose_name="Dane Płatnika", blank=True, null=True
+    )
     nip = models.CharField("NIP", max_length=10, blank=True, null=True)
-    address = models.CharField("Ulica", max_length=100, blank=True, null=True)
+    invoice_street = models.CharField(
+        "Ulica", max_length=100, blank=True, null=True
+    )
+    invoice_house_number = models.CharField(
+        "Numer domu", max_length=10, blank=True, null=True
+    )
+    invoice_local_number = models.CharField(
+        "Numer lokalu", max_length=10, blank=True, null=True
+    )
+    invoice_city = models.CharField(
+        "Miasto", max_length=50, blank=True, null=True
+    )
+    invoice_postal_code = models.CharField(
+        "Kod pocztowy", max_length=6, blank=True, null=True
+    )
+
+    street = models.CharField("Ulica", max_length=100, blank=True, null=True)
     house_number = models.CharField(
         "Numer domu", max_length=10, blank=True, null=True
     )

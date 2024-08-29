@@ -7,11 +7,8 @@ from rest_framework.response import Response
 
 from web.models.products import Product
 
-from .serializers import (
-    ProductDetailsSerializer,
-    ProductListItemSerializer,
-    ProductsPathListSerializer,
-)
+from .serializers import (ProductDetailsSerializer, ProductListItemSerializer,
+                          ProductsPathListSerializer)
 
 
 class ProductPagination(PageNumberPagination):

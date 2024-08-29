@@ -43,12 +43,18 @@ class Order(models.Model):
         max_digits=10, verbose_name="Cena", decimal_places=2
     )
     amount_with_discount = models.DecimalField(
-        max_digits=10, verbose_name="Cena z rabatem", decimal_places=2, blank=True, null=True
+        max_digits=10,
+        verbose_name="Cena z rabatem",
+        decimal_places=2,
+        blank=True,
+        null=True,
     )
     discount = models.DecimalField(
         max_digits=10, verbose_name="Rabat", decimal_places=2, default=0
     )
-    info = models.TextField(verbose_name="Informacje do zamówienia", null=True, blank=True)
+    info = models.TextField(
+        verbose_name="Informacje do zamówienia", null=True, blank=True
+    )
     delivery_method = models.ForeignKey(
         "Delivery",
         on_delete=models.CASCADE,
@@ -63,7 +69,10 @@ class Order(models.Model):
         related_name="orders",
     )
     payment_price = models.DecimalField(
-        max_digits=10, verbose_name="Opłata za płatność", decimal_places=2, default=0
+        max_digits=10,
+        verbose_name="Opłata za płatność",
+        decimal_places=2,
+        default=0,
     )
     payment_date = models.DateTimeField(
         verbose_name="Data płatności",
@@ -76,8 +85,9 @@ class Order(models.Model):
         null=True,
         blank=True,
     )
-    
-    #Delivery
+    is_paid = models.BooleanField(verbose_name="Opłacone", default=False)
+
+    # Delivery
     delivery_method = models.ForeignKey(
         "Delivery",
         on_delete=models.CASCADE,
@@ -85,20 +95,66 @@ class Order(models.Model):
         related_name="orders",
     )
     delivery_price = models.DecimalField(
-        max_digits=10, verbose_name="Opłata za dostwę", decimal_places=2, default=0
+        max_digits=10,
+        verbose_name="Opłata za dostwę",
+        decimal_places=2,
+        default=0,
     )
     inpost_box_id = models.CharField(
         verbose_name="Id paczkomatu", max_length=255, null=True, blank=True
     )
-    
-    #Items
+    street = models.CharField(
+        verbose_name="Ulica", max_length=255, null=True, blank=True
+    )
+    house_number = models.CharField(
+        verbose_name="Numer domu", max_length=255, null=True, blank=True
+    )
+    local_number = models.CharField(
+        verbose_name="Numer lokalu", max_length=255, null=True, blank=True
+    )
+    city = models.CharField(
+        verbose_name="Miasto", max_length=255, null=True, blank=True
+    )
+    postal_code = models.CharField(
+        verbose_name="Kod pocztowy", max_length=255, null=True, blank=True
+    )
+
+    # Items
     cart_items = models.JSONField(verbose_name="Produkty w koszyku", null=True)
     cart_items_price = models.DecimalField(
-        max_digits=10, verbose_name="Cena produktów", decimal_places=2, default=0
+        max_digits=10,
+        verbose_name="Cena produktów",
+        decimal_places=2,
+        default=0,
     )
 
     # Invoice
     invoice = models.BooleanField(verbose_name="Faktura", default=False)
+    company = models.CharField(
+        verbose_name="Nazwa firmy", max_length=255, null=True, blank=True
+    )
+    company_payer = models.TextField(
+        verbose_name="Płatnik", null=True, blank=True
+    )
+    invoice_street = models.CharField(
+        verbose_name="Ulica", max_length=255, null=True, blank=True
+    )
+    nip = models.CharField(
+        verbose_name="NIP", max_length=255, null=True, blank=True
+    )
+    invoice_house_number = models.CharField(
+        verbose_name="Numer domu", max_length=255, null=True, blank=True
+    )
+    invoice_local_number = models.CharField(
+        verbose_name="Numer lokalu", max_length=255, null=True, blank=True
+    )
+    invoice_city = models.CharField(
+        verbose_name="Miasto", max_length=255, null=True, blank=True
+    )
+    invoice_postal_code = models.CharField(
+        verbose_name="Kod pocztowy", max_length=255, null=True, blank=True
+    )
+
     email_notification = models.BooleanField(
         verbose_name="Czy wysyłac email", default=True
     )
@@ -122,11 +178,11 @@ class Order(models.Model):
         return f"{self.order_number} - {self.amount} zł"
 
     def save(self, *args, **kwargs):
-        if not self.order_number:  
+        if not self.order_number:
             self.order_number = generate_order_number()
 
         super().save(*args, **kwargs)
-        
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(

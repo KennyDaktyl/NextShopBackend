@@ -8,19 +8,11 @@ from web.models.categories import Category
 from web.models.deliveries import Delivery
 from web.models.heros import Hero
 from web.models.images import Photo, Thumbnail
-from web.models.orders import Order, OrderItem
+from web.models.orders import Order
 from web.models.payments import Payment
 from web.models.prices import PriceGroup, ProductPrice
-from web.models.products import (
-    Brand,
-    Material,
-    Product,
-    ProductOption,
-    ProductOptionItem,
-    ProductVariant,
-    Size,
-    Tag,
-)
+from web.models.products import (Brand, Material, Product, ProductOption,
+                                 ProductOptionItem, ProductVariant, Size, Tag)
 
 
 @admin.register(Hero)
@@ -33,9 +25,9 @@ class HeroAdmin(admin.ModelAdmin):
 class ProfileInline(admin.StackedInline):
     model = Profile
     can_delete = False
-    verbose_name_plural = 'profile'
+    verbose_name_plural = "profile"
 
-    
+
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = [f.name for f in Profile._meta.fields]
@@ -44,12 +36,59 @@ class ProfileAdmin(admin.ModelAdmin):
         "user__email",
         "company",
         "nip",
-        "address",
+        "street",
         "city",
         "postal_code",
     )
     list_filter = ["user__is_active", "status", "newsletter"]
-    
+
+    # Definiowanie fieldsets dla sekcji
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "user",
+                    "status",
+                    "mobile",
+                    "newsletter",
+                    "price_group",
+                )
+            },
+        ),
+        (
+            "Dane adresowe",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "street",
+                    "house_number",
+                    "local_number",
+                    "city",
+                    "postal_code",
+                    "inpost_code",
+                ),
+            },
+        ),
+        (
+            "Dane do faktury",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "invoice",
+                    "company",
+                    "company_payer",
+                    "nip",
+                    "invoice_street",
+                    "invoice_house_number",
+                    "invoice_local_number",
+                    "invoice_city",
+                    "invoice_postal_code",
+                ),
+            },
+        ),
+    )
+
 
 class CustomUserAdmin(BaseUserAdmin):
     list_display = (
@@ -83,9 +122,6 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = [f.name for f in Category._meta.fields]
     search_fields = ("name",)
     list_filter = ["is_active", "is_main"]
-
-
-
 
 
 class ProductPriceInline(admin.TabularInline):
@@ -176,7 +212,6 @@ class PaymentAdmin(admin.ModelAdmin):
     list_filter = ("is_active",)
 
 
-
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
@@ -237,7 +272,43 @@ class OrderAdmin(admin.ModelAdmin):
                 "fields": (
                     "payment_date",
                     "checkout_session_id",
+                    "is_paid",
+                ),
+            },
+        ),
+        (
+            "Address",
+            {
+                "fields": (
+                    "inpost_box_id",
+                    "street",
+                    "house_number",
+                    "local_number",
+                    "city",
+                    "postal_code",
+                ),
+            },
+        ),
+        (
+            "Invoice",
+            {
+                "fields": (
                     "invoice",
+                    "company",
+                    "company_payer",
+                    "nip",
+                    "invoice_street",
+                    "invoice_house_number",
+                    "invoice_local_number",
+                    "invoice_city",
+                    "invoice_postal_code",
+                ),
+            },
+        ),
+        (
+            "Overriden",
+            {
+                "fields": (
                     "email_notification",
                     "overriden_invoice_number",
                     "overriden_invoice_date",
