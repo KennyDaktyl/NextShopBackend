@@ -252,7 +252,6 @@ class OrderAdmin(admin.ModelAdmin):
                     "client_name",
                     "client_email",
                     "client_mobile",
-                    "client_address",
                     "amount",
                     "amount_with_discount",
                     "discount",
