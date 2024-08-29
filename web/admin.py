@@ -236,8 +236,7 @@ class OrderAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "payment_date",
-                    "payment_id",
-                    "order_code_stripe",
+                    "checkout_session_id",
                     "invoice",
                     "email_notification",
                     "overriden_invoice_number",

@@ -4,8 +4,6 @@ import json
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.generics import (
-    CreateAPIView,
-    DestroyAPIView,
     ListAPIView,
     RetrieveAPIView,
     UpdateAPIView,
@@ -22,7 +20,7 @@ from web.models.payments import Payment
 from .serializers import (
     CreateOrderSerializer,
     OrderSerializer,
-    OrderItemSerializer
+    OrderUpdateStatusSerializer
 )
 
 
@@ -88,65 +86,33 @@ class OrderDetailsView(RetrieveAPIView):
             return Order.objects.none()
 
 
-class AddOrderItems(CreateAPIView):
-    serializer_class = OrderItemSerializer
+class UpdateOrderStatus(GenericAPIView):
+    queryset = Order.objects.all()
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        order_id = kwargs.get('pk')
+        
+        if not order_id:
+            return Response({"detail": "Order ID not provided."}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            order_id = kwargs.get("order_id")
-            order = Order.objects.get(pk=order_id)
-
-            if isinstance(request.data, list):
-                serializer = self.get_serializer(data=request.data, many=True)
-            else:
-                serializer = self.get_serializer(data=request.data)
-
-            serializer.is_valid(raise_exception=True)
-
-            order_items = []
-            for item_data in serializer.validated_data:
-                item_data["order"] = order
-                order_items.append(OrderItem(**item_data))
-
-            OrderItem.objects.bulk_create(order_items)
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            instance = Order.objects.get(id=order_id)
         except Order.DoesNotExist:
-            return Response(
-                {"message": "Order not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            return Response({"detail": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
 
+        new_status = request.data.get('status')
+        checkout_session_id = request.data.get('checkout_session_id')
+        
+        if new_status is None:
+            return Response({"detail": "Status not provided."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if checkout_session_id:
+            instance.checkout_session_id = checkout_session_id
+            instance.save()
 
-class UpdateOrderItem(UpdateAPIView):
-    serializer_class = OrderItemSerializer
+        instance.status = new_status
+        instance.save()
 
-    def get_queryset(self):
-        return OrderItem.objects.all()
+        return Response({"detail": "Order status updated successfully."}, status=status.HTTP_200_OK)
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop("partial", False)
-        instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, data=request.data, partial=partial
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class DeleteOrderItem(DestroyAPIView):
-    serializer_class = OrderItemSerializer
-
-    def get_queryset(self):
-        return OrderItem.objects.all()
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, order_id=self.kwargs.get("pk"))
-        return obj
-
-    def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)

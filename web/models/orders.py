@@ -70,14 +70,11 @@ class Order(models.Model):
         null=True,
         blank=True,
     )
-    payment_id = models.CharField(
+    checkout_session_id = models.CharField(
         verbose_name="Identyfikator płatności",
         max_length=255,
         null=True,
         blank=True,
-    )
-    order_code_stripe = models.CharField(
-        verbose_name="Kod płatności", max_length=255, null=True, blank=True
     )
     
     #Delivery

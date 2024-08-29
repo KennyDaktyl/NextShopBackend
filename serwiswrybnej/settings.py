@@ -45,6 +45,7 @@ if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:3000", 
         "http://127.0.0.1:3000", 
+        "https://23cf-91-236-86-24.ngrok-free.app"
     ]
 
     SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
@@ -219,6 +220,9 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 if os.environ.get("ENVIRONMENT") in ["production", "staging", "dev"]:
     EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "").lower() == "false"
 
+
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+STRIPE_ENDPOINT_SECRET = os.environ.get("STRIPE_ENDPOINT_SECRET")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (

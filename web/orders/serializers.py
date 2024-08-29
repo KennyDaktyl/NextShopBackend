@@ -36,8 +36,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
 
 class DecimalField(serializers.Field):
     def to_representation(self, value):
-        return str(value)  # Można zmienić na float(value) dla większej precyzji
-
+        return str(value)  
     def to_internal_value(self, data):
         try:
             return Decimal(data)
@@ -73,3 +72,9 @@ class CreateOrderSerializer(serializers.Serializer):
     info = serializers.CharField(
         max_length=255, required=False, allow_blank=True, allow_null=True
     )
+
+
+class OrderUpdateStatusSerializer(serializers.Serializer):
+    status = serializers.IntegerField()
+    
+   
