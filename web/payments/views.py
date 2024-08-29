@@ -4,6 +4,15 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+import json
+import stripe
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.views import View
+from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+
+from web.models.orders import Order
 from web.models.payments import Payment
 
 from .serializers import PaymentMethodsSerializer
@@ -23,4 +32,46 @@ class PaymentMethodsView(GenericAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
+class StripeWebhookView(View):
+    def post(self, request, *args, **kwargs):
+        payload = request.body
+        sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+        event = None
+
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        endpoint_secret = settings.STRIPE_ENDPOINT_SECRET
+        
+        try:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, endpoint_secret
+            )
+        except ValueError as e:
+            print('⚠️  Webhook error while parsing basic request.' + str(e))
+            return HttpResponseBadRequest()
+        except stripe.error.SignatureVerificationError as e:
+            print('⚠️  Webhook signature verification failed.' + str(e))
+            return HttpResponseBadRequest()
+
+        # Handle the event
+        if event['type'] == 'checkout.session.completed':
+            checkout_session = event['data']['object']  
+            print('Payment for {} succeeded'.format(checkout_session['amount_total']))
+            
+            order_id = checkout_session['metadata']['order_id']
+            payment_status = checkout_session['payment_status']
+            try:
+                order = Order.objects.get(pk=order_id)
+                if payment_status == 'paid':
+                    order.status = 3
+                else:
+                    order.status = 4
+                order.save()
+            except Order.DoesNotExist:
+                pass
+            
+        return JsonResponse({'success': True})
+    
+    
 payment_methods = PaymentMethodsView.as_view()
+webhook = StripeWebhookView.as_view()

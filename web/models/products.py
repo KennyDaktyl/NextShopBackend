@@ -280,10 +280,10 @@ class Product(models.Model):
         if self.show_variant_label:
             return self.product_thumbnails.filter(
                 width_expected=650, height_expected=650
-            )
+            ).order_by("-id")
         return self.product_thumbnails.filter(
             width_expected=650, height_expected=650
-        )
+        ).order_by("-id")
 
     @property
     def variants(self):
