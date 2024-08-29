@@ -36,9 +36,7 @@ class Order(models.Model):
     client_mobile = models.CharField(
         verbose_name="Telefon klienta", max_length=15
     )
-    client_address = models.CharField(
-        verbose_name="Adres klienta", max_length=255, null=True, blank=True
-    )
+    
     amount = models.DecimalField(
         max_digits=10, verbose_name="Cena", decimal_places=2
     )
