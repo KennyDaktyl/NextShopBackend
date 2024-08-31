@@ -18,3 +18,13 @@ class DeliveriesSerializer(serializers.ModelSerializer):
             "inpost_box",
             "in_store_pickup",
         )
+
+
+class DeliveriesForOrderSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Delivery
+        fields = (
+            "name",
+            "price",
+        )
