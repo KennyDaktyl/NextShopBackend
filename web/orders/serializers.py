@@ -2,8 +2,10 @@ from decimal import Decimal, InvalidOperation
 
 from rest_framework import serializers
 
+from web.deliveries.serializers import DeliveriesSerializer
 from web.images.serializers import ThumbnailSerializer
 from web.models.orders import Order, OrderItem
+from web.payments.serializers import PaymentMethodsSerializer
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -13,7 +15,9 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    order_items = OrderItemSerializer(many=True, read_only=True)
+    status = serializers.CharField(source="get_status_display")
+    delivery_method = DeliveriesSerializer()
+    payment_method = PaymentMethodsSerializer()
 
     class Meta:
         model = Order
