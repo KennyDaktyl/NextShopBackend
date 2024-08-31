@@ -8,6 +8,7 @@ from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from rest_framework import serializers
 
 from web.models.accounts import Profile
+from web.orders.serializers import OrderSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(BaseUserCreateSerializer):
     profile = ProfileSerializer()
+    orders = OrderSerializer(many=True, read_only=True)
 
     class Meta(BaseUserCreateSerializer.Meta):
         model = User
@@ -72,6 +74,7 @@ class UserSerializer(BaseUserCreateSerializer):
             "last_name",
             "email",
             "profile",
+            "orders",
         ]
         extra_kwargs = {"password": {"write_only": True}}
 
