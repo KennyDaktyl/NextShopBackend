@@ -17,3 +17,13 @@ class PaymentMethodsSerializer(serializers.ModelSerializer):
             "payment_on_delivery",
             "payment_online",
         )
+
+
+class PaymentMethodsForOrdersSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Payment
+        fields = (
+            "name",
+            "price",
+        )

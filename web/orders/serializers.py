@@ -2,10 +2,10 @@ from decimal import Decimal, InvalidOperation
 
 from rest_framework import serializers
 
-from web.deliveries.serializers import DeliveriesSerializer
+from web.deliveries.serializers import DeliveriesForOrderSerializer, DeliveriesSerializer
 from web.images.serializers import ThumbnailSerializer
 from web.models.orders import Order, OrderItem
-from web.payments.serializers import PaymentMethodsSerializer
+from web.payments.serializers import PaymentMethodsForOrdersSerializer, PaymentMethodsSerializer
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -14,6 +14,16 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class OrdersUserSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(source="get_status_display")
+    delivery_method = DeliveriesForOrderSerializer()
+    payment_method = PaymentMethodsForOrdersSerializer()
+
+    class Meta:
+        model = Order
+        fields = "__all__"
+        
+        
 class OrderSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     delivery_method = DeliveriesSerializer()
