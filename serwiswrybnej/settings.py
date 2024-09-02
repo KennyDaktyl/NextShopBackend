@@ -55,7 +55,7 @@ if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
     SESSION_COOKIE_SAMESITE = "Lax"
     CSRF_COOKIE_SECURE = False
 else:
-    SITE_URL = "https://serwiswrybnej-api.resto-app.pl/"
+    SITE_URL = "https://new-serwiswrybnej-api.resto-app.pl/"
     DEBUG = False
     ALLOWED_HOSTS = [
         "serwiswrybnej.pl",
