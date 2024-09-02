@@ -56,12 +56,38 @@ class LoginSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Profile
         fields = "__all__"
 
 
-class UserSerializer(BaseUserCreateSerializer):
+class UserRegisterSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer()
+
+    class Meta:
+        model = User
+        fields = ("username", "email", "password", "profile")
+
+
+class UserAddressDataSerializer(BaseUserCreateSerializer):
+    profile = ProfileSerializer()
+
+    class Meta(BaseUserCreateSerializer.Meta):
+        model = User
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "profile",
+            "orders",
+        ]
+        extra_kwargs = {"password": {"write_only": True}}
+
+
+class UserFullDataSerializer(BaseUserCreateSerializer):
     profile = ProfileSerializer()
     orders = OrdersUserSerializer(many=True, read_only=True)
 
@@ -91,3 +117,47 @@ class TokenCreateSerializer(TokenCreateSerializer):
             raise serializers.ValidationError(msg)
 
         return attrs
+
+
+class UserMainDataSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["id", "first_name", "last_name", "email"]
+
+
+class UserPasswordSerializer(serializers.ModelSerializer):
+    new_password = serializers.CharField()
+
+    class Meta:
+        model = User
+        fields = ["new_password"]
+
+
+class UserAddressSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Profile
+        fields = [
+            "street",
+            "house_number",
+            "local_number",
+            "city",
+            "postal_code",
+        ]
+
+
+class UserInvoiceDataSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Profile
+        fields = [
+            "company",
+            "company_payer",
+            "nip",
+            "invoice_street",
+            "invoice_house_number",
+            "invoice_local_number",
+            "invoice_city",
+            "invoice_postal_code",
+        ]

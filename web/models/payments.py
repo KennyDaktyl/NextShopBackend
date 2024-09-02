@@ -21,6 +21,13 @@ class Payment(models.Model):
     payment_online = models.BooleanField(
         verbose_name="Czy to płatność online?", default=False
     )
+    bank_transfer = models.BooleanField(
+        verbose_name="Czy to przelew bankowy?", default=False
+    )
+    payment_deferral = models.IntegerField(
+        verbose_name="Dni na opłacenie", default=14
+    )
+
     oryg_image = models.ImageField(
         verbose_name="Zdjęcie główne", upload_to="deliveries", blank=True
     )

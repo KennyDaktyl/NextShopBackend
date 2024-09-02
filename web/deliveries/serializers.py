@@ -27,4 +27,7 @@ class DeliveriesForOrderSerializer(serializers.ModelSerializer):
         fields = (
             "name",
             "price",
+            "price_promo",
+            "inpost_box",
+            "in_store_pickup",
         )

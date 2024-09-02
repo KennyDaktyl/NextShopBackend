@@ -10,5 +10,6 @@ class WebConfig(AppConfig):
         import web.deliveries.signals
         import web.front.signals
         import web.images.signals
+        import web.orders.signals
         import web.payments.signals
         import web.products.signals

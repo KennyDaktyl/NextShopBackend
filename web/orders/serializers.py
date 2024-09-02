@@ -1,11 +1,15 @@
 from decimal import Decimal, InvalidOperation
+from urllib.parse import urljoin
 
+from django.conf import settings
 from rest_framework import serializers
 
-from web.deliveries.serializers import DeliveriesForOrderSerializer, DeliveriesSerializer
+from web.deliveries.serializers import (DeliveriesForOrderSerializer,
+                                        DeliveriesSerializer)
 from web.images.serializers import ThumbnailSerializer
-from web.models.orders import Order, OrderItem
-from web.payments.serializers import PaymentMethodsForOrdersSerializer, PaymentMethodsSerializer
+from web.models.orders import Invoice, Order, OrderItem
+from web.payments.serializers import (PaymentMethodsForOrdersSerializer,
+                                      PaymentMethodsSerializer)
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -14,16 +18,71 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class InvoiceSerializer(serializers.Serializer):
+    pdf = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Invoice
+        fields = "pdf"
+
+    def get_pdf(self, obj):
+        request = self.context.get("request", None)
+
+        if obj.pdf:
+            if request:
+                full_path = urljoin(
+                    request.build_absolute_uri("/"), obj.pdf.url
+                )
+            else:
+                site_url = getattr(
+                    settings, "SITE_URL", "http://127.0.0.1:8000/"
+                )
+                full_path = urljoin(site_url, obj.pdf.url)
+            return full_path
+        return None
+
+
 class OrdersUserSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     delivery_method = DeliveriesForOrderSerializer()
     payment_method = PaymentMethodsForOrdersSerializer()
+    invoice = InvoiceSerializer()
 
     class Meta:
         model = Order
-        fields = "__all__"
-        
-        
+        fields = (
+            "id",
+            "status",
+            "created_date",
+            "delivery_method",
+            "payment_method",
+            "amount",
+            "invoice",
+            "info",
+            "order_number",
+            "delivery_price",
+            "payment_price",
+            "cart_items_price",
+            "cart_items",
+            "is_paid",
+            "inpost_box_id",
+            "street",
+            "house_number",
+            "local_number",
+            "city",
+            "postal_code",
+            "make_invoice",
+            "company",
+            "company_payer",
+            "nip",
+            "invoice_street",
+            "invoice_house_number",
+            "invoice_local_number",
+            "invoice_city",
+            "invoice_postal_code",
+        )
+
+
 class OrderSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     delivery_method = DeliveriesSerializer()
@@ -111,7 +170,7 @@ class CreateOrderSerializer(serializers.Serializer):
         max_length=255, required=False, allow_blank=True, allow_null=True
     )
 
-    invoice = serializers.BooleanField()
+    make_invoice = serializers.BooleanField()
     company = serializers.CharField(
         max_length=255, required=False, allow_blank=True, allow_null=True
     )

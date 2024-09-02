@@ -8,7 +8,7 @@ from web.models.categories import Category
 from web.models.deliveries import Delivery
 from web.models.heros import Hero
 from web.models.images import Photo, Thumbnail
-from web.models.orders import Order
+from web.models.orders import Invoice, Order
 from web.models.payments import Payment
 from web.models.prices import PriceGroup, ProductPrice
 from web.models.products import (Brand, Material, Product, ProductOption,
@@ -75,7 +75,7 @@ class ProfileAdmin(admin.ModelAdmin):
             {
                 "classes": ("collapse",),
                 "fields": (
-                    "invoice",
+                    "make_invoice",
                     "company",
                     "company_payer",
                     "nip",
@@ -292,7 +292,8 @@ class OrderAdmin(admin.ModelAdmin):
             "Invoice",
             {
                 "fields": (
-                    "invoice",
+                    "make_invoice",
+                    "invoice_created",
                     "company",
                     "company_payer",
                     "nip",
@@ -316,6 +317,12 @@ class OrderAdmin(admin.ModelAdmin):
         ),
         ("Timestamps", {"fields": ("created_date", "updated_date")}),
     )
+
+
+@admin.register(Invoice)
+class InvoiceAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in Invoice._meta.fields]
+    search_fields = ("number",)
 
 
 @admin.register(Thumbnail)

@@ -13,14 +13,13 @@ class ThumbnailSerializer(serializers.ModelSerializer):
     def get_url(self, obj):
         request = self.context.get("request")
 
-        print("request", request)
         if request is None:
-            return None 
+            return None
 
         if isinstance(obj, dict):
             return request.build_absolute_uri(obj["url"])
 
         if obj.oryg_image:
             return request.build_absolute_uri(obj.oryg_image.url)
-        
+
         return None
