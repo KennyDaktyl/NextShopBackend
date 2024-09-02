@@ -5,7 +5,6 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
-
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -39,6 +38,7 @@ CORS_ALLOW_METHODS = [
 ]
 
 if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
+    SITE_URL = "http://127.0.0.1:8000/"
     DEBUG = True
     ALLOWED_HOSTS = ["*"]
     CORS_ALLOW_CREDENTIALS = True
@@ -55,6 +55,7 @@ if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
     SESSION_COOKIE_SAMESITE = "Lax"
     CSRF_COOKIE_SECURE = False
 else:
+    SITE_URL = "https://serwiswrybnej-api.resto-app.pl/"
     DEBUG = False
     ALLOWED_HOSTS = [
         "serwiswrybnej.pl",

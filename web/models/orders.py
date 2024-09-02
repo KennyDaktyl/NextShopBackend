@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -36,7 +37,7 @@ class Order(models.Model):
     client_mobile = models.CharField(
         verbose_name="Telefon klienta", max_length=15
     )
-    
+
     amount = models.DecimalField(
         max_digits=10, verbose_name="Cena", decimal_places=2
     )
@@ -127,7 +128,12 @@ class Order(models.Model):
     )
 
     # Invoice
-    invoice = models.BooleanField(verbose_name="Faktura", default=False)
+    make_invoice = models.BooleanField(
+        verbose_name="Generuj fakturę?", default=False
+    )
+    invoice_created = models.BooleanField(
+        verbose_name="Faktura utworzona", default=False
+    )
     company = models.CharField(
         verbose_name="Nazwa firmy", max_length=255, null=True, blank=True
     )
@@ -219,3 +225,34 @@ class OrderItem(models.Model):
                 + f" {self.qty} x {self.price} zł ({self.discount}% rabatu)"
             )
         return self.name + f" {self.qty} x {self.price} zł"
+
+
+class Invoice(models.Model):
+    created_time = models.DateTimeField(
+        verbose_name="Data utworzenia", default=timezone.now, db_index=True
+    )
+    order = models.OneToOneField(
+        "Order", on_delete=models.CASCADE, null=True, blank=True, db_index=True
+    )
+    number = models.CharField(max_length=64)
+    override_number = models.CharField(
+        verbose_name="Nadpisany numer faktury",
+        max_length=64,
+        null=True,
+        blank=True,
+    )
+    override_date = models.DateField(
+        verbose_name="Nadpisana data faktury", null=True, blank=True
+    )
+    pdf = models.FileField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("-created_time",)
+        verbose_name_plural = "Faktury"
+
+    def __str__(self):
+        return str(self.pdf)
+
+    @property
+    def full_path(self, request):
+        return request.build_absolute_uri(settings.MEDIA_URL + self.pdf.url)

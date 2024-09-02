@@ -14,7 +14,7 @@ class Profile(models.Model):
     )
     status = models.IntegerField("Status", choices=PROFILE_STATUS, default=0)
     mobile = models.CharField("Mobile", max_length=15, blank=True, null=True)
-    invoice = models.BooleanField("Faktura", default=False)
+    make_invoice = models.BooleanField("Faktura", default=False)
     company = models.CharField(
         "Nazwa firmy", max_length=100, blank=True, null=True
     )
