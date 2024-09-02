@@ -1,286 +1,286 @@
 {% load custom_filters %}
 <html lang="pl">
- <head>
+<head>
   <style>
     @font-face {
-    font-family: FreeSans;
-    src: url("/usr/share/fonts/truetype/freefont/FreeSerif.ttf");
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+      src: url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    @font-face {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      src: url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
     }
-    
+
     body {
-    font-family: FreeSans;
-    width: 100%;
-    margin: auto;
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      color: #333;
+      background-color: #f9f9f9;
+      padding: 30px;
+      margin: 0;
     }
 
+    h1, h4 {
+      text-align: center;
+      font-weight: 700;
+      color: #444;
+    }
 
-    h1 {
-       text-align: center;
-     }
+    .wrapper {
+      width: 100%;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .box {
+      width: 48%;
+    }
+
+    .box p {
+      margin: 0 0 10px;
+      line-height: 1.5;
+    }
+
+    .box-50-l {
+      text-align: left;
+    }
+
+    .box-50-r {
+      text-align: right;
+    }
+
+    .box p strong {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 700;
+      color: #444;
+    }
 
     table {
-       border: 1px solid;
-       margin: 0 auto;
-       width: 100%;
-     }
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+    }
 
-     td, th {
-       text-align: center;
-       border: 1px solid;
-     }
-     div.wrapper {
-      width: 100%; 
-      display: flex;
-       flex-direction: row;
-       flex-wrap: wrap;
-       margin: auto;
-     }
-     div.box-50-l {
-       width: 50%;
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-     }
-     div.box-50-r {
-       width: 50%;
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      text-align: right;
-     }
-     p {
-      width: 100%; 
-      font-family: FreeSans;
-      src: url("/usr/share/fonts/truetype/freefont/FreeSans.ttf");
-      margin: 3px;
-      padding: 0;
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: center;
       font-size: 12px;
-     }
-     table {
-       width: 100%;
-     }
-     th {
-       font-size: 12px;
-       font-weight: bold;
-       box-sizing: border-box;
-     }
-     td {
-       font-size: 12px;
-       padding: 5px 7px;
-     }
-</style>  
-<meta charset="UTF-8">
-  <title>{{ orders.ivoice.pdf }}</title>
- </head>
- <body>
-    <div class="wrapper">
-      
-      <div class="box-50-l">
-        <p style="width: 100%;font-weight: 900;">
-          Sprzedawca:
-        </p>
-        <p style="width: 100%">
-          Michał Pielak Miktel<br>
-          32-061 Rybna, ul. Wspólna 2<br>
-          NIP: 678 280 52 34<br>
-          Numer konta: 21 1020 2906 0000 1702 0373 8333<br>
-        </p>
-        <p style="width: 100%;font-weight: 900; margin-top: 30px;">
-          Nabywca:
-        </p>
-        <p style="width: 100%;">
-          {{ order.company }}<br>
-          
-          {{ order.invoice_post_code}} {{ order.invoice_city }}, {{ order.invoice_street }} {{ order.invoice_house_number }} {% if order.invoice_local_number %} / {{ order.invoice_local_number }} {% endif %}<br>
-          NIP: {{ order.nip }}<br>
-        </p>
-        {% if order.company_payer %}
-          <p style="width: 100%;font-weight: 900; margin-top: 30px;">
-            Płatnik/Odbiorca:
-          </p>
-          <p style="width: 100%;">
-          {{ order.company_payer }}
-          </p>
-        {% endif %}
-      </div>
-      <div class="box-50-r">
-        <p style="width: 100%;font-weight: 900;">
-          Miejsce wystawienia:
-        </p>
-        <p style="width: 100%;">
-          Rybna
-        </p>
-        <p style="width: 100%;font-weight: 900;">
-          Data wystawienia:
-        </p>
-        <p style="width: 100%;">
-          {% if not invoice_date %}{{ order.invoice.created_time|date:"Y-m-d" }}{% else %}{{ invoice_date|date:"Y-m-d" }}{% endif %}
-        </p>
-        <p style="width: 100%;font-weight: 900;">
-          Data sprzedaży:
-        </p>
-        <p style="width: 100%;">
-          {% if not invoice_date %} {{ order.invoice.created_time|date:"Y-m-d" }}{% else %}{{ invoice_date|date:"Y-m-d" }}{% endif %}
-        </p>
-        
-      </div>
-   </div>
-   <h4 style="width: 100%; text-align: center; margin-top: 15px;">Faktura VAT {% if not invoice_number %}{{ order.invoice.number }}{% else %}{{ invoice_number }}{% endif %}</h4>
-   <table class="main" style="margin-top: 15px;">
-     <thead>
-       <tr>
-         <th class="">L.P</th>
-         <th style="min-width: 200px;">Nazwa towaru lub usługi</th>
-         <th>Jm.</th>
-         <th>Ilość</th>
-         <th>Cena netto</th>
-         <th>Cena brutto</th>
-         <th>Wartość netto</th>
-         <th>Stawka VAT</th>
-         <th>Kwota Vat</th>
-         <th>Warość brutto</th>
-       </tr>
-     </thead>
-     <tbody>
+    }
+
+    th {
+      background-color: #f2f2f2;
+      font-weight: 700;
+    }
+
+    .summary-table {
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    .summary-table th, .summary-table td {
+      border: none;
+      text-align: right;
+      padding: 8px;
+    }
+
+    .summary-table th {
+      width: 50%;
+    }
+
+    .summary-table td {
+      width: 50%;
+      font-weight: 700;
+    }
+
+    .signature-section {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 50px;
+    }
+
+    .signature-box {
+      width: 48%;
+      height: 100px;
+      border: 1px solid #ccc;
+      text-align: center;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .signature-box p {
+      font-size: 10px;
+      margin-top: 70px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 10px;
+      color: #777;
+    }
+  </style>
+  <meta charset="UTF-8">
+  <title>{{ order.invoice.number }}</title>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="box box-50-l">
+      <p><strong>Sprzedawca:</strong></p>
+      <p>Michał Pielak Miktel<br>
+        32-061 Rybna, ul. Wspólna 2<br>
+        NIP: 678 280 52 34<br>
+        Numer konta: 21 1020 2906 0000 1702 0373 8333
+      </p>
+      <p><strong>Nabywca:</strong></p>
+      <p>{{ order.company }}<br>
+        {{ order.invoice_post_code}} {{ order.invoice_city }}, {{ order.invoice_street }} {{ order.invoice_house_number }}{% if order.invoice_local_number %} / {{ order.invoice_local_number }}{% endif %}<br>
+        NIP: {{ order.nip }}
+      </p>
+      {% if order.company_payer %}
+      <p><strong>Płatnik/Odbiorca:</strong></p>
+      <p>{{ order.company_payer }}</p>
+      {% endif %}
+    </div>
+
+    <div class="box box-50-r">
+      <p><strong>Miejsce wystawienia:</strong></p>
+      <p>Rybna</p>
+      <p><strong>Data wystawienia:</strong></p>
+      <p>{% if not invoice_date %}{{ order.invoice.created_time|date:"Y-m-d" }}{% else %}{{ invoice_date|date:"Y-m-d" }}{% endif %}</p>
+      <p><strong>Data sprzedaży:</strong></p>
+      <p>{% if not invoice_date %}{{ order.invoice.created_time|date:"Y-m-d" }}{% else %}{{ invoice_date|date:"Y-m-d" }}{% endif %}</p>
+    </div>
+  </div>
+
+  <h4>Faktura VAT {% if not invoice_number %}{{ order.invoice.number }}{% else %}{{ invoice_number }}{% endif %}</h4>
+
+  <table>
+    <thead>
+      <tr>
+        <th>L.P</th>
+        <th>Nazwa towaru lub usługi</th>
+        <th>Jm.</th>
+        <th>Ilość</th>
+        <th>Cena netto</th>
+        <th>Cena brutto</th>
+        <th>Wartość netto</th>
+        <th>Stawka VAT</th>
+        <th>Kwota VAT</th>
+        <th>Wartość brutto</th>
+      </tr>
+    </thead>
+    <tbody>
       {% for item in order.cart_items|json_loads %}
       <tr>
         <td>{{ forloop.counter }}</td>
         <td>{{ item.name }}<br>
-        {% if item.variant %}
-          <small>{{ item.variant }}</small>
-        {% endif %}
-        {% if item.variant and item.selected_option %}
-          <small><br></small>
-        {% endif %}
-        {% if item.selected_option %}
-          <small>{{ item.selected_option }}</small>
-        {% endif %}
+          {% if item.variant %}<small>{{ item.variant }}</small>{% endif %}
+          {% if item.variant and item.selected_option %}<small><br></small>{% endif %}
+          {% if item.selected_option %}<small>{{ item.selected_option }}</small>{% endif %}
         </td>
         <td>szt.</td>
         <td>{{ item.quantity }}</td>
-        <!-- Cena netto -->
         <td>{{ item.price|div:1.23|floatformat:2 }}</td>
-        <!-- Wartość netto -->
+        <td>{{ item.price|floatformat:2 }}</td>
         <td>{{ item.price|div:1.23|mul:item.quantity|floatformat:2 }}</td>
-         <!-- Cena brutto -->
-         <td>{{ item.price|floatformat:2 }}</td>
         <td>23%</td>
-        <!-- Kwota VAT -->
-        <td>{{ item.price|mul:item.quantity|div:1.23|mul:0.23|floatformat:2 }}</td>
-        <!-- Wartość brutto -->
+        <td>{{ item.price|mul:item.quantity|vat_value|floatformat:2 }}</td>
         <td>{{ item.price|mul:item.quantity|floatformat:2 }}</td>
       </tr>
       {% endfor %}
       {% if order.delivery_price %}
       <tr>
-           <td>{{ forloop.counter|add:"1" }}</td>
-           <td>Przesyłka</td>
-           <td>szt.</td>
-           <td>1</td>
-           <!-- Cena netto -->
-           <td>{{ order.delivery_price|div:1.23|floatformat:2 }}</td>
-           <!-- Wartość netto -->
-           <td>{{ order.delivery_price|div:1.23|floatformat:2 }}</td>
-           <td>23%</td>
-           <!-- Kwota VAT -->
-           <td>{{ order.delivery_price|div:1.23|mul:0.23|floatformat:2 }}</td>
-           <!-- Cena brutto -->
-           <td>{{ order.delivery_price|floatformat:2 }}</td>
-           <!-- Wartość brutto -->
-           <td>{{ order.delivery_price|floatformat:2 }}</td>
+        <td>{{ forloop.counter|add:"1" }}</td>
+        <td>Przesyłka</td>
+        <td>szt.</td>
+        <td>1</td>
+        <td>{{ order.delivery_price|div:1.23|floatformat:2 }}</td>
+        <td>{{ order.delivery_price|floatformat:2 }}</td>
+        <td>{{ order.delivery_price|div:1.23|floatformat:2 }}</td>
+        <td>23%</td>
+        <td>{{ order.delivery_price|vat_value|floatformat:2 }}</td>
+        <td>{{ order.delivery_price|floatformat:2 }}</td>
       </tr>
       {% endif %}
       {% if order.payment_price %}
       <tr>
-           <td>{{ forloop.counter|add:"2" }}</td>
-           <td>Płatność za pobraniem</td>
-           <td>szt.</td>
-           <td>1</td>
-           <!-- Cena netto -->
-           <td>{{ order.payment_price|div:1.23|floatformat:2 }}</td>
-           <!-- Wartość netto -->
-           <td>{{ order.payment_price|div:1.23|floatformat:2 }}</td>
-           <td>23%</td>
-           <!-- Kwota VAT -->
-           <td>{{ order.payment_price|div:1.23|mul:0.23|floatformat:2 }}</td>
-           <!-- Cena brutto -->
-           <td>{{ order.payment_price|floatformat:2 }}</td>
-           <!-- Wartość brutto -->
-           <td>{{ order.payment_price|floatformat:2 }}</td>
+        <td>{{ forloop.counter|add:"2" }}</td>
+        <td>Płatność za pobraniem</td>
+        <td>szt.</td>
+        <td>1</td>
+        <td>{{ order.payment_price|div:1.23|floatformat:2 }}</td>
+        <td>{{ order.payment_price|floatformat:2 }}</td>
+        <td>{{ order.payment_price|div:1.23|floatformat:2 }}</td>
+        <td>23%</td>
+        <td>{{ order.payment_price|vat_value|floatformat:2 }}</td>
+        <td>{{ order.payment_price|floatformat:2 }}</td>
       </tr>
       {% endif %}
     </tbody>
-   </table>
-   
-   <table style="margin-top:15px">
-      <thead>
-        <tr>
-          <th colspan="7" style="border: 0px">Według stawki VAT</th>
-          <th style="border: 0px; padding: 5px 7px;">Kwota Vat</th>
-          <th style="border: 0px; padding: 5px 7px;">Warość netto</th>
-          <th style="border: 0px; padding: 5px 7px;">Warość brutto</th>
-        </tr>
-      </thead>
-      <tbody>
-      <tr style="border: 0px">
-       <td colspan="7" style="border: 0px">Podstawowy podatek VAT 23%</td>
-       <td style="border: 0px">{{ order.amount|vat_value|floatformat:2 }}</td>
-       <td style="border: 0px">{{ order.amount|div:1.23|floatformat:2 }}</td>
-       <td style="border: 0px">{{ order.amount|floatformat:2 }}</td>
-     </tr>
-    </tbody>
-    </table>
-    
-    <table style="margin-top:15px">
-      <thead>
-        <tr>
-          <th colspan="8" style="border: 0px; text-align: left; padding: 5px 7px;">Sposób płatności</th>
-          {% if order.is_paid %}
-          <th style="border: 0px; padding: 5px 7px;">Zapłacono</th>
-          {% else %}
-          <th style="border: 0px; padding: 5px 7px;">Kwota do zapłaty:</th>
-          {% endif %}
-        </tr>
-      </thead>
-      <tbody>
-       <tr style="border: 0px">
-          <td colspan="8" style="border: 0px;  text-align: left">{{ order.payment_method.name }}  
-            {% if order.payment_method.bank_transfer and not invoice_date %}&nbsp;Termin płatności: {{ order.payment_method.payment_deferral }} dni {{ order.invoice.created_time|date_add:order.payment_method.payment_deferral }}{% endif%}
-            {% if order.payment_method.bank_transfer and invoice_date %}&nbsp;Termin płatności: {{ order.payment_method.payment_deferral }} dni {{ invoice_date|date_add:order.payment_method.payment_deferral }}{% endif%}
-          </td>
-          <td style="border: 0px">{{ order.amount|floatformat:2 }} PLN</td>
-      </tr>
-      </tbody>
-    </table>
+  </table>
 
-    <div style="display: flex; flex-wrap: wrap; flex-direction: row; width: 100%; margin-top: 20px;">
-      <div style="margin: 0px; padding: 0px; width: 100%; text-align: left;">Status płatności</div>
+  <table class="summary-table">
+    <tr>
+      <th>Podstawowy podatek VAT 23%</th>
+      <td>{{ order.amount|vat_value|floatformat:2 }}</td>
+    </tr>
+    <tr>
+      <th>Wartość netto</th>
+      <td>{{ order.amount|div:1.23|floatformat:2 }}</td>
+    </tr>
+    <tr>
+      <th>Wartość brutto</th>
+      <td>{{ order.amount|floatformat:2 }}</td>
+    </tr>
+  </table>
+
+  <table class="summary-table">
+    <tr>
+      <th>Sposób płatności:</th>
+      <td>{{ order.payment_method.name }}</td>
+    </tr>
+    {% if order.payment_method.bank_transfer %}
+    <tr>
+      <th>Termin płatności:</th>
+      <td>
+        {% if not invoice_date %}
+          {{ order.payment_method.payment_deferral }} dni {{ order.invoice.created_time|date_add:order.payment_method.payment_deferral }}
+        {% else %}
+          {{ order.payment_method.payment_deferral }} dni {{ invoice_date|date_add:order.payment_method.payment_deferral }}
+        {% endif %}
+      </td>
+    </tr>
+    {% endif %}
+    <tr>
       {% if order.is_paid %}
-        <p style="margin: 0px; padding: 0px; width: 100%; text-align: left;">Zapłacono:</p>
+      <th>Zapłacono</th>
+      <td>{{ order.amount|floatformat:2 }} PLN</td>
       {% else %}
-        <p style="margin: 0px; padding: 0px; width: 100%; text-align: left;">Do zapłaty&nbsp;<b>{{ order.amount|floatformat:2 }} PLN</b></p>
+      <th>Kwota do zapłaty:</th>
+      <td>{{ order.amount|floatformat:2 }} PLN</td>
       {% endif %}
-    </div>
+    </tr>
+  </table>
 
-    <section style="display: flex; flex-wrap: wrap; flex-direction: row; width: 100%; margin-top: 20px;">
-        <div style="display: flex; flex-wrap: wrap; flex-direction: row; width: 100%;">
-          <div style="margin: 0px; padding: 0px; width: 50%; background-color: gray; text-align: center;">Odebrał</div>
-          <div style="margin: 0px; padding: 0px; width: 50%; background-color: gray; text-align: center;">Wystawił</div>
-        </div>
-        <div style="display: flex; flex-wrap: nowrap; flex-direction: row; width: 100%;">
-          <div style="border: 1px solid;height: 80px; margin: 0px; padding: 0px; width: 50%; box-sizing: border-box;"></div>
-          <div style="border: 1px solid;height: 80px; margin: 0px; padding: 0px; width: 50%; box-sizing: border-box;"></div>
-        </div>
-        <div style="display: flex; flex-wrap: nowrap; flex-direction: row; width: 100%;">
-          <p style="border: 1px solid; margin: 0px; padding: 0px; width: 50%; box-sizing: border-box; text-align: center; font-size: 9px;">Podpis osoby upoważnionej do odbioru faktury VAT</p>
-          <p style="border: 1px solid; margin: 0px; padding: 0px; width: 50%; box-sizing: border-box; text-align: center; font-size: 9px;">Podpis osoby upoważnionej do wystawienia faktury VAT</p>
-        </div>
-    </section>
- </body>
+  <div class="signature-section">
+    <div class="signature-box">
+      <p>Podpis osoby upoważnionej do odbioru faktury VAT</p>
+    </div>
+    <div class="signature-box">
+      <p>Podpis osoby upoważnionej do wystawienia faktury VAT</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Faktura wygenerowana automatycznie. Dziękujemy za zakupy!</p>
+  </div>
+</body>
 </html>
