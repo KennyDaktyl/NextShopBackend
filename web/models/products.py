@@ -181,6 +181,9 @@ class Product(models.Model):
     free_delivery = models.BooleanField(
         verbose_name="Darmowa dostawa", default=False
     )
+    is_service = models.BooleanField(
+        verbose_name="Usługa", default=False
+    )
 
     class Meta:
         verbose_name = "Produkt"
@@ -208,10 +211,10 @@ class Product(models.Model):
             if old_product.name != self.name:
                 old_name = old_product.name
 
-        if old_image and old_image != self.oryg_image:
-            thumbs = self.product_thumbnails.filter(main=True)
-            if thumbs:
-                thumbs.delete()
+            if self.oryg_image and old_image != self.oryg_image:
+                thumbs = self.product_thumbnails.filter(main=True, is_variant=False)
+                if thumbs:
+                    thumbs.delete()
         super().save(*args, **kwargs)
 
         if is_new_instance or old_name != self.name or self.slug is None:
@@ -279,11 +282,11 @@ class Product(models.Model):
     def images(self):
         if self.show_variant_label:
             return self.product_thumbnails.filter(
-                width_expected=650, height_expected=650
-            ).order_by("-id")
+                width_expected=650, height_expected=650, is_variant=True
+            ).order_by("id")
         return self.product_thumbnails.filter(
-            width_expected=650, height_expected=650
-        ).order_by("-id")
+            width_expected=650, height_expected=650, is_variant=False
+        ).order_by("id")
 
     @property
     def variants(self):
@@ -303,6 +306,8 @@ class Product(models.Model):
 
     @property
     def full_path(self):
+        if self.is_service:
+            return f"/usluga/{self.slug}"
         return f"/produkt/{self.slug}"
 
 
@@ -388,7 +393,7 @@ class ProductVariant(models.Model):
     @property
     def item_image(self):
         return self.variant_thumbnails.filter(
-            width_expected=350, height_expected=350, is_variant=True
+            width_expected=350, height_expected=350, is_variant=True, main=True
         ).first()
 
 

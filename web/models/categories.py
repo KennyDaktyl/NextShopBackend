@@ -87,7 +87,10 @@ class Category(models.Model):
             if thumbs:
                 thumbs.delete()
 
-        if is_new_instance or old_image != self.oryg_image and self.oryg_image:
+        if is_new_instance:
+            super().save(*args, **kwargs)
+
+        if old_image != self.oryg_image and self.oryg_image:
             self.thumbnails = generate_thumbnails(
                 self, True, False, "category", self.oryg_image
             )
