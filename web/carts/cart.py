@@ -19,6 +19,7 @@ class Cart:
             self.request.session["cart"] = {
                 "id": self.request.session.session_key,
                 "cart_items": [],
+                "free_delivery": False,
             }
         self.request.session.modified = True
 
@@ -56,6 +57,13 @@ class Cart:
                 self.save_session()
                 return
 
+    def is_free_delivery(self):
+        if self.get_items():
+            self.request.session["cart"]["free_delivery"] = any(item["free_delivery"] for item in self.get_items())
+        else:
+            self.request.session["cart"]["free_delivery"] = False
+        return self.request.session["cart"]["free_delivery"]
+                        
     def get_id(self):
         return self.request.session["cart"]["id"]
 

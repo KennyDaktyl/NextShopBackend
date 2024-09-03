@@ -149,7 +149,7 @@ class ProductOptionItemAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductVariantInline, ProductPriceInline]
-    list_display = [f.name for f in Product._meta.fields]
+    list_display = ("id", "name", "qty", "category", "on_first_page",)
     search_fields = ["name", "pk"]
     list_filter = ["on_first_page"]
 

@@ -69,6 +69,7 @@ class CartCreateView(GenericAPIView):
                 "available_quantity": available_quantity,
                 "image": image,
                 "url": product.full_path,
+                "free_relivery": product.free_delivery,
             }
 
             cart_item_serializer = CartItemSerializer(
@@ -106,7 +107,7 @@ class CartUpdateView(GenericAPIView):
             selected_option = serializer.validated_data.get(
                 "selected_option", None
             )
-
+            free_delivery = serializer.validated_data.get("free_delivery")
             cart = Cart(request)
 
             if not cart:
@@ -156,6 +157,7 @@ class CartUpdateView(GenericAPIView):
                 "available_quantity": available_quantity,
                 "image": image,
                 "url": product.full_path,
+                "free_delivery": product.free_delivery,
             }
 
             cart_item_serializer = CartItemSerializer(
@@ -174,11 +176,12 @@ class GetCartItemsView(GenericAPIView):
     def get(self, request, *args, **kwargs):
         cart = Cart(request)
         cart_items = cart.get_items()
+        free_delivery = cart.is_free_delivery()
         cart_items_serializer = CartItemSerializer(
             cart_items, many=True, context={"request": request}
         )
         return JsonResponse(
-            {"cart_items": cart_items_serializer.data}, status=200
+            {"cart_items": cart_items_serializer.data, "free_delivery": free_delivery}, status=200
         )
 
 

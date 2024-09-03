@@ -136,6 +136,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             "product_option",
             "free_delivery",
             "full_path",
+            "is_service",
         )
 
     def get_color(self, obj):
@@ -171,4 +172,5 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             "show_variant_label",
             "variant_label",
             "full_path",
+            "is_service",
         )
