@@ -31,6 +31,15 @@ class Payment(models.Model):
     oryg_image = models.ImageField(
         verbose_name="Zdjęcie główne", upload_to="deliveries", blank=True
     )
+    image_alt = models.CharField(
+        verbose_name="Tekst alternatywny",
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    image_title = models.CharField(
+        verbose_name="Tytuł zdjęcia", max_length=255, blank=True, null=True
+    )
     thumbnails = models.JSONField(default=dict, blank=True, null=True)
     is_active = models.BooleanField(verbose_name="Czy aktywna?", default=True)
 
@@ -66,7 +75,13 @@ class Payment(models.Model):
         if is_new_instance or old_image != self.oryg_image and self.oryg_image:
             if self.oryg_image:
                 self.thumbnails = generate_thumbnails(
-                    self, True, False, "payment", self.oryg_image
+                    self,
+                    True,
+                    False,
+                    "payment",
+                    self.oryg_image,
+                    alt=self.image_alt,
+                    title=self.image_title,
                 )
         super().save()
 

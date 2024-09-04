@@ -159,6 +159,15 @@ class Product(models.Model):
     oryg_image = models.ImageField(
         verbose_name="Zdjęcie główne", upload_to="products", blank=True
     )
+    image_alt = models.CharField(
+        verbose_name="Tekst alternatywny",
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    image_title = models.CharField(
+        verbose_name="Tytuł zdjęcia", max_length=255, blank=True, null=True
+    )
     is_active = models.BooleanField(verbose_name="Czy aktywny", default=True)
     on_first_page = models.BooleanField(
         default=False, verbose_name="Na 1 stronie?"
@@ -181,9 +190,7 @@ class Product(models.Model):
     free_delivery = models.BooleanField(
         verbose_name="Darmowa dostawa", default=False
     )
-    is_service = models.BooleanField(
-        verbose_name="Usługa", default=False
-    )
+    is_service = models.BooleanField(verbose_name="Usługa", default=False)
 
     class Meta:
         verbose_name = "Produkt"
@@ -212,7 +219,9 @@ class Product(models.Model):
                 old_name = old_product.name
 
             if self.oryg_image and old_image != self.oryg_image:
-                thumbs = self.product_thumbnails.filter(main=True, is_variant=False)
+                thumbs = self.product_thumbnails.filter(
+                    main=True, is_variant=False
+                )
                 if thumbs:
                     thumbs.delete()
         super().save(*args, **kwargs)
@@ -223,7 +232,13 @@ class Product(models.Model):
         if is_new_instance or old_image != self.oryg_image and self.oryg_image:
             if self.oryg_image:
                 self.thumbnails = generate_thumbnails(
-                    self, True, False, "product", self.oryg_image
+                    self,
+                    True,
+                    False,
+                    "product",
+                    self.oryg_image,
+                    alt=self.image_alt,
+                    title=self.image_title,
                 )
 
         if is_new_instance:
@@ -281,9 +296,16 @@ class Product(models.Model):
     @property
     def images(self):
         if self.show_variant_label:
-            return self.product_thumbnails.filter(
+            image_main = self.product_thumbnails.filter(
+                width_expected=650, height_expected=650, is_variant=False
+            )
+            image_variants = self.product_thumbnails.filter(
                 width_expected=650, height_expected=650, is_variant=True
-            ).order_by("id")
+            )
+            return image_main.union(image_variants).order_by(
+                "is_variant", "-id"
+            )
+
         return self.product_thumbnails.filter(
             width_expected=650, height_expected=650, is_variant=False
         ).order_by("id")
@@ -300,9 +322,20 @@ class Product(models.Model):
 
     @property
     def item_image(self):
+        if self.show_variant_label:
+            return self.product_thumbnails.filter(
+                width_expected=350,
+                height_expected=350,
+                main=True,
+                is_variant=True,
+            ).last()
+
         return self.product_thumbnails.filter(
-            width_expected=350, height_expected=350, main=True
-        ).first()
+            width_expected=350,
+            height_expected=350,
+            main=True,
+            is_variant=False,
+        ).last()
 
     @property
     def full_path(self):
@@ -338,6 +371,15 @@ class ProductVariant(models.Model):
     qty = models.IntegerField(verbose_name="Ilość", default=0)
     oryg_image = models.ImageField(
         verbose_name="Zdjęcie wariantu", upload_to="variants", blank=True
+    )
+    image_alt = models.CharField(
+        verbose_name="Tekst alternatywny",
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    image_title = models.CharField(
+        verbose_name="Tytuł zdjęcia", max_length=255, blank=True, null=True
     )
     thumbnails = models.JSONField(default=dict, blank=True, null=True)
     tags = models.ManyToManyField("Tag", verbose_name="Tagi", blank=True)
@@ -376,6 +418,8 @@ class ProductVariant(models.Model):
                     "variant",
                     self.oryg_image,
                     file_name=file_name,
+                    alt=self.image_alt,
+                    title=self.image_title,
                 )
         if old_name != self.name:
             self.slug = slugify(self.name)

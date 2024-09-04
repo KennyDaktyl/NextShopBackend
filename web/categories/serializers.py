@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from web.images.serializers import ThumbnailSerializer
 from web.models.categories import Category
-from web.products.serializers import ProductListItemSerializer
+from web.products.serializers import ProductOnFirstPageSerializer
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -16,6 +16,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "name",
+            "item_label",
             "slug",
             "description",
             "seo_text",
@@ -59,7 +60,6 @@ class SubcategoryOnFirstPageSerializer(serializers.ModelSerializer):
             "name",
             "slug",
             "description",
-            "seo_text",
             "products_count",
             "full_path",
         )
@@ -72,7 +72,7 @@ class CategoryListOnFirstPageSerializer(serializers.ModelSerializer):
     full_path = serializers.SerializerMethodField()
     image = ThumbnailSerializer()
     all_subcategories = SubcategoryOnFirstPageSerializer(many=True)
-    products_on_first_page = ProductListItemSerializer(many=True)
+    products_on_first_page = ProductOnFirstPageSerializer(many=True)
 
     class Meta:
         model = Category
@@ -124,6 +124,7 @@ class ProductsByCategorySerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "name",
+            "item_label",
             "slug",
             "description",
             "seo_text",

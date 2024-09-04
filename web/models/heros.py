@@ -16,6 +16,15 @@ class Hero(models.Model):
     oryg_image = models.ImageField(
         verbose_name="Zdjęcie", upload_to="heros", blank=True, null=True
     )
+    image_alt = models.CharField(
+        verbose_name="Tekst alternatywny",
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    image_title = models.CharField(
+        verbose_name="Tytuł zdjęcia", max_length=255, blank=True, null=True
+    )
     link = models.URLField(verbose_name="Link", blank=True, null=True)
     link_text = models.CharField(
         max_length=50, verbose_name="Tekst linku", blank=True, null=True
@@ -75,7 +84,13 @@ class Hero(models.Model):
                     super().save(*args, **kwargs)
                 if self.oryg_image:
                     self.thumbnails = generate_thumbnails(
-                        self, False, self.order, "hero", self.oryg_image
+                        self,
+                        False,
+                        self.order,
+                        "hero",
+                        self.oryg_image,
+                        alt=self.image_alt,
+                        title=self.image_title,
                     )
 
         super().save(*args, **kwargs)

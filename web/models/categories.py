@@ -11,6 +11,9 @@ from web.models.images import generate_thumbnails
 class Category(models.Model):
     order = models.IntegerField(verbose_name="Kolejność", default=1)
     name = models.CharField(max_length=100, verbose_name="Nazwa kategorii")
+    item_label = models.CharField(
+        max_length=100, verbose_name="Etykieta w menu", blank=True, null=True
+    )
     on_first_page = models.BooleanField(
         verbose_name="Czy widoczna na 1 stronie?", default=False
     )
@@ -33,6 +36,15 @@ class Category(models.Model):
     )
     oryg_image = models.ImageField(
         verbose_name="Zdjęcie kategorii", upload_to="categories", blank=True
+    )
+    image_alt = models.CharField(
+        verbose_name="Tekst alternatywny",
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    image_title = models.CharField(
+        verbose_name="Tytuł zdjęcia", max_length=255, blank=True, null=True
     )
     is_main = models.BooleanField(
         verbose_name="Czy w menu głównym", default=False
@@ -82,6 +94,9 @@ class Category(models.Model):
                 .replace("---", "-")
             )
 
+        if not self.item_label:
+            self.item_label = self.name
+
         if old_image and old_image != self.oryg_image:
             thumbs = self.category_thumbnails.filter(main=True)
             if thumbs:
@@ -92,7 +107,13 @@ class Category(models.Model):
 
         if old_image != self.oryg_image and self.oryg_image:
             self.thumbnails = generate_thumbnails(
-                self, True, False, "category", self.oryg_image
+                self,
+                True,
+                False,
+                "category",
+                self.oryg_image,
+                alt=self.image_alt,
+                title=self.image_title,
             )
 
         super().save(*args, **kwargs)

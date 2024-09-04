@@ -20,7 +20,7 @@ class CartItemSerializer(serializers.Serializer):
     available_quantity = serializers.IntegerField()
     image = ThumbnailSerializer()
     url = serializers.CharField(max_length=255)
-    free_delivery = serializers.BooleanField()
+    free_delivery = serializers.BooleanField(default=False)
 
 
 class UpdateCartItemQtySerializer(serializers.Serializer):
