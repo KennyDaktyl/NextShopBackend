@@ -174,3 +174,28 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             "full_path",
             "is_service",
         )
+
+
+class ProductOnFirstPageSerializer(serializers.ModelSerializer):
+    category = ProductCategorySerializer()
+    current_price = serializers.DecimalField(
+        max_digits=10, decimal_places=2, read_only=True
+    )
+    image = ThumbnailSerializer()
+    variants = ProductListVariantSerializer(many=True)
+
+    class Meta:
+        model = Product
+        fields = (
+            "id",
+            "name",
+            "slug",
+            "category",
+            "image",
+            "current_price",
+            "min_price_last_30",
+            "full_path",
+            "variants",
+            "show_variant_label",
+            "full_path",
+        )

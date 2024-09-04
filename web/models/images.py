@@ -17,7 +17,14 @@ THUMBNAIL_SIZES = [
 
 
 def generate_thumbnails(
-    instance, main, order, relation_name, original_image, file_name=None
+    instance,
+    main,
+    order,
+    relation_name,
+    original_image,
+    file_name=None,
+    alt=None,
+    title=None,
 ):
     if not file_name:
         file_name = instance.slug
@@ -31,6 +38,8 @@ def generate_thumbnails(
             order=order,
             original_image=original_image,
             file_name=file_name,
+            alt=alt,
+            title=title,
         )
         thumbnails.update(thumbnail)
     return thumbnails
@@ -62,8 +71,15 @@ class Photo(models.Model):
         blank=True,
     )
     oryg_image = models.ImageField(upload_to="photos/")
-    alt_text = models.CharField(max_length=255, blank=True, null=True)
-    title_text = models.CharField(max_length=255, blank=True, null=True)
+    image_alt = models.CharField(
+        verbose_name="Tekst alternatywny",
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    image_title = models.CharField(
+        verbose_name="Tytuł zdjęcia", max_length=255, blank=True, null=True
+    )
     thumbnails = models.JSONField(default=dict, blank=True, null=True)
 
     class Meta:
@@ -113,6 +129,8 @@ class Photo(models.Model):
                 instance_name,
                 self.oryg_image,
                 self.slug,
+                alt=self.image_alt,
+                title=self.image_title,
             )
 
         super().save(*args, **kwargs)
@@ -196,7 +214,15 @@ class Thumbnail(models.Model):
 
 
 def create_thumbnail(
-    relation, relation_name, size, main, order, original_image, file_name
+    relation,
+    relation_name,
+    size,
+    main,
+    order,
+    original_image,
+    file_name,
+    alt=None,
+    title=None,
 ):
     thumbnail = Thumbnail()
 
@@ -248,6 +274,24 @@ def create_thumbnail(
 
     img = img.resize((new_width, new_height), Image.LANCZOS)
 
+    # watermark_path = os.path.join(settings.MEDIA_ROOT, "watermark.png")
+    # if watermark_path:
+    #     watermark = Image.open(watermark_path).convert("RGBA")
+
+    #     watermark_width, watermark_height = watermark.size
+    #     scale_factor = 3
+    #     new_watermark_width = new_width // scale_factor
+    #     new_watermark_height = int((new_watermark_width / watermark_width) * watermark_height)
+    #     watermark = watermark.resize((new_watermark_width, new_watermark_height), Image.LANCZOS)
+
+    #     position = (new_width - new_watermark_width - 10, new_height - new_watermark_height - 10)
+
+    #     img.paste(watermark, position, watermark)
+
+    thumbnail_dir = os.path.join(settings.MEDIA_ROOT, "thumbnails/")
+    if not os.path.exists(thumbnail_dir):
+        os.makedirs(thumbnail_dir)
+
     thumbnail_dir = os.path.join(settings.MEDIA_ROOT, "thumbnails/")
     if not os.path.exists(thumbnail_dir):
         os.makedirs(thumbnail_dir)
@@ -261,6 +305,11 @@ def create_thumbnail(
     thumbnail.height = new_height
     thumbnail.width_expected = size[0]
     thumbnail.height_expected = size[1]
+
+    if alt:
+        thumbnail.alt = alt
+    if title:
+        thumbnail.title = title
 
     temp_thumb = BytesIO()
     img.convert("RGBA").save(temp_thumb, "WEBP", quality=100, lossless=True)

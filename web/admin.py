@@ -119,7 +119,14 @@ class PriceGroupAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = [f.name for f in Category._meta.fields]
+    list_display = (
+        "id",
+        "name",
+        "parent",
+        "description",
+        "is_active",
+        "is_main",
+    )
     search_fields = ("name",)
     list_filter = ["is_active", "is_main"]
 
@@ -149,7 +156,13 @@ class ProductOptionItemAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductVariantInline, ProductPriceInline]
-    list_display = ("id", "name", "qty", "category", "on_first_page",)
+    list_display = (
+        "id",
+        "name",
+        "qty",
+        "category",
+        "on_first_page",
+    )
     search_fields = ["name", "pk"]
     list_filter = ["on_first_page"]
 
@@ -331,6 +344,8 @@ class ThumbnailAdmin(admin.ModelAdmin):
         "id",
         "width",
         "height",
+        "main",
+        "is_variant",
         "product",
         "category",
         "product_variant",

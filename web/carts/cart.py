@@ -43,10 +43,12 @@ class Cart:
 
         cart_item["item_id"] = str(uuid.uuid4())
         cart_items.append(cart_item)
+        self.is_free_delivery()
         self.save_session()
 
     def update_items(self, cart_item):
         self.request.session["cart"]["cart_items"].append(cart_item)
+        self.is_free_delivery()
         self.save_session()
 
     def update_item_qty(self, item_id, qty):
@@ -59,11 +61,13 @@ class Cart:
 
     def is_free_delivery(self):
         if self.get_items():
-            self.request.session["cart"]["free_delivery"] = any(item["free_delivery"] for item in self.get_items())
+            self.request.session["cart"]["free_delivery"] = any(
+                item["free_delivery"] for item in self.get_items()
+            )
         else:
             self.request.session["cart"]["free_delivery"] = False
         return self.request.session["cart"]["free_delivery"]
-                        
+
     def get_id(self):
         return self.request.session["cart"]["id"]
 
