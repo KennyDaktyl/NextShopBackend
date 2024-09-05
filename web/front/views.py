@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from django.db.models import Prefetch
 
 from web.categories.serializers import CategoryListOnFirstPageSerializer
 from web.front.serializers import ContactEmailSerializer, HeroSerializer
@@ -18,21 +19,32 @@ class FirstPageView(GenericAPIView):
         operation_description="Retrieve details of a first page",
     )
     def get(self, request, *args, **kwargs):
+        # Pobieranie kategorii z posortowanymi podkategoriami
         categories = Category.objects.filter(
             is_active=True, on_first_page=True
+        ).prefetch_related(
+            Prefetch(
+                'children',  # Nazwa relacji (related_name)
+                queryset=Category.objects.filter(is_active=True).order_by('order')  # Sortowanie po 'order'
+            )
         )
+
+        # Pobieranie aktywnych herosów
         heros = Hero.objects.filter(is_active=True)
+
+        # Serializacja kategorii i herosów
         categories_serialized = CategoryListOnFirstPageSerializer(
             categories, many=True, context={"request": request}
         ).data
         heros_serialized = HeroSerializer(
             heros, many=True, context={"request": request}
         ).data
+
         return Response(
             {"categories": categories_serialized, "heros": heros_serialized},
             status=status.HTTP_200_OK,
         )
-
+        
 
 class ContactView(GenericAPIView):
     permission_classes = [AllowAny]
