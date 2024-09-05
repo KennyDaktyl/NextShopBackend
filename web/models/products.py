@@ -303,7 +303,7 @@ class Product(models.Model):
                 width_expected=650, height_expected=650, is_variant=True
             )
             return image_main.union(image_variants).order_by(
-                "is_variant", "-id"
+                "order", "is_variant", 
             )
 
         return self.product_thumbnails.filter(
@@ -318,7 +318,7 @@ class Product(models.Model):
     def image(self):
         return self.product_thumbnails.filter(
             width_expected=350, height_expected=350, main=True
-        ).first()
+        ).last()
 
     @property
     def item_image(self):
@@ -327,7 +327,7 @@ class Product(models.Model):
                 width_expected=350,
                 height_expected=350,
                 main=True,
-                is_variant=True,
+                is_variant=False,
             ).last()
 
         return self.product_thumbnails.filter(

@@ -35,7 +35,6 @@ class CartCreateSerializer(serializers.Serializer):
     selected_option = serializers.DictField(
         child=serializers.IntegerField(), required=False
     )
-    free_delivery = serializers.BooleanField(default=False)
 
     def validate_selected_option(self, value):
         if not isinstance(value, dict):

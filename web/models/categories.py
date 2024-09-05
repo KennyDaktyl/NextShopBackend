@@ -58,18 +58,18 @@ class Category(models.Model):
         old_name = None
 
         if self.pk:
-            if not self.oryg_image:
-                self.thumbnails = {}
+            # Pobieramy starą instancję kategorii
             old_category = Category.objects.get(pk=self.pk)
             old_name = old_category.name
-            old_image = old_category.image
 
-            if old_category.image and old_category.image != self.oryg_image:
-                old_image = old_category.image
+            # Sprawdzamy czy obraz istnieje przed przypisaniem
+            if old_category.oryg_image:
+                old_image = old_category.oryg_image
 
             if old_category.name != self.name:
                 old_name = old_category.name
 
+        # Tworzenie slug na podstawie nowej nazwy
         if is_new_instance or old_name != self.name:
             self.slug = slugify(
                 self.name.replace("ł", "l")
@@ -94,17 +94,14 @@ class Category(models.Model):
                 .replace("---", "-")
             )
 
+        # Ustawiamy etykietę, jeśli jest pusta
         if not self.item_label:
             self.item_label = self.name
 
-        if old_image and old_image != self.oryg_image:
-            thumbs = self.category_thumbnails.filter(main=True)
-            if thumbs:
-                thumbs.delete()
+        # Zapisujemy nową instancję kategorii
+        super().save(*args, **kwargs)
 
-        if is_new_instance:
-            super().save(*args, **kwargs)
-
+        # Generujemy miniaturki tylko po zapisaniu nowej kategorii lub zmianie obrazu
         if old_image != self.oryg_image and self.oryg_image:
             self.thumbnails = generate_thumbnails(
                 self,
@@ -116,6 +113,7 @@ class Category(models.Model):
                 title=self.image_title,
             )
 
+        # Ponowne zapisanie po wygenerowaniu miniaturek
         super().save(*args, **kwargs)
 
     def __str__(self):

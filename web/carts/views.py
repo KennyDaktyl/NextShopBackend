@@ -29,7 +29,6 @@ class CartCreateView(GenericAPIView):
             selected_option = serializer.validated_data.get(
                 "selected_option", None
             )
-            free_delivery = serializer.validated_data.get("free_delivery")
 
             product = get_object_or_404(Product, id=product_id)
             variant = None
@@ -70,7 +69,7 @@ class CartCreateView(GenericAPIView):
                 "available_quantity": available_quantity,
                 "image": image,
                 "url": product.full_path,
-                "free_relivery": free_delivery,
+                "free_delivery": product.free_delivery,
             }
 
             cart_item_serializer = CartItemSerializer(
@@ -82,8 +81,7 @@ class CartCreateView(GenericAPIView):
             cart.add_product(cart_item)
 
             unique_cart_id = str(uuid.uuid4())
-            response = JsonResponse({"cart_id": unique_cart_id}, status=201)
-
+            response = JsonResponse({"cart_id": unique_cart_id, "free_delivery": product.free_delivery}, status=201)
             response.set_cookie(
                 "sessionid",
                 request.session.session_key,
@@ -108,7 +106,6 @@ class CartUpdateView(GenericAPIView):
             selected_option = serializer.validated_data.get(
                 "selected_option", None
             )
-            free_delivery = serializer.validated_data.get("free_delivery")
             cart = Cart(request)
 
             if not cart:
@@ -158,7 +155,7 @@ class CartUpdateView(GenericAPIView):
                 "available_quantity": available_quantity,
                 "image": image,
                 "url": product.full_path,
-                "free_delivery": free_delivery,
+                "free_delivery": product.free_delivery,
             }
 
             cart_item_serializer = CartItemSerializer(
@@ -168,7 +165,7 @@ class CartUpdateView(GenericAPIView):
 
             cart.add_product(cart_item)
             return JsonResponse(
-                {"cart_id": cart_id, "free_delivery": free_delivery},
+                {"cart_id": cart_id, "free_delivery": product.free_delivery},
                 status=200,
             )
         return JsonResponse(serializer.errors, status=400)
@@ -184,6 +181,7 @@ class GetCartItemsView(GenericAPIView):
         cart_items_serializer = CartItemSerializer(
             cart_items, many=True, context={"request": request}
         )
+        print(free_delivery)
         return JsonResponse(
             {
                 "cart_items": cart_items_serializer.data,

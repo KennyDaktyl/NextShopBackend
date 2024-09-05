@@ -345,6 +345,7 @@ class ThumbnailAdmin(admin.ModelAdmin):
         "width",
         "height",
         "main",
+        "order",
         "is_variant",
         "product",
         "category",
