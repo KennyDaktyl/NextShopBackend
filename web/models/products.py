@@ -317,7 +317,7 @@ class Product(models.Model):
     @property
     def image(self):
         return self.product_thumbnails.filter(
-            width_expected=350, height_expected=350, main=True
+            width_expected=350, height_expected=350, main=True, is_variant=False
         ).last()
 
     @property
