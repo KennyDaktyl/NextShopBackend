@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 
 from web.models.accounts import Profile
-from web.models.carts import Cart, CartItem
+# from web.models.carts import Cart, CartItem
 from web.models.categories import Category
 from web.models.deliveries import Delivery
 from web.models.heros import Hero
@@ -184,31 +184,31 @@ class ProductPriceAdmin(admin.ModelAdmin):
     list_filter = ["product__name"]
 
 
-class ItemInline(admin.TabularInline):
-    model = CartItem
-    extra = 1
+# class ItemInline(admin.TabularInline):
+#     model = CartItem
+#     extra = 1
 
 
-@admin.register(Cart)
-class CartAdmin(admin.ModelAdmin):
-    list_display = (
-        "id",
-        "client",
-        "created_date",
-        "amount",
-        "amount_with_discount",
-        "discount",
-    )
-    search_fields = ("client__username", "client__email")
-    list_filter = ("created_date", "updated_date")
-    inlines = [ItemInline]
+# @admin.register(Cart)
+# class CartAdmin(admin.ModelAdmin):
+#     list_display = (
+#         "id",
+#         "client",
+#         "created_date",
+#         "amount",
+#         "amount_with_discount",
+#         "discount",
+#     )
+#     search_fields = ("client__username", "client__email")
+#     list_filter = ("created_date", "updated_date")
+#     inlines = [ItemInline]
 
 
-@admin.register(CartItem)
-class ItemAdmin(admin.ModelAdmin):
-    list_display = ("id", "cart", "name", "qty", "price", "discount")
-    search_fields = ("name", "cart__client__username")
-    list_filter = ("cart__created_date",)
+# @admin.register(CartItem)
+# class ItemAdmin(admin.ModelAdmin):
+#     list_display = ("id", "cart", "name", "qty", "price", "discount")
+#     search_fields = ("name", "cart__client__username")
+#     list_filter = ("cart__created_date",)
 
 
 @admin.register(Delivery)

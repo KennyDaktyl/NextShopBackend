@@ -21,7 +21,7 @@ class Profile(models.Model):
     company_payer = models.TextField(
         verbose_name="Dane Płatnika", blank=True, null=True
     )
-    nip = models.CharField("NIP", max_length=10, blank=True, null=True)
+    nip = models.CharField("NIP", max_length=56, blank=True, null=True)
     invoice_street = models.CharField(
         "Ulica", max_length=100, blank=True, null=True
     )
