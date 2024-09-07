@@ -102,14 +102,14 @@ class CategoriesOnFirstPageSerializer(serializers.Serializer):
 
 class CategoryMetaDataSerializer(serializers.ModelSerializer):
     full_path = serializers.SerializerMethodField()
-
+    image = ThumbnailSerializer()
+    
     class Meta:
         model = Category
         fields = (
             "name",
             "description",
-            "seo_text",
-            "seo_text",
+            "image",
             "has_children",
             "full_path",
         )
