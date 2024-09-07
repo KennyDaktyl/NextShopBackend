@@ -29,7 +29,7 @@ class CartCreateView(GenericAPIView):
             selected_option = serializer.validated_data.get(
                 "selected_option", None
             )
-
+            info = serializer.validated_data.get("info")
             product = get_object_or_404(Product, id=product_id)
             variant = None
             if variant_id:
@@ -70,6 +70,7 @@ class CartCreateView(GenericAPIView):
                 "image": image,
                 "url": product.full_path,
                 "free_delivery": product.free_delivery,
+                "info": info,
             }
 
             cart_item_serializer = CartItemSerializer(
@@ -106,6 +107,7 @@ class CartUpdateView(GenericAPIView):
             selected_option = serializer.validated_data.get(
                 "selected_option", None
             )
+            info = serializer.validated_data.get("info")
             cart = Cart(request)
 
             if not cart:
@@ -156,6 +158,7 @@ class CartUpdateView(GenericAPIView):
                 "image": image,
                 "url": product.full_path,
                 "free_delivery": product.free_delivery,
+                "info": info,
             }
 
             cart_item_serializer = CartItemSerializer(
@@ -181,7 +184,6 @@ class GetCartItemsView(GenericAPIView):
         cart_items_serializer = CartItemSerializer(
             cart_items, many=True, context={"request": request}
         )
-        print(free_delivery)
         return JsonResponse(
             {
                 "cart_items": cart_items_serializer.data,
