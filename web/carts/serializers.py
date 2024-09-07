@@ -20,6 +20,7 @@ class CartItemSerializer(serializers.Serializer):
     available_quantity = serializers.IntegerField()
     image = ThumbnailSerializer()
     url = serializers.CharField(max_length=255)
+    info = serializers.CharField(max_length=255, required=False, allow_null=True)
     free_delivery = serializers.BooleanField(default=False)
 
 
@@ -35,7 +36,8 @@ class CartCreateSerializer(serializers.Serializer):
     selected_option = serializers.DictField(
         child=serializers.IntegerField(), required=False
     )
-
+    info = serializers.CharField(max_length=255, required=False, allow_null=True)
+    
     def validate_selected_option(self, value):
         if not isinstance(value, dict):
             raise serializers.ValidationError(

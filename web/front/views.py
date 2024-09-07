@@ -55,7 +55,7 @@ class ContactView(GenericAPIView):
     )
     
     def get(self, request, *args, **kwargs):
-        print("Hello")
+        
         return Response(
             {"message": "Contact form"},
             status=status.HTTP_200_OK,

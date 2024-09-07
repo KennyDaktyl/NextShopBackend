@@ -36,6 +36,7 @@ class Cart:
                 item["id"] == cart_item["id"]
                 and item.get("variant") == cart_item.get("variant")
                 and item["selected_option"] == cart_item.get("selected_option")
+                and item["info"] == cart_item.get("info")
             ):
                 item["quantity"] += cart_item["quantity"]
                 self.save_session()
