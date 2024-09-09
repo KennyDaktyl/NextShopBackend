@@ -119,7 +119,7 @@ class UserUpdateMainDataView(GenericAPIView):
             user.last_name = serializer.validated_data.get("last_name")
             user.save()
 
-            profile = user.profile
+            profile = Profile.objects.get(user=user)
             profile.mobile = serializer.validated_data.get("mobile")
             profile.save()
             
