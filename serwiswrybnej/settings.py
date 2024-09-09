@@ -38,7 +38,7 @@ CORS_ALLOW_METHODS = [
 ]
 
 if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
-    SITE_URL = "http://127.0.0.1:8000/"
+    SITE_URL = os.environ.get("NEXTJS_BASE_URL")
     DEBUG = True
     ALLOWED_HOSTS = ["*"]
     CORS_ALLOW_CREDENTIALS = True
@@ -55,7 +55,7 @@ if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
     SESSION_COOKIE_SAMESITE = "Lax"
     CSRF_COOKIE_SECURE = False
 else:
-    SITE_URL = "https://new-serwiswrybnej-api.resto-app.pl/"
+    SITE_URL = os.environ.get("NEXTJS_BASE_URL")
     DEBUG = False
     ALLOWED_HOSTS = [
         "serwiswrybnej.pl",
@@ -267,7 +267,7 @@ DJOSER = {
     "SET_USERNAME_RETYPE": True,
     "SET_PASSWORD_RETYPE": True,
     "PASSWORD_RESET_CONFIRM_RETYPE": True,
-    "PASSWORD_RESET_CONFIRM_URL": "password/reset/confirm/{uid}/{token}",
+    "PASSWORD_RESET_CONFIRM_URL": "auth/password/reset/confirm/{uid}/{token}",
     "USERNAME_RESET_CONFIRM_URL": "email/reset/confirm/{uid}/{token}",
     "ACTIVATION_URL": "auth/{uid}/{token}",
     "ACTIVATION_EXPIRATION_DAYS": 3,
@@ -282,6 +282,8 @@ DJOSER = {
     "PERMISSIONS": {
         "user_create": ["rest_framework.permissions.AllowAny"],
     },
+    'EMAIL_ACTIVATION_SUBJECT': 'Aktywacja konta w serwisie', 
+    'EMAIL_PASSWORD_RESET_SUBJECT': 'Resetowanie hasła do konta', 
 }
 
 LOGGING = {

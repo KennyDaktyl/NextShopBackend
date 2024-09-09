@@ -11,6 +11,7 @@ class Order(models.Model):
     id = models.AutoField(primary_key=True) 
     uid = models.UUIDField(
         verbose_name="Unikalny identyfikator",
+        db_index=True,
         default=uuid.uuid4, 
         editable=False,
         unique=True,  
@@ -180,6 +181,9 @@ class Order(models.Model):
     overriden_invoice_date = models.DateField(
         verbose_name="Nadpisz datę faktury", null=True, blank=True
     )
+    link = models.URLField(
+        verbose_name="Link do zamówienia", null=True, blank=True
+    )
 
     class Meta:
         verbose_name = "Zamówienie"
@@ -192,7 +196,8 @@ class Order(models.Model):
     def save(self, *args, **kwargs):
         if not self.order_number:
             self.order_number = generate_order_number()
-
+        if not self.link:
+            self.link = settings.SITE_URL + "koszyk/zamowienie-szczegoly?order_uid="  + str(self.uid)
         super().save(*args, **kwargs)
 
 
