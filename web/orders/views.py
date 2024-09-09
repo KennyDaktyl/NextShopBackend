@@ -72,7 +72,7 @@ class CreateOrderView(GenericAPIView):
                 **order_serializer.validated_data,
             )
             return Response(
-                {"order_id": order.id}, status=status.HTTP_201_CREATED
+                {"order_uid": order.uid}, status=status.HTTP_201_CREATED
             )
         else:
             print(order_serializer.errors)
@@ -99,16 +99,16 @@ class UpdateOrderStatus(GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        order_id = kwargs.get("pk")
+        order_uid = kwargs.get("uid")
 
-        if not order_id:
+        if not order_uid:
             return Response(
                 {"detail": "Order ID not provided."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            instance = Order.objects.get(id=order_id)
+            instance = Order.objects.get(uid=order_uid)
         except Order.DoesNotExist:
             return Response(
                 {"detail": "Order not found."},

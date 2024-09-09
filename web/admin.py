@@ -275,6 +275,7 @@ class OrderAdmin(admin.ModelAdmin):
                     "delivery_price",
                     "cart_items_price",
                     "cart_items",
+                    "link"
                 )
             },
         ),

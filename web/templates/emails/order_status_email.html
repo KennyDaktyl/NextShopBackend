@@ -166,21 +166,14 @@
                     <span class="badge badge-unpaid">Nieopłacone</span>
                 {% endif %}
             </li>
-            {% if order.info %}
-            <li><strong>Informacje do zamówienia:</strong> {{ order.info }}</li>
-            {% endif %}
+           
             <li><strong>Sposób dostawy:</strong> {{ order.delivery_method.name }}</li>
+            {% if order.inpost_box_id and order.delivery_method.inpost_box %}
+                <li><strong>Id paczkomatu:</strong> {{ order.inpost_box_id }}</li>
+            {% endif %}
             <li><strong>Sposób płatności:</strong> {{ order.payment_method.name }}</li>
-            <li><strong>Cena całkowita:</strong> {{ order.amount }} zł</li>
-            {% if order.amount_with_discount %}
-            <li><strong>Cena z rabatem:</strong> {{ order.amount_with_discount }} zł</li>
-            {% endif %}
-            {% if order.delivery_price %}
-                <li><strong>Opłata za dostawę:</strong> {{ order.delivery_price }} zł</li>
-            {% endif %}
-            {% if order.payment_price %}
-                <li><strong>Opłata za płatność:</strong> {{ order.payment_price }} zł</li>
-            {% endif %}
+            <a href="{{ order.link }}" ><strong>Link do zamówienia:</strong></a>
+
         </ul>
 
         <h2>Produkty:</h2>
@@ -217,6 +210,52 @@
             </tbody>
         </table>
 
+        <h2>Podsumowanie:</h2>
+        <table class="summary-table">
+            <tr>
+                <th>Cena produktów:</th>
+                <td>{{ order.cart_items_price }} zł</td>
+            </tr>
+            {% if order.delivery_price %}
+            <tr>
+                <th>Opłata za dostawę:</th>
+                <td>{{ order.delivery_price }} zł</td>
+            </tr>
+            {% endif %}
+            {% if order.payment_price %}
+            <tr>
+                <th>Opłata za płatność:</th>
+                <td>{{ order.payment_price }} zł</td>
+            </tr>
+            {% endif %}
+            {% if order.discount %}
+            <tr>
+                <th>Rabat:</th>
+                <td>{{ order.discount }} zł</td>
+            </tr>
+            {% endif %}
+            <tr class="summary-row">
+                <th>Suma zamówienia:</th>
+                <td class="bold">{{ order.amount }} zł</td>
+            </tr>
+        </table>
+
+        {% if order.make_invoice %}
+        <h2>Dane do faktury:</h2>
+        <ul>
+            {% if order.company_peyer %}
+                <li><strong>Płatnik:</strong> {{ order.company_peyer }}</li>
+            {% endif %}
+            <li><strong>Firma:</strong> {{ order.company }}</li>
+            <li><strong>NIP:</strong> {{ order.nip }}</li>
+            <li><strong>Adres:</strong> {{ order.invoice_street }}, {{ order.invoice_house_number }}{% if order.invoice_local_number %}&nbsp;/&nbsp;{{ order.invoice_local_number }}{% endif %}, {{ order.invoice_city }}, {{ order.invoice_postal_code }}</li>
+        </ul>
+        {% endif %}
+
+        {% if order.info %}
+            <p><strong>Informacje do zamówienia:</strong> {{ order.info }}</p>
+        {% endif %}
+    
         <p>Jeśli masz pytania dotyczące zamówienia, skontaktuj się z nami pod adresem <a href="mailto:michal.pielak81@gmail.com" class="button">SerwisWRybnej</a>.</p>
         <p>Dziękujemy za zakupy!</p>
 

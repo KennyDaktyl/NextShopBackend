@@ -61,10 +61,10 @@ class StripeWebhookView(View):
                 )
             )
 
-            order_id = checkout_session["metadata"]["order_id"]
+            order_uid = checkout_session["metadata"]["order_uid"]
             payment_status = checkout_session["payment_status"]
             try:
-                order = Order.objects.get(pk=order_id)
+                order = Order.objects.get(uid=order_uid)
                 if payment_status == "paid":
                     order.status = 3
                     order.is_paid = True
