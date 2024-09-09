@@ -1,0 +1,228 @@
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potwierdzenie zamówienia</title>
+    <style>
+        /* Stylizacja globalna */
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin-bottom: 5px;
+        }
+
+        /* Tabela produktów */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .text-bold {
+            font-weight: bold;
+        }
+
+        .text-small-bold {
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .text-green {
+            color: #28a745;
+        }
+
+        .text-red {
+            color: #dc3545;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .badge-paid {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .badge-unpaid {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .badge-status {
+            background-color: #007bff;
+            color: white;
+        }
+
+        /* Button do kontaktu */
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        hr {
+            margin-top: 20px;
+            border: none;
+            border-top: 1px solid #ddd;
+        }
+
+        .footer {
+            font-size: 12px;
+            color: #999;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Potwierdzenie zamówienia #{{ order.order_number }}</h1>
+        <p>Drogi Kliencie <span class="text-bold">{{ order.client_name }}</span>,</p>
+        <p>Dziękujemy za złożenie zamówienia w naszym sklepie. Oto szczegóły Twojego zamówienia:</p>
+        
+        <h2>Dane zamówienia:</h2>
+        <ul>
+            <li><strong>Numer zamówienia:</strong> {{ order.order_number }}</li>
+            <li><strong>Data zamówienia:</strong> {{ order.created_date }}</li>
+            <li><strong>Imię i nazwisko:</strong> {{ order.client_name }}</li>
+            <li><strong>Email:</strong> {{ order.client_email }}</li>
+            <li><strong>Telefon:</strong> {{ order.client_mobile }}</li>
+            <li><strong>Status zamówienia:</strong> 
+                <span class="badge badge-status">{{ order.get_status_display }}</span>
+            </li>
+            <li><strong>Status płatności:</strong> 
+                {% if order.is_paid %}
+                    <span class="badge badge-paid">Opłacone</span>
+                {% else %}
+                    <span class="badge badge-unpaid">Nieopłacone</span>
+                {% endif %}
+            </li>
+            {% if order.info %}
+            <li><strong>Informacje do zamówienia:</strong> {{ order.info }}</li>
+            {% endif %}
+            <li><strong>Sposób dostawy:</strong> {{ order.delivery_method.name }}</li>
+            <li><strong>Sposób płatności:</strong> {{ order.payment_method.name }}</li>
+            <li><strong>Cena całkowita:</strong> {{ order.amount }} zł</li>
+            {% if order.amount_with_discount %}
+            <li><strong>Cena z rabatem:</strong> {{ order.amount_with_discount }} zł</li>
+            {% endif %}
+            {% if order.delivery_price %}
+                <li><strong>Opłata za dostawę:</strong> {{ order.delivery_price }} zł</li>
+            {% endif %}
+            {% if order.payment_price %}
+                <li><strong>Opłata za płatność:</strong> {{ order.payment_price }} zł</li>
+            {% endif %}
+        </ul>
+
+        <h2>Produkty:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Produkt</th>
+                    <th>Ilość</th>
+                    <th>Cena jednostkowa</th>
+                    <th>Opcje</th>
+                    <th>Cena całkowita</th>
+                    <th>Info</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td class="text-bold">
+                        {{ item.name }}<br>
+                    </td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.price }} zł</td>
+                    <td>
+                        {% if item.variant %}<small>{{ item.variant }}</small>{% endif %}
+                        {% if item.variant and item.selected_option %}<small><br></small>{% endif %}
+                        {% if item.selected_option %}<small>{{ item.selected_option }}</small>{% endif %}
+                        </td>
+                    <td>{{ item.quantity|floatformat:2 }} * {{ item.price|floatformat:2 }} = {{ item.price|mul:item.quantity|floatformat:2 }} zł</td>
+                    <td>
+                        {% if item.info %} <span class="text-small-bold">Info:</span> {{ item.info }} {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <p>Jeśli masz pytania dotyczące zamówienia, skontaktuj się z nami pod adresem <a href="mailto:michal.pielak81@gmail.com" class="button">SerwisWRybnej</a>.</p>
+        <p>Dziękujemy za zakupy!</p>
+
+        <hr>
+
+        <p class="footer">Ten e-mail został wygenerowany automatycznie. Prosimy nie odpowiadać na tę wiadomość.</p>
+    </div>
+</body>
+</html>

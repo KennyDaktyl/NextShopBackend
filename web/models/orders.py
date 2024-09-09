@@ -1,3 +1,4 @@
+import uuid
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -7,6 +8,13 @@ from web.orders.functions import generate_order_number
 
 
 class Order(models.Model):
+    id = models.AutoField(primary_key=True) 
+    uid = models.UUIDField(
+        verbose_name="Unikalny identyfikator",
+        default=uuid.uuid4, 
+        editable=False,
+        unique=True,  
+    )
     created_date = models.DateTimeField(
         verbose_name="Data utworzenia zamówienia",
         default=timezone.now,
@@ -232,7 +240,7 @@ class Invoice(models.Model):
         verbose_name="Data utworzenia", default=timezone.now, db_index=True
     )
     order = models.OneToOneField(
-        "Order", on_delete=models.CASCADE, null=True, blank=True, db_index=True
+        "Order", on_delete=models.CASCADE, null=True, blank=True, db_index=True, related_name="invoice"
     )
     number = models.CharField(max_length=64)
     override_number = models.CharField(
