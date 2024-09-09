@@ -38,7 +38,7 @@ CORS_ALLOW_METHODS = [
 ]
 
 if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
-    SITE_URL = os.environ.get("NEXTJS_BASE_URL")
+    SITE_URL = "http://127.0.0.1:8000/"
     DEBUG = True
     ALLOWED_HOSTS = ["*"]
     CORS_ALLOW_CREDENTIALS = True
@@ -55,7 +55,7 @@ if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
     SESSION_COOKIE_SAMESITE = "Lax"
     CSRF_COOKIE_SECURE = False
 else:
-    SITE_URL = os.environ.get("NEXTJS_BASE_URL")
+    SITE_URL = "https://new-serwiswrybnej-api.resto-app.pl/"
     DEBUG = False
     ALLOWED_HOSTS = [
         "serwiswrybnej.pl",

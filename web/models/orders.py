@@ -1,3 +1,4 @@
+import os
 import uuid
 from django.conf import settings
 from django.db import models
@@ -197,7 +198,7 @@ class Order(models.Model):
         if not self.order_number:
             self.order_number = generate_order_number()
         if not self.link:
-            self.link = settings.SITE_URL + "koszyk/zamowienie-szczegoly?order_uid="  + str(self.uid)
+            self.link = os.environ.get("NEXTJS_BASE_URL") + "koszyk/zamowienie-szczegoly?order_uid="  + str(self.uid)
         super().save(*args, **kwargs)
 
 
