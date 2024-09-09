@@ -9,6 +9,7 @@ from rest_framework.generics import (GenericAPIView, ListAPIView,
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from web.functions import send_email_order_status
 from web.models.deliveries import Delivery
 from web.models.orders import Order
 from web.models.payments import Payment

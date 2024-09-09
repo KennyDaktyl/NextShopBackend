@@ -53,7 +53,8 @@ class Profile(models.Model):
         "Kod paczkomatu InPost", max_length=10, blank=True, null=True
     )
     newsletter = models.BooleanField("Newsletter", default=False)
-
+    send_emails = models.BooleanField("Wysyłać maile", default=False)
+                                      
     price_group = models.ForeignKey(
         PriceGroup,
         on_delete=models.SET_NULL,

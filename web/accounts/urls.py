@@ -2,12 +2,12 @@ from django.urls import path
 
 from .views import (UserFullDataView, UserLoginView,
                     UserProfileUpdateInvoiceDataView, UserProfileUpdateView,
-                    UserProfileView, UserRegistrationView,
+                    UserProfileView, UserRegistrationViewSet,
                     UserUpdateMainDataView, UserUpdatePassowrdView)
 
 urlpatterns = [
     path("login/", UserLoginView.as_view(), name="login"),
-    path("register/", UserRegistrationView.as_view(), name="register"),
+    # path("register/", UserRegistrationView.as_view(), name="register"),
     path("profile/", UserProfileView.as_view(), name="profile"),
     path("full-data/", UserFullDataView.as_view(), name="full-data"),
     path(

@@ -120,10 +120,11 @@ class TokenCreateSerializer(TokenCreateSerializer):
 
 
 class UserMainDataSerializer(serializers.ModelSerializer):
+    mobile = serializers.CharField()
 
     class Meta:
         model = User
-        fields = ["id", "first_name", "last_name", "email"]
+        fields = ["id", "first_name", "last_name", "email", "mobile"]
 
 
 class UserPasswordSerializer(serializers.ModelSerializer):

@@ -9,7 +9,7 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 
-from web.accounts.views import UserLoginView, UserRegistrationView
+from web.accounts.views import UserLoginView, UserRegistrationViewSet
 
 
 schema_view = get_schema_view(
@@ -22,6 +22,9 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
+router = DefaultRouter()
+router.register(r'users', UserRegistrationViewSet, basename='user')
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -29,12 +32,13 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     # User
+    path('auth/', include(router.urls)),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
     path('auth/', include('djoser.social.urls')),
     
     # path('login/', UserLoginView.as_view(), name='user-login'),
-    # path('register/', UserRegistrationView.as_view(), name='user-registration'),
+    # path('register/', UserRegistrationViewSet, name='user-registration'),
 
     # Categories
     path("api/categories/", include("web.categories.urls")),
