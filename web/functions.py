@@ -44,7 +44,7 @@ def send_activation_info_for_owner(title, message, user):
 def send_email_order_status(order):
     subject = f"Zamówienie w Serwisie w Rybnej nr: {order.order_number} zakończono pomyślnie."
     from_email = settings.EMAIL_HOST_USER
-    to = [order.client_email, settings.EMAIL_HOST_USER]
+    to = [order.client_email, settings.EMAIL_HOST_USER,]
 
     try:
         cart_items = json.loads(order.cart_items) 
@@ -58,14 +58,17 @@ def send_email_order_status(order):
             "cart_items": cart_items,
         },
     )
-    msg = EmailMultiAlternatives(subject, html_content, from_email, to)
-    msg.attach_alternative(html_content, "text/html")
+    
+    for email in to:
+        msg = EmailMultiAlternatives(subject, html_content, from_email, [email])
+        msg.attach_alternative(html_content, "text/html")
 
-    if hasattr(order, 'invoice') and order.invoice.pdf:
-        msg.attach(
-            f"faktura-{order.order_number}.pdf",
-            order.invoice.pdf.read(),
-            "application/pdf"
-        )
+        if hasattr(order, 'invoice') and order.invoice.pdf:
+            order.invoice.pdf.seek(0)
+            msg.attach(
+                f"faktura-{order.order_number}.pdf",
+                order.invoice.pdf.read(),
+                "application/pdf"
+            )
 
-    msg.send()
+        msg.send()
