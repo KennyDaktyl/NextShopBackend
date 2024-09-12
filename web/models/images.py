@@ -70,6 +70,13 @@ class Photo(models.Model):
         null=True,
         blank=True,
     )
+    article = models.ForeignKey(
+        "Article",
+        on_delete=models.CASCADE,
+        related_name="articles",
+        null=True,
+        blank=True,
+    )
     oryg_image = models.ImageField(upload_to="photos/")
     image_alt = models.CharField(
         verbose_name="Tekst alternatywny",
@@ -97,6 +104,9 @@ class Photo(models.Model):
         elif self.category:
             instance_name = "category"
             instance = self.category
+        elif self.article:
+            instance_name = "article"
+            instance = self.article
         else:
             instance_name = "photo"
             instance = self
@@ -192,6 +202,13 @@ class Thumbnail(models.Model):
         null=True,
         blank=True,
     )
+    article = models.ForeignKey(
+        "Article",
+        on_delete=models.CASCADE,
+        related_name="article_thumbnails",
+        null=True,
+        blank=True,
+    )
     width = models.IntegerField(verbose_name="Szerokość")
     height = models.IntegerField(verbose_name="Wysokość")
     width_expected = models.IntegerField(
@@ -253,9 +270,11 @@ def create_thumbnail(
         thumbnail.delivery = relation
     elif relation_name == "payment":
         thumbnail.payment = relation
+    elif relation_name == "article":
+        thumbnail.article = relation
     else:
         raise ValueError(
-            "Relation must be 'product', 'variant', 'category', 'hero', 'delivery', 'payment' or 'photo'."
+            "Relation must be 'product', 'variant', 'category', 'hero', 'delivery', 'payment', 'article' or 'photo'."
         )
 
     # Zmniejszenie obrazu zachowując proporcje

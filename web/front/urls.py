@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import contact_view, senf_contact_email, first_page_view
+from .views import contact_view, first_page_view, senf_contact_email
 
 urlpatterns = [
     path("first-page", first_page_view, name="first-page"),

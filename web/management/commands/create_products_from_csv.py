@@ -1,26 +1,36 @@
-from django.core.management.base import BaseCommand
+import os
+
 import numpy as np
 import pandas as pd
 from django.core.files import File
-import os
 from django.core.files.temp import NamedTemporaryFile
-from web.models.products import Product, Brand
+from django.core.management.base import BaseCommand
+
 from web.models.categories import Category
 from web.models.prices import ProductPrice
+from web.models.products import Brand, Product
 
 
 class Command(BaseCommand):
-    help = 'Import products from a CSV file and assign them to a specified category.'
+    help = "Import products from a CSV file and assign them to a specified category."
 
     def add_arguments(self, parser):
         # Dodajemy dwa argumenty: nazwę pliku i kategorię
-        parser.add_argument('file_path', type=str, help='Path to the CSV file with product data.')
-        parser.add_argument('category_name', type=str, help='Category name to assign to the products.')
+        parser.add_argument(
+            "file_path",
+            type=str,
+            help="Path to the CSV file with product data.",
+        )
+        parser.add_argument(
+            "category_name",
+            type=str,
+            help="Category name to assign to the products.",
+        )
 
     def handle(self, *args, **options):
-        file_path = options['file_path']  # Pobieramy nazwę pliku
-        category_name = options['category_name']  # Pobieramy nazwę kategorii
-        
+        file_path = options["file_path"]  # Pobieramy nazwę pliku
+        category_name = options["category_name"]  # Pobieramy nazwę kategorii
+
         default_brand = Brand.objects.get(name="Expres")
 
         # Wczytujemy dane z CSV
@@ -29,7 +39,7 @@ class Command(BaseCommand):
         except FileNotFoundError:
             self.stderr.write(f"File {file_path} not found.")
             return
-        
+
         df = data.replace({np.nan: None})
 
         # Znajdujemy kategorię lub tworzymy nową
@@ -50,7 +60,7 @@ class Command(BaseCommand):
                 continue
 
             # Otwieramy lokalny plik zamiast używać urlopen
-            with open(image_path, 'rb') as img_file:
+            with open(image_path, "rb") as img_file:
                 img_temp = NamedTemporaryFile(delete=True)
                 img_temp.write(img_file.read())
                 img_temp.flush()
@@ -63,15 +73,18 @@ class Command(BaseCommand):
                     category=category,
                     image_alt=row["name"],
                     image_title=row["name"],
-                    oryg_image=File(img_temp, name=os.path.basename(image_path)),
+                    oryg_image=File(
+                        img_temp, name=os.path.basename(image_path)
+                    ),
                 )
                 product.save()
 
                 # Tworzymy cenę dla produktu
                 product_price = ProductPrice(
-                    product=product,
-                    price=row["price"]
+                    product=product, price=row["price"]
                 )
                 product_price.save()
 
-                self.stdout.write(f"Product {product.name} created with price {product_price.price}")
+                self.stdout.write(
+                    f"Product {product.name} created with price {product_price.price}"
+                )

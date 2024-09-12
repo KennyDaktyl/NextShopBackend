@@ -6,6 +6,7 @@ class WebConfig(AppConfig):
     name = "web"
 
     def ready(self):
+        import web.articles.signals
         import web.categories.signals
         import web.deliveries.signals
         import web.front.signals

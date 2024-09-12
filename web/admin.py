@@ -1,9 +1,14 @@
+import os
+
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
+from weasyprint import HTML
 
 from web.models.accounts import Profile
 # from web.models.carts import Cart, CartItem
+from web.models.articles import Article
 from web.models.categories import Category
 from web.models.deliveries import Delivery
 from web.models.heros import Hero
@@ -275,7 +280,7 @@ class OrderAdmin(admin.ModelAdmin):
                     "delivery_price",
                     "cart_items_price",
                     "cart_items",
-                    "link"
+                    "link",
                 )
             },
         ),
@@ -333,10 +338,56 @@ class OrderAdmin(admin.ModelAdmin):
     )
 
 
+from django.template.loader import render_to_string
+from django.utils import timezone
+
+
+@admin.action(description="Utwórz fakturę")
+def create_invoice(modeladmin, request, queryset):
+    for invoice in queryset:
+        invoice_number = (
+            invoice.override_number
+            if invoice.override_number
+            else f"faktura-{invoice.order.order_number}"
+        )
+        invoice_date = (
+            invoice.override_date
+            if invoice.override_date
+            else timezone.now().date()
+        )
+
+        pdf_filename = f"invoices/{invoice_number}.pdf"
+        pdf_path = os.path.join(settings.MEDIA_ROOT, pdf_filename)
+
+        pdf_dir = os.path.dirname(pdf_path)
+        if not os.path.exists(pdf_dir):
+            os.makedirs(pdf_dir)
+
+        html_content = render_to_string(
+            "emails/invoice.html",
+            {
+                "order": invoice.order,
+                "invoice_number": invoice_number,
+                "invoice_date": invoice_date,
+            },
+        )
+        html = HTML(string=html_content)
+        html.write_pdf(target=pdf_path)
+
+        invoice.number = invoice_number
+        invoice.override_number = invoice.override_number
+        invoice.override_date = invoice.override_date
+        invoice.pdf = pdf_filename
+        invoice.save()
+
+
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
     list_display = [f.name for f in Invoice._meta.fields]
     search_fields = ("number",)
+    actions = [
+        create_invoice,
+    ]
 
 
 @admin.register(Thumbnail)
@@ -355,6 +406,7 @@ class ThumbnailAdmin(admin.ModelAdmin):
         "hero",
         "delivery",
         "payment",
+        "article",
         "oryg_image",
     )
     search_fields = (
@@ -408,3 +460,15 @@ class ProductVariantAdmin(admin.ModelAdmin):
     list_display = ("id", "product", "name", "size", "material", "qty")
     search_fields = ("product__name", "size__name", "material__name")
     list_filter = ("size", "material")
+
+
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "name",
+        "category",
+        "created_date",
+    )
+    search_fields = ("name", "category__name")
+    list_filter = ("created_date",)

@@ -2,7 +2,7 @@ import logging
 import os
 
 import requests
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_delete, post_save, pre_delete
 from django.dispatch import receiver
 
 from web.models.images import Thumbnail
@@ -10,77 +10,84 @@ from web.models.images import Thumbnail
 logger = logging.getLogger(__name__)
 
 
-@receiver(post_save, sender=Thumbnail)
-@receiver(post_delete, sender=Thumbnail)
-def revalidate_product_cache(sender, instance, **kwargs):
+def revalidate_cache(tags):
     next_js_url = (
         os.environ.get("NEXTJS_BASE_URL") + "/api/webhooks/revalidate"
     )
     try:
-        tags = []
-        if instance.product:
-            main_products_tag = "products"
-            tags.append(main_products_tag)
-
-            product_details_tag = f"product-{instance.product.slug}"
-            tags.append(product_details_tag)
-
-            # Dodajemy tagi dla wszystkich rodziców kategorii produktu
-            current_category = instance.product.category
-            while current_category:
-                menu_items_category = f"products-{current_category.slug}"
-                tags.append(menu_items_category)
-                current_category = current_category.parent
-
-        if instance.category:
-            main_products_tag = "products"
-            tags.append(main_products_tag)
-
-            products_by_category_tag = f"products-{instance.category.slug}"
-            tags.append(products_by_category_tag)
-
-            # Dodajemy tagi dla wszystkich rodziców kategorii
-            current_category = instance.category
-            while current_category:
-                menu_items_category = f"products-{current_category.slug}"
-                tags.append(menu_items_category)
-                current_category = current_category.parent
-
         response = requests.post(next_js_url, json={"tags": tags})
         response.raise_for_status()
-        logger.info(
-            f"Successfully revalidated cache for instance {instance} and tags {tags}"
-        )
+        logger.info(f"Successfully revalidated cache for tags {tags}")
     except requests.exceptions.RequestException as e:
-        logger.error(
-            f"Error revalidating cache for instance {instance.id}: {e}"
-        )
+        logger.error(f"Error revalidating cache: {e}")
 
 
-# @receiver(post_save, sender=Photo)
-# @receiver(post_delete, sender=Photo)
-# def revalidate_product_cache(sender, instance, **kwargs):
-#     next_js_url = 'http://localhost:3000/api/webhooks/revalidate'
-#     try:
-#         tags = []
-#         if instance.product:
-#             product_details_tag = f'product-{instance.product.slug}'
-#             menu_items_category = f'menu-items-{instance.product.category.parent.slug}' if instance.product.category.parent else 'none'
-#             menu_items_prev_category = f'menu-items-{instance.product.prev_category.parent.slug}' if instance.product.prev_category and instance.product.prev_category.parent else 'none'
+@receiver(pre_delete, sender=Thumbnail)
+def cache_thumbnail_info_before_delete(sender, instance, **kwargs):
+    instance._product_slug = (
+        instance.product.slug if instance.product else None
+    )
+    instance._category_slug = (
+        instance.category.slug if instance.category else None
+    )
+    instance._variant_slug = (
+        instance.product_variant.slug if instance.product_variant else None
+    )
+    instance._hero_id = instance.hero.id if instance.hero else None
+    instance._delivery_id = instance.delivery.id if instance.delivery else None
+    instance._payment_id = instance.payment.id if instance.payment else None
+    instance._article_id = instance.article.id if instance.article else None
 
-#             tags.append(product_details_tag)
-#             tags.append(menu_items_category)
-#             tags.append(menu_items_prev_category)
 
-#         if instance.category:
-#             products_by_category_tag = f'products-{instance.slug}'
-#             menu_items_category = f'menu-items-{instance.parent.slug}' if instance.parent else 'none'
+@receiver(post_delete, sender=Thumbnail)
+def revalidate_product_cache_thumbnail(sender, instance, **kwargs):
+    tags = []
 
-#             tags.append(products_by_category_tag)
-#             tags.append(menu_items_category)
+    if hasattr(instance, "_product_slug") and instance._product_slug:
+        tags.append(f"product-{instance._product_slug}")
+        tags.append(f"products")
 
-#         response = requests.post(next_js_url, json={"tags": tags})
-#         response.raise_for_status()
-#         logger.info(f"Successfully revalidated cache for category {instance.slug} and tags {tags}")
-#     except requests.exceptions.RequestException as e:
-#         logger.error(f"Error revalidating cache for category {instance.id}: {e}")
+    if hasattr(instance, "_category_slug") and instance._category_slug:
+        tags.append(f"products-{instance._category_slug}")
+
+    if hasattr(instance, "_variant_slug") and instance._variant_slug:
+        tags.append(f"product-variant-{instance._variant_slug}")
+
+    if hasattr(instance, "_hero_id") and instance._hero_id:
+        tags.append(f"hero-{instance._hero_id}")
+
+    if hasattr(instance, "_delivery_id") and instance._delivery_id:
+        tags.append(f"delivery-{instance._delivery_id}")
+
+    if hasattr(instance, "_payment_id") and instance._payment_id:
+        tags.append(f"payment-{instance._payment_id}")
+    if hasattr(instance, "_article_id") and instance._article_id:
+        tags.append(f"article-{instance._article_id}")
+        tags.append(f"articles")
+
+    revalidate_cache(tags)
+
+
+@receiver(post_save, sender=Thumbnail)
+def revalidate_product_cache_thumbnail_save(sender, instance, **kwargs):
+    tags = []
+
+    if instance.product:
+        tags.append(f"product-{instance.product.slug}")
+
+    if instance.category:
+        tags.append(f"products-{instance.category.slug}")
+
+    if instance.product_variant:
+        tags.append(f"product-variant-{instance.product_variant.slug}")
+
+    if instance.hero:
+        tags.append(f"hero-{instance.hero.id}")
+
+    if instance.delivery:
+        tags.append(f"delivery-{instance.delivery.id}")
+
+    if instance.payment:
+        tags.append(f"payment-{instance.payment.id}")
+
+    revalidate_cache(tags)

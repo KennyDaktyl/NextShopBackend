@@ -1,9 +1,9 @@
+from django.db.models import Prefetch
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.db.models import Prefetch
 
 from web.categories.serializers import CategoryListOnFirstPageSerializer
 from web.front.serializers import ContactEmailSerializer, HeroSerializer
@@ -24,8 +24,10 @@ class FirstPageView(GenericAPIView):
             is_active=True, on_first_page=True
         ).prefetch_related(
             Prefetch(
-                'children',  # Nazwa relacji (related_name)
-                queryset=Category.objects.filter(is_active=True).order_by('order')  # Sortowanie po 'order'
+                "children",  # Nazwa relacji (related_name)
+                queryset=Category.objects.filter(is_active=True).order_by(
+                    "order"
+                ),  # Sortowanie po 'order'
             )
         )
 
@@ -44,7 +46,7 @@ class FirstPageView(GenericAPIView):
             {"categories": categories_serialized, "heros": heros_serialized},
             status=status.HTTP_200_OK,
         )
-        
+
 
 class ContactView(GenericAPIView):
     permission_classes = [AllowAny]
@@ -53,15 +55,14 @@ class ContactView(GenericAPIView):
     @swagger_auto_schema(
         operation_description="Retrieve contact details",
     )
-    
     def get(self, request, *args, **kwargs):
-        
+
         return Response(
             {"message": "Contact form"},
             status=status.HTTP_200_OK,
         )
-        
-        
+
+
 class SendContactEmailView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = ContactEmailSerializer
@@ -69,7 +70,6 @@ class SendContactEmailView(GenericAPIView):
     @swagger_auto_schema(
         operation_description="Retrieve contact details",
     )
-    
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():

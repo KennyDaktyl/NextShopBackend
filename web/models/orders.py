@@ -1,21 +1,22 @@
 import os
 import uuid
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
-from web.constants import ORDER_STATUS, PAYMENT_METHOD
+from web.constants import ORDER_STATUS
 from web.orders.functions import generate_order_number
 
 
 class Order(models.Model):
-    id = models.AutoField(primary_key=True) 
+    id = models.AutoField(primary_key=True)
     uid = models.UUIDField(
         verbose_name="Unikalny identyfikator",
         db_index=True,
-        default=uuid.uuid4, 
+        default=uuid.uuid4,
         editable=False,
-        unique=True,  
+        unique=True,
     )
     created_date = models.DateTimeField(
         verbose_name="Data utworzenia zamówienia",
@@ -198,7 +199,11 @@ class Order(models.Model):
         if not self.order_number:
             self.order_number = generate_order_number()
         if not self.link:
-            self.link = os.environ.get("NEXTJS_BASE_URL") + "koszyk/zamowienie-szczegoly?order_uid="  + str(self.uid)
+            self.link = (
+                os.environ.get("NEXTJS_BASE_URL")
+                + "koszyk/zamowienie-szczegoly?order_uid="
+                + str(self.uid)
+            )
         super().save(*args, **kwargs)
 
 
@@ -246,7 +251,12 @@ class Invoice(models.Model):
         verbose_name="Data utworzenia", default=timezone.now, db_index=True
     )
     order = models.OneToOneField(
-        "Order", on_delete=models.CASCADE, null=True, blank=True, db_index=True, related_name="invoice"
+        "Order",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        db_index=True,
+        related_name="invoice",
     )
     number = models.CharField(max_length=64)
     override_number = models.CharField(

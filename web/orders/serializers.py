@@ -133,7 +133,9 @@ class CartItemSerializer(serializers.Serializer):
     quantity = serializers.IntegerField()
     image = ThumbnailSerializer(allow_null=True, required=False)
     url = serializers.CharField()
-    info = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    info = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
 
 
 class CreateOrderSerializer(serializers.Serializer):

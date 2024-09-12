@@ -1,15 +1,10 @@
-from rest_framework.response import Response
-from rest_framework.decorators import action
-
+from django.contrib.auth import authenticate, login
 from djoser import signals
 from djoser.compat import get_user_email
 from djoser.conf import settings
-
-
-from django.contrib.auth import authenticate, login
 from djoser.views import UserViewSet
-
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -43,25 +38,27 @@ class UserLoginView(GenericAPIView):
 
 
 class UserRegistrationViewSet(UserViewSet):
-    
+
     def perform_create(self, serializer, *args, **kwargs):
         user = serializer.save(*args, **kwargs)
         signals.user_registered.send(
             sender=self.__class__, user=user, request=self.request
         )
         Profile.objects.get_or_create(user=user, send_emails=True)
-        
+
         context = {"user": user}
         to = [get_user_email(user)]
         if settings.SEND_ACTIVATION_EMAIL:
             settings.EMAIL.activation(self.request, context).send(to)
         elif settings.SEND_CONFIRMATION_EMAIL:
             settings.EMAIL.confirmation(self.request, context).send(to)
-        
+
         email_title = "Nowy użytkownik zarejestrował się w systemie"
-        email_message = f"Użytkownik: {user.username} został zarejestrowany w systemie"
+        email_message = (
+            f"Użytkownik: {user.username} został zarejestrowany w systemie"
+        )
         send_activation_info_for_owner(email_title, email_message, user)
-    
+
     @action(["post"], detail=False)
     def activation(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -82,9 +79,9 @@ class UserRegistrationViewSet(UserViewSet):
         email_title = "Nowy użytkownik aktywował konto"
         email_message = f"Użytkownik: {user.username} aktywował konto"
         send_activation_info_for_owner(email_title, email_message, user)
-        
+
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
 
 class UserProfileView(GenericAPIView):
     serializer_class = UserAddressDataSerializer
@@ -122,7 +119,7 @@ class UserUpdateMainDataView(GenericAPIView):
             profile = Profile.objects.get(user=user)
             profile.mobile = serializer.validated_data.get("mobile")
             profile.save()
-            
+
             return Response(
                 {"message": "Update data successful"},
                 status=status.HTTP_201_CREATED,
@@ -182,4 +179,3 @@ class UserProfileUpdateInvoiceDataView(GenericAPIView):
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

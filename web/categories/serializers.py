@@ -72,7 +72,7 @@ class SubcategoryOnFirstPageSerializer(serializers.ModelSerializer):
 class CategoryListOnFirstPageSerializer(serializers.ModelSerializer):
     full_path = serializers.SerializerMethodField()
     image = ThumbnailSerializer()
-    all_subcategories = serializers.SerializerMethodField()  
+    all_subcategories = serializers.SerializerMethodField()
     products_on_first_page = ProductOnFirstPageSerializer(many=True)
 
     class Meta:
@@ -87,11 +87,11 @@ class CategoryListOnFirstPageSerializer(serializers.ModelSerializer):
             "image",
             "products_on_first_page",
         )
-    
+
     def get_all_subcategories(self, obj):
-        subcategories = obj.children.filter(is_active=True).order_by('order')
+        subcategories = obj.children.filter(is_active=True).order_by("order")
         return SubcategoryOnFirstPageSerializer(subcategories, many=True).data
-    
+
     def get_full_path(self, obj):
         return obj.get_full_path()
 
@@ -103,7 +103,7 @@ class CategoriesOnFirstPageSerializer(serializers.Serializer):
 class CategoryMetaDataSerializer(serializers.ModelSerializer):
     full_path = serializers.SerializerMethodField()
     image = ThumbnailSerializer()
-    
+
     class Meta:
         model = Category
         fields = (
