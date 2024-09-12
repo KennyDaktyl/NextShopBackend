@@ -82,7 +82,13 @@ class CartCreateView(GenericAPIView):
             cart.add_product(cart_item)
 
             unique_cart_id = str(uuid.uuid4())
-            response = JsonResponse({"cart_id": unique_cart_id, "free_delivery": product.free_delivery}, status=201)
+            response = JsonResponse(
+                {
+                    "cart_id": unique_cart_id,
+                    "free_delivery": product.free_delivery,
+                },
+                status=201,
+            )
             response.set_cookie(
                 "sessionid",
                 request.session.session_key,

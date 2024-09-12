@@ -2,6 +2,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import sentry_sdk
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
@@ -110,6 +112,12 @@ else:
         "PATCH",
         "DELETE",
     ]
+
+    sentry_sdk.init(
+        dsn="https://a3d117dad313dbcb96b0df16e0aecd2b@o4504289148534784.ingest.us.sentry.io/4507938590687232",
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+    )
 
 SITE_ID = 1
 
@@ -282,8 +290,8 @@ DJOSER = {
     "PERMISSIONS": {
         "user_create": ["rest_framework.permissions.AllowAny"],
     },
-    'EMAIL_ACTIVATION_SUBJECT': 'Aktywacja konta w serwisie', 
-    'EMAIL_PASSWORD_RESET_SUBJECT': 'Resetowanie hasła do konta', 
+    "EMAIL_ACTIVATION_SUBJECT": "Aktywacja konta w serwisie",
+    "EMAIL_PASSWORD_RESET_SUBJECT": "Resetowanie hasła do konta",
 }
 
 LOGGING = {

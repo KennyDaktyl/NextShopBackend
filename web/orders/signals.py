@@ -18,10 +18,10 @@ def oder_create_or_update_signals(sender, instance, created, **kwargs):
         generate_invoice_for_order(instance)
         instance.invoice_created = True
         instance.save(update_fields=["invoice_created"])
-    
+
     if instance.client is not None:
         if not instance.client.profile.send_emails:
             return
-    
+
     if instance.status in [3, 5, 9, 12, 14]:
         send_email_order_status(instance)

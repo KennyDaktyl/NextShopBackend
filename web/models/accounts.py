@@ -54,7 +54,7 @@ class Profile(models.Model):
     )
     newsletter = models.BooleanField("Newsletter", default=False)
     send_emails = models.BooleanField("Wysyłać maile", default=False)
-                                      
+
     price_group = models.ForeignKey(
         PriceGroup,
         on_delete=models.SET_NULL,

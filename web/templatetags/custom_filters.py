@@ -47,6 +47,7 @@ def json_loads(value):
     except (ValueError, TypeError):
         return []
 
+
 @register.filter
 def multiply(value, arg):
     """Mnożnik dla wartości w szablonie"""

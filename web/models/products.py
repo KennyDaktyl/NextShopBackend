@@ -212,8 +212,11 @@ class Product(models.Model):
             if old_product.category != self.category:
                 self.prev_category = old_product.category
 
-            if old_product.image and old_product.image != self.oryg_image:
-                old_image = old_product.image
+            if (
+                old_product.oryg_image
+                and old_product.oryg_image != self.oryg_image
+            ):
+                old_image = old_product.oryg_image
 
             if old_product.name != self.name:
                 old_name = old_product.name
@@ -303,7 +306,8 @@ class Product(models.Model):
                 width_expected=650, height_expected=650, is_variant=True
             )
             return image_main.union(image_variants).order_by(
-                "order", "is_variant", 
+                "order",
+                "is_variant",
             )
 
         return self.product_thumbnails.filter(
@@ -317,7 +321,10 @@ class Product(models.Model):
     @property
     def image(self):
         return self.product_thumbnails.filter(
-            width_expected=350, height_expected=350, main=True, is_variant=False
+            width_expected=350,
+            height_expected=350,
+            main=True,
+            is_variant=False,
         ).last()
 
     @property

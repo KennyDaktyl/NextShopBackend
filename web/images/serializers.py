@@ -8,7 +8,16 @@ class ThumbnailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Thumbnail
-        fields = ["id", "width", "height", "url", "alt", "title"]
+        fields = [
+            "id",
+            "width",
+            "height",
+            "url",
+            "alt",
+            "title",
+            "height_expected",
+            "width_expected",
+        ]
 
     def get_url(self, obj):
         request = self.context.get("request")
