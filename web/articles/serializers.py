@@ -44,3 +44,9 @@ class ArticlesDetailsSerializer(serializers.ModelSerializer):
             "gallery",
             "full_path",
         )
+
+
+class ArticlesPathListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = ("full_path",)

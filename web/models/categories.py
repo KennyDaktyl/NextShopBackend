@@ -9,7 +9,16 @@ from web.models.images import generate_thumbnails
 
 
 class Category(models.Model):
+    meta_title = models.CharField(
+        max_length=60, verbose_name="Meta title", blank=True, null=True
+    )
+    meta_description = models.CharField(
+        max_length=160, verbose_name="Meta description", blank=True, null=True
+    )
     order = models.IntegerField(verbose_name="Kolejność", default=1)
+    h1_tag = models.CharField(
+        max_length=100, verbose_name="Nagłówek H1", blank=True, null=True
+    )
     name = models.CharField(max_length=100, verbose_name="Nazwa kategorii")
     item_label = models.CharField(
         max_length=100, verbose_name="Etykieta w menu", blank=True, null=True
