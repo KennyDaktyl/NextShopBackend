@@ -95,6 +95,18 @@ class ProductOptionItem(models.Model):
 
 
 class Product(models.Model):
+    meta_title = models.CharField(
+        verbose_name="Meta title dla produktu",
+        blank=True,
+        null=True,
+        max_length=60,
+    )
+    meta_description = models.CharField(
+        verbose_name="Meta description dla produktu",
+        blank=True,
+        null=True,
+        max_length=160,
+    )
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
@@ -110,6 +122,9 @@ class Product(models.Model):
         related_name="prev_products",
         null=True,
         blank=True,
+    )
+    h1_tag = models.CharField(
+        verbose_name="Tag H1", max_length=255, blank=True, null=True
     )
     name = models.CharField(
         verbose_name="Nazwa", max_length=255, db_index=True

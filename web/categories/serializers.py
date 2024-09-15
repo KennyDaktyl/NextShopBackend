@@ -15,6 +15,9 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = (
             "id",
+            "meta_title",
+            "meta_description",
+            "h1_tag",
             "name",
             "item_label",
             "slug",
@@ -108,6 +111,8 @@ class CategoryMetaDataSerializer(serializers.ModelSerializer):
         model = Category
         fields = (
             "name",
+            "meta_title",
+            "meta_description",
             "description",
             "image",
             "has_children",

@@ -116,6 +116,9 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         model = Product
         fields = (
             "id",
+            "meta_title",
+            "meta_description",
+            "h1_tag",
             "name",
             "slug",
             "category",

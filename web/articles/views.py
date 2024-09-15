@@ -6,7 +6,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from web.articles.serializers import (ArticlesDetailsSerializer,
-                                      ArticlesListSerializer)
+                                      ArticlesListSerializer,
+                                      ArticlesPathListSerializer)
 from web.models.articles import Article
 
 
@@ -52,4 +53,22 @@ class ArticlesDetailsView(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
+class ArticlesPathListView(generics.ListAPIView):
+    serializer_class = ArticlesPathListSerializer
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="Retrieve a list of active articles path",
+        responses={200: ArticlesPathListSerializer(many=True)},
+    )
+    def get_queryset(self):
+        return Article.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        context = {"request": request}
+        serializer = self.get_serializer(queryset, many=True, context=context)
         return Response(serializer.data)
