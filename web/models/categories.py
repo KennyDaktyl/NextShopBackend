@@ -168,7 +168,7 @@ class Category(models.Model):
         descendants = self.get_descendants()
         for descendant in descendants:
             products.update(
-                descendant.products.filter(is_active=True)
+                descendant.products.filter(is_active=True, on_first_page=True)
             )
         return products
 
