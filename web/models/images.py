@@ -114,7 +114,10 @@ class Photo(models.Model):
         if self.pk:
             old_photo = Photo.objects.get(pk=self.pk)
             if old_photo.oryg_image != self.oryg_image:
-                delete_thumbnails(instance, instance_name)
+                self.thumbnails = {}
+                thumbs = Thumbnail.objects.filter(photo=self)
+                if thumbs:
+                    thumbs.delete()
             if old_photo.name != self.name:
                 self.slug = slugify(
                     self.name.replace("ł", "l").replace("Ł", "L")
