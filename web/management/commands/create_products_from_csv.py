@@ -30,7 +30,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         file_path = options["file_path"]  # Pobieramy nazwę pliku
         category_name = options["category_name"]  # Pobieramy nazwę kategorii
-
+ 
         default_brand = Brand.objects.get(name="Expres")
 
         # Wczytujemy dane z CSV
@@ -43,12 +43,7 @@ class Command(BaseCommand):
         df = data.replace({np.nan: None})
 
         # Znajdujemy kategorię lub tworzymy nową
-        category, created = Category.objects.get_or_create(name=category_name)
-
-        if created:
-            self.stdout.write(f"Created new category: {category_name}")
-        else:
-            self.stdout.write(f"Using existing category: {category_name}")
+        category = Category.objects.get_or_create(slug=category_name)
 
         # Tworzymy produkty
         for index, row in df.iterrows():
