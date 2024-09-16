@@ -43,6 +43,8 @@ class MenuItemsView(generics.RetrieveAPIView):
         ).data
         custom_response = {
             "name": category_data["name"],
+            "meta_title": category_data["meta_title"],
+            "meta_description": category_data["meta_description"],
             "item_label": category_data["item_label"],
             "slug": category_data["slug"],
             "description": category_data["description"],

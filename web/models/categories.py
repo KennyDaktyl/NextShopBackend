@@ -184,7 +184,7 @@ class Category(models.Model):
         descendants = set()
 
         def _get_children(category):
-            children = category.children.filter(is_active=True)
+            children = category.children.filter(is_active=True, on_first_page=True)
             for child in children:
                 descendants.add(child)
                 _get_children(child)
@@ -212,18 +212,6 @@ class Category(models.Model):
         return self.category_thumbnails.filter(
             width_expected=350, height_expected=350, main=True
         ).first()
-
-    def get_descendants(self):
-        descendants = set()
-
-        def _get_children(category):
-            children = category.children.filter(is_active=True)
-            for child in children:
-                descendants.add(child)
-                _get_children(child)
-
-        _get_children(self)
-        return descendants
 
     @property
     def full_path(self):
