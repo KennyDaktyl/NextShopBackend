@@ -327,7 +327,7 @@ class Product(models.Model):
 
         return self.product_thumbnails.filter(
             width_expected=650, height_expected=650, is_variant=False
-        ).order_by("id")
+        ).order_by("order")
 
     @property
     def variants(self):
