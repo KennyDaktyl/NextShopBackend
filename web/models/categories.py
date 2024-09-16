@@ -168,7 +168,7 @@ class Category(models.Model):
         descendants = self.get_descendants()
         for descendant in descendants:
             products.update(
-                descendant.products.filter(is_active=True, on_first_page=True)
+                descendant.products.filter(is_active=True)
             )
         return products
 
@@ -184,7 +184,7 @@ class Category(models.Model):
         descendants = set()
 
         def _get_children(category):
-            children = category.children.filter(is_active=True, on_first_page=True)
+            children = category.children.filter(is_active=True)
             for child in children:
                 descendants.add(child)
                 _get_children(child)
