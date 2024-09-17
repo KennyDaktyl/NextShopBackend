@@ -69,7 +69,7 @@ class Article(models.Model):
     class Meta:
         verbose_name = "Artykuł"
         verbose_name_plural = "Artykuły"
-        ordering = ["created_date"]
+        ordering = ["-created_date"]
 
     def save(self, *args, **kwargs):
         is_new_instance = not self.pk
