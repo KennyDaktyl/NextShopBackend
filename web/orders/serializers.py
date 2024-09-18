@@ -87,6 +87,7 @@ class OrderSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     delivery_method = DeliveriesSerializer()
     payment_method = PaymentMethodsSerializer()
+    invoice = InvoiceSerializer()
 
     class Meta:
         model = Order

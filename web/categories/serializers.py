@@ -47,7 +47,7 @@ class CategoryPathSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ("full_path",)
+        fields = ("full_path", "modified_date")
 
     def get_full_path(self, obj):
         return obj.get_full_path()

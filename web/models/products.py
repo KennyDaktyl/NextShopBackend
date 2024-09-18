@@ -95,6 +95,12 @@ class ProductOptionItem(models.Model):
 
 
 class Product(models.Model):
+    created_date = models.DateTimeField(
+        verbose_name="Data utworzenia", auto_now_add=True
+    )
+    modified_date = models.DateTimeField(
+        verbose_name="Data modyfikacji", auto_now=True
+    )
     meta_title = models.CharField(
         verbose_name="Meta title dla produktu",
         blank=True,

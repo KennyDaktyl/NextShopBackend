@@ -24,10 +24,10 @@ class FirstPageView(GenericAPIView):
             is_active=True, on_first_page=True
         ).prefetch_related(
             Prefetch(
-                "children", 
+                "children",
                 queryset=Category.objects.filter(is_active=True).order_by(
                     "order"
-                ),  
+                ),
             )
         )
         # Pobieranie aktywnych herosów

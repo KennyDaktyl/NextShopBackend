@@ -3,11 +3,13 @@ from decimal import Decimal
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import (GenericAPIView, ListAPIView,
                                      RetrieveAPIView)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from web.functions import send_email_order_status
 from web.models.deliveries import Delivery
@@ -92,6 +94,33 @@ class OrderDetailsView(RetrieveAPIView):
             return Order.objects.filter(client=user)
         else:
             return Order.objects.none()
+
+
+class OrderDetailsByUIDView(RetrieveAPIView):
+    serializer_class = OrderSerializer
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="Retrieve an order by UID",
+        responses={200: OrderSerializer()},
+    )
+    def get_queryset(self):
+        return Order.objects.all()
+
+    def get_object(self):
+        uid = self.kwargs.get("uid")
+        queryset = self.get_queryset()
+        return get_object_or_404(queryset, uid=uid)
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=HTTP_200_OK)
+        except Order.DoesNotExist:
+            return Response(
+                {"detail": "Order not found."}, status=HTTP_404_NOT_FOUND
+            )
 
 
 class UpdateOrderStatus(GenericAPIView):

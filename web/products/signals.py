@@ -66,7 +66,7 @@ def revalidate_product_cache_variant(sender, instance, **kwargs):
         tags = []
         main_products_tag = "products"
         tags.append(main_products_tag)
-        
+
         paths_tag = "products-path"
         tags.append(paths_tag)
 
