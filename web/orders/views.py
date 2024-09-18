@@ -133,7 +133,6 @@ class UpdateOrderStatus(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         order_uid = kwargs.get("uid")
-
         if not order_uid:
             return Response(
                 {"detail": "Order ID not provided."},
@@ -171,7 +170,10 @@ class UpdateOrderStatus(GenericAPIView):
             instance.save()
             send_email_order_status(instance)
         else:
-            instance.status = new_status
+            if new_status == 3 and instance.payment_method.payment_online and not instance.is_paid:
+                instance.status = 4
+            else:
+                instance.status = new_status
             instance.save()
 
         return Response(
