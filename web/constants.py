@@ -46,3 +46,7 @@ VARIANT_COLORS = (
     (11, _("Beżowy")),
     (12, _("Czarny")),
 )
+
+
+STATUS_FOR_SEND_EMAIL = [3, 5, 9, 12, 14]
+STATUS_TO_MAKE_INVOICE = [3, 5, 8, 9, 12, 13]

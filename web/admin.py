@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from weasyprint import HTML
 
 from web.models.accounts import Profile
+
 # from web.models.carts import Cart, CartItem
 from web.models.articles import Article
 from web.models.categories import Category
@@ -16,8 +17,16 @@ from web.models.images import Photo, Thumbnail
 from web.models.orders import Invoice, Order
 from web.models.payments import Payment
 from web.models.prices import PriceGroup, ProductPrice
-from web.models.products import (Brand, Material, Product, ProductOption,
-                                 ProductOptionItem, ProductVariant, Size, Tag)
+from web.models.products import (
+    Brand,
+    Material,
+    Product,
+    ProductOption,
+    ProductOptionItem,
+    ProductVariant,
+    Size,
+    Tag,
+)
 
 
 @admin.register(Hero)
@@ -278,6 +287,7 @@ class OrderAdmin(admin.ModelAdmin):
                     "uid",
                     "order_number",
                     "status",
+                    "prev_status",
                     "client",
                     "client_name",
                     "client_email",
