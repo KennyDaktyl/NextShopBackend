@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .views import (CreateOrderView, OrderDetailsView, OrderListView,
-                    UpdateOrderStatus)
+from .views import (CreateOrderView, OrderDetailsByUIDView, OrderDetailsView,
+                    OrderListView, UpdateOrderStatus)
 
 urlpatterns = [
     # Orders
@@ -12,5 +12,10 @@ urlpatterns = [
         "update-status/<slug:uid>/",
         UpdateOrderStatus.as_view(),
         name="update-order-status",
+    ),
+    path(
+        "by-uid/<slug:uid>/",
+        OrderDetailsByUIDView.as_view(),
+        name="order-details-by-uid",
     ),
 ]

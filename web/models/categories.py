@@ -9,6 +9,12 @@ from web.models.images import generate_thumbnails
 
 
 class Category(models.Model):
+    created_date = models.DateTimeField(
+        verbose_name="Data utworzenia", auto_now_add=True
+    )
+    modified_date = models.DateTimeField(
+        verbose_name="Data modyfikacji", auto_now=True
+    )
     meta_title = models.CharField(
         max_length=60, verbose_name="Meta title", blank=True, null=True
     )

@@ -134,6 +134,15 @@ class CategoryAdmin(admin.ModelAdmin):
     )
     search_fields = ("name",)
     list_filter = ["is_active", "is_main"]
+    readonly_fields = ("created_date", "modified_date")
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if "parent" in form.base_fields:
+            form.base_fields["parent"].queryset = (
+                Category.objects.all().order_by("name")
+            )
+        return form
 
 
 class ProductPriceInline(admin.TabularInline):
@@ -169,14 +178,15 @@ class ProductAdmin(admin.ModelAdmin):
         "on_first_page",
     )
     search_fields = ["name", "pk"]
-    list_filter = ["on_first_page"]
+    list_filter = ["on_first_page", "is_service"]
+    readonly_fields = ("created_date", "modified_date")
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         if "category" in form.base_fields:
             form.base_fields["category"].queryset = Category.objects.filter(
                 children__isnull=True
-            )
+            ).order_by("name")
         return form
 
 
@@ -249,6 +259,7 @@ class OrderAdmin(admin.ModelAdmin):
         "client__username",
         "client_email",
         "client_name",
+        "uid",
     )
     list_filter = (
         "status",
@@ -257,13 +268,14 @@ class OrderAdmin(admin.ModelAdmin):
         "delivery_method",
         "payment_method",
     )
-    readonly_fields = ("created_date", "updated_date")
+    readonly_fields = ("created_date", "updated_date", "uid")
 
     fieldsets = (
         (
             None,
             {
                 "fields": (
+                    "uid",
                     "order_number",
                     "status",
                     "client",
@@ -469,6 +481,8 @@ class ArticleAdmin(admin.ModelAdmin):
         "name",
         "category",
         "created_date",
+        "modified_date",
     )
     search_fields = ("name", "category__name")
     list_filter = ("created_date",)
+    readonly_fields = ("created_date", "modified_date")

@@ -98,7 +98,7 @@ class ProductsPathListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ("full_path",)
+        fields = ("full_path", "modified_date")
 
 
 class ProductDetailsSerializer(serializers.ModelSerializer):

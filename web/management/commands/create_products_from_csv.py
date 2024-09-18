@@ -30,7 +30,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         file_path = options["file_path"]  # Pobieramy nazwę pliku
         category_name = options["category_name"]  # Pobieramy nazwę kategorii
- 
+
         default_brand = Brand.objects.get(name="Expres")
 
         # Wczytujemy dane z CSV

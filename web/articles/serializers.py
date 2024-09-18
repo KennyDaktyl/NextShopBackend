@@ -49,4 +49,4 @@ class ArticlesDetailsSerializer(serializers.ModelSerializer):
 class ArticlesPathListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ("full_path",)
+        fields = ("full_path", "modified_date")

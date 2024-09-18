@@ -19,6 +19,9 @@ class Article(models.Model):
     created_date = models.DateTimeField(
         verbose_name="Data utworzenia", auto_now_add=True
     )
+    modified_date = models.DateTimeField(
+        verbose_name="Data modyfikacji", auto_now=True
+    )
     category = models.ForeignKey(
         "Category",
         on_delete=models.CASCADE,
