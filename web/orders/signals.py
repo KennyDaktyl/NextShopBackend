@@ -23,5 +23,5 @@ def oder_create_or_update_signals(sender, instance, created, **kwargs):
         if not instance.client.profile.send_emails:
             return
 
-    if instance.status in [3, 5, 9, 12, 14]:
+    if instance.status in [3, 5, 9, 12, 14] and instance.prev_status != instance.status:
         send_email_order_status(instance)
