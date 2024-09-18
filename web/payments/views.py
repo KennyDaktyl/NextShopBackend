@@ -70,10 +70,11 @@ class StripeWebhookView(View):
                     order.status = 3
                     order.is_paid = True
                     order.payment_date = timezone.now()
+                    order.save()
                     send_email_order_status(order)
                 else:
                     order.status = 4
-                order.save()
+                    order.save()
             except Order.DoesNotExist:
                 pass
 
