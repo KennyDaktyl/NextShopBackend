@@ -30,6 +30,9 @@ class Order(models.Model):
         verbose_name="Numer zamówienia", max_length=255
     )
     status = models.IntegerField("Status", choices=ORDER_STATUS, default=0)
+    prev_status = models.IntegerField(
+        "Poprzedni status", choices=ORDER_STATUS, default=0
+    )
     client = models.ForeignKey(
         "auth.User",
         verbose_name="Klient",
@@ -204,6 +207,8 @@ class Order(models.Model):
                 + "koszyk/zamowienie-szczegoly?order_uid="
                 + str(self.uid)
             )
+        if self.status != self.prev_status:
+            self.prev_status = self.status
         super().save(*args, **kwargs)
 
 

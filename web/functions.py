@@ -41,7 +41,7 @@ def send_activation_info_for_owner(title, message, user):
 
 
 def send_email_order_status(order):
-    subject = f"Zamówienie w Serwisie w Rybnej nr: {order.order_number} zakończono pomyślnie."
+    subject = f"Zamówienie w Serwisie w Rybnej nr: {order.order_number} Zmiana statusu"
     from_email = settings.EMAIL_HOST_USER
     to = [
         order.client_email,
