@@ -134,7 +134,17 @@ INSTALLED_APPS = [
     "drf_yasg",
     "djoser",
     "corsheaders",
+    "csp"
 ]
+
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "cdn.example.com",)
+CSP_STYLE_SRC = ("'self'", "fonts.googleapis.com",)
+CSP_IMG_SRC = ("'self'", "data:", "cdn.example.com",)
+CSP_FONT_SRC = ("'self'", "fonts.gstatic.com",)
+CSP_CONNECT_SRC = ("'self'", "api.example.com",)
+CSP_FRAME_SRC = ("'self'",)
+CSP_OBJECT_SRC = ("'none'",)
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -146,6 +156,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = "serwiswrybnej.urls"
