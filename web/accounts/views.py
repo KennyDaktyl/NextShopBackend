@@ -12,10 +12,15 @@ from rest_framework.response import Response
 from web.functions import send_activation_info_for_owner
 from web.models.accounts import Profile
 
-from .serializers import (LoginSerializer, UserAddressDataSerializer,
-                          UserAddressSerializer, UserFullDataSerializer,
-                          UserInvoiceDataSerializer, UserMainDataSerializer,
-                          UserPasswordSerializer)
+from .serializers import (
+    LoginSerializer,
+    UserAddressDataSerializer,
+    UserAddressSerializer,
+    UserFullDataSerializer,
+    UserInvoiceDataSerializer,
+    UserMainDataSerializer,
+    UserPasswordSerializer,
+)
 
 
 class UserLoginView(GenericAPIView):

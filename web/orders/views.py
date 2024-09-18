@@ -5,12 +5,16 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import (GenericAPIView, ListAPIView,
-                                     RetrieveAPIView)
+from rest_framework.generics import (
+    GenericAPIView,
+    ListAPIView,
+    RetrieveAPIView,
+)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
+from web.constants import STATUS_FOR_SEND_EMAIL
 from web.functions import send_email_order_status
 from web.models.deliveries import Delivery
 from web.models.orders import Order
@@ -157,8 +161,18 @@ class UpdateOrderStatus(GenericAPIView):
             instance.checkout_session_id = checkout_session_id
             instance.save()
 
-        instance.status = new_status
-        instance.save()
+        if (
+            new_status != instance.status
+            and not checkout_session_id
+            and instance.email_notification
+            and new_status in STATUS_FOR_SEND_EMAIL
+        ):
+            instance.status = new_status
+            instance.save()
+            send_email_order_status(instance)
+        else:
+            instance.status = new_status
+            instance.save()
 
         return Response(
             {"detail": "Order status updated successfully."},

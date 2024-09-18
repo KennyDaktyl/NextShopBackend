@@ -207,8 +207,10 @@ class Order(models.Model):
                 + "koszyk/zamowienie-szczegoly?order_uid="
                 + str(self.uid)
             )
-        if self.status != self.prev_status:
-            self.prev_status = self.status
+        if self.pk:
+            old_order_data = Order.objects.get(pk=self.pk)
+            if old_order_data.status != self.status:
+                self.prev_status = old_order_data.status
         super().save(*args, **kwargs)
 
 

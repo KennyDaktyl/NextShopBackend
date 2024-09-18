@@ -11,6 +11,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from web.functions import send_email_order_status
 from web.models.orders import Order
 from web.models.payments import Payment
 
@@ -69,6 +70,7 @@ class StripeWebhookView(View):
                     order.status = 3
                     order.is_paid = True
                     order.payment_date = timezone.now()
+                    send_email_order_status(order)
                 else:
                     order.status = 4
                 order.save()
