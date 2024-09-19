@@ -98,7 +98,7 @@ class Hero(models.Model):
     @property
     def image(self):
         return self.hero_thumbnails.filter(
-            width_expected=650, height_expected=650
+            width_expected=350, height_expected=350
         ).first()
 
 
