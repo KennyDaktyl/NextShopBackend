@@ -5,11 +5,8 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import (
-    GenericAPIView,
-    ListAPIView,
-    RetrieveAPIView,
-)
+from rest_framework.generics import (GenericAPIView, ListAPIView,
+                                     RetrieveAPIView)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
@@ -170,7 +167,11 @@ class UpdateOrderStatus(GenericAPIView):
             instance.save()
             send_email_order_status(instance)
         else:
-            if new_status == 3 and instance.payment_method.payment_online and not instance.is_paid:
+            if (
+                new_status == 3
+                and instance.payment_method.payment_online
+                and not instance.is_paid
+            ):
                 instance.status = 4
             else:
                 instance.status = new_status

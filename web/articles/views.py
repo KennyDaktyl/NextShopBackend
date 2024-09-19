@@ -5,11 +5,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from web.articles.serializers import (
-    ArticlesDetailsSerializer,
-    ArticlesListSerializer,
-    ArticlesPathListSerializer,
-)
+from web.articles.serializers import (ArticlesDetailsSerializer,
+                                      ArticlesListSerializer,
+                                      ArticlesPathListSerializer)
 from web.models.articles import Article
 
 

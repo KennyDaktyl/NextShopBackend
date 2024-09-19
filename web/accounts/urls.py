@@ -1,14 +1,9 @@
 from django.urls import path
 
-from .views import (
-    UserFullDataView,
-    UserLoginView,
-    UserProfileUpdateInvoiceDataView,
-    UserProfileUpdateView,
-    UserProfileView,
-    UserUpdateMainDataView,
-    UserUpdatePassowrdView,
-)
+from .views import (UserFullDataView, UserLoginView,
+                    UserProfileUpdateInvoiceDataView, UserProfileUpdateView,
+                    UserProfileView, UserUpdateMainDataView,
+                    UserUpdatePassowrdView)
 
 urlpatterns = [
     path("login/", UserLoginView.as_view(), name="login"),
