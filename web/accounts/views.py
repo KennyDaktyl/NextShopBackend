@@ -1,4 +1,6 @@
 from django.contrib.auth import authenticate, login
+from django.contrib.auth import get_user_model
+
 from djoser import signals
 from djoser.compat import get_user_email
 from djoser.conf import settings
@@ -17,6 +19,7 @@ from .serializers import (LoginSerializer, UserAddressDataSerializer,
                           UserInvoiceDataSerializer, UserMainDataSerializer,
                           UserPasswordSerializer)
 
+User = get_user_model()
 
 class UserLoginView(GenericAPIView):
     permission_classes = [AllowAny]
@@ -82,6 +85,28 @@ class UserRegistrationViewSet(UserViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(["post"], detail=False)
+    def reset_password(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data.get("email")
+        
+        try:
+            user = User.objects.get(username=email)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "Użytkownik z podanym adresem e-mail nie istnieje."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        context = {"user": user}
+        to = [get_user_email(user)]
+        settings.EMAIL.password_reset(self.request, context).send(to)
+
+        print("reset_password", user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
 
 class UserProfileView(GenericAPIView):
     serializer_class = UserAddressDataSerializer

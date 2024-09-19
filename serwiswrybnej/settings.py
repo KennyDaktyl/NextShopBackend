@@ -14,8 +14,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3010",
     "http://51.75.64.242:3010",
     "https://new-serwiswrybnej-api.resto-app.pl",
+    "https://serwiswrybnej.pl"
 ]
-CSRF_TRUSTED_ORIGINS = ["https://new-serwiswrybnej-api.resto-app.pl"]
+CSRF_TRUSTED_ORIGINS = ["https://new-serwiswrybnej-api.resto-app.pl", "https://serwiswrybnej.pl"]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_HEADERS = [
     "authorization",
@@ -83,12 +84,10 @@ else:
         "http://127.0.0.1:3010",
         "http://51.75.64.242:3010",
         "https://new-serwiswrybnej-api.resto-app.pl",
+        "https://serwiswrybnej.pl",
     ]
 
-    CSRF_TRUSTED_ORIGINS = ["https://new-serwiswrybnej-api.resto-app.pl"]
-
     CORS_ALLOW_CREDENTIALS = True
-
     CORS_ALLOW_HEADERS = [
         "authorization",
         "content-type",
