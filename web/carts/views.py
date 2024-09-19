@@ -11,13 +11,9 @@ from web.carts.cart import Cart
 from web.models.products import Product
 from web.models.products import ProductVariant as Variant
 
-from .serializers import (
-    CartCreateSerializer,
-    CartItemSerializer,
-    CartUpdateSerializer,
-    RemoveItemSerializer,
-    UpdateCartItemQtySerializer,
-)
+from .serializers import (CartCreateSerializer, CartItemSerializer,
+                          CartUpdateSerializer, RemoveItemSerializer,
+                          UpdateCartItemQtySerializer)
 
 
 class CartCreateView(GenericAPIView):

@@ -4,16 +4,12 @@ from urllib.parse import urljoin
 from django.conf import settings
 from rest_framework import serializers
 
-from web.deliveries.serializers import (
-    DeliveriesForOrderSerializer,
-    DeliveriesSerializer,
-)
+from web.deliveries.serializers import (DeliveriesForOrderSerializer,
+                                        DeliveriesSerializer)
 from web.images.serializers import ThumbnailSerializer
 from web.models.orders import Invoice, Order, OrderItem
-from web.payments.serializers import (
-    PaymentMethodsForOrdersSerializer,
-    PaymentMethodsSerializer,
-)
+from web.payments.serializers import (PaymentMethodsForOrdersSerializer,
+                                      PaymentMethodsSerializer)
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
