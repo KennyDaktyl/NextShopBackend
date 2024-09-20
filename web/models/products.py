@@ -242,7 +242,7 @@ class Product(models.Model):
             if old_product.name != self.name:
                 old_name = old_product.name
 
-            if self.oryg_image and old_image != self.oryg_image:
+            if not self.oryg_image or old_image != self.oryg_image:
                 thumbs = self.product_thumbnails.filter(
                     main=True, is_variant=False
                 )

@@ -67,7 +67,7 @@ class CategoriesPathListView(generics.ListAPIView):
         responses={200: CategorySerializer(many=True)},
     )
     def get_queryset(self):
-        return Category.objects.filter(is_active=True)
+        return Category.objects.filter(is_active=True).prefetch_related('parent')
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
