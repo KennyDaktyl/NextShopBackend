@@ -137,11 +137,12 @@
       <p>Michał Pielak Miktel<br>
         32-061 Rybna, ul. Wspólna 2<br>
         NIP: 678 280 52 34<br>
-        Numer konta: 21 1020 2906 0000 1702 0373 8333
+        Numer konta: <br>
+        21 1020 2906 0000 1702 0373 8333
       </p>
       <p><strong>Nabywca:</strong></p>
       <p>{{ order.company }}<br>
-        {{ order.invoice_post_code}} {{ order.invoice_city }}, {{ order.invoice_street }} {{ order.invoice_house_number }}{% if order.invoice_local_number %} / {{ order.invoice_local_number }}{% endif %}<br>
+        {{ order.invoice_postal_code}} {{ order.invoice_city }}, {{ order.invoice_street }} {{ order.invoice_house_number }}{% if order.invoice_local_number %} / {{ order.invoice_local_number }}{% endif %}<br>
         NIP: {{ order.nip }}
       </p>
       {% if order.company_payer %}

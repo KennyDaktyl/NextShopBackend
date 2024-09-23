@@ -23,19 +23,19 @@ class Profile(models.Model):
     )
     nip = models.CharField("NIP", max_length=56, blank=True, null=True)
     invoice_street = models.CharField(
-        "Ulica", max_length=100, blank=True, null=True
+        "Ulica na FV", max_length=100, blank=True, null=True
     )
     invoice_house_number = models.CharField(
-        "Numer domu", max_length=10, blank=True, null=True
+        "Numer domu na FV", max_length=10, blank=True, null=True
     )
     invoice_local_number = models.CharField(
-        "Numer lokalu", max_length=10, blank=True, null=True
+        "Numer lokalu  na FV", max_length=10, blank=True, null=True
     )
     invoice_city = models.CharField(
-        "Miasto", max_length=50, blank=True, null=True
+        "Miasto na FV", max_length=50, blank=True, null=True
     )
     invoice_postal_code = models.CharField(
-        "Kod pocztowy", max_length=6, blank=True, null=True
+        "Kod pocztowy na FV", max_length=6, blank=True, null=True
     )
 
     street = models.CharField("Ulica", max_length=100, blank=True, null=True)
