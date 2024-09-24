@@ -44,9 +44,15 @@ def send_email_order_status(order):
     subject = f"Zamówienie w Serwisie w Rybnej nr: {order.order_number} Zmiana statusu"
     from_email = settings.EMAIL_HOST_USER
     to = [
-        order.client_email,
         settings.EMAIL_HOST_USER,
     ]
+    
+    if order.client and order.client.send_emails:
+        to.append(order.client.email)
+    elif order.client is None:
+        to.append(order.client_email)
+    else:
+        pass
 
     try:
         cart_items = json.loads(order.cart_items)
