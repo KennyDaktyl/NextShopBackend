@@ -47,8 +47,8 @@ def send_email_order_status(order):
         settings.EMAIL_HOST_USER,
     ]
     
-    if order.client and order.client.send_emails:
-        to.append(order.client.email)
+    if order.client and order.client.profile.send_emails:
+        to.append(order.client_email)
     elif order.client is None:
         to.append(order.client_email)
     else:
