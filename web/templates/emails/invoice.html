@@ -142,7 +142,7 @@
       </p>
       <p><strong>Nabywca:</strong></p>
       <p>{{ order.company }}<br>
-        {{ order.invoice_postal_code}} {{ order.invoice_city }}, {{ order.invoice_street }} {{ order.invoice_house_number }}{% if order.invoice_local_number %} / {{ order.invoice_local_number }}{% endif %}<br>
+        {{ order.invoice_postal_code }} {{ order.invoice_city }}, {{ order.invoice_street }} {{ order.invoice_house_number }}{% if order.invoice_local_number %} / {{ order.invoice_local_number }}{% endif %}<br>
         NIP: {{ order.nip }}
       </p>
       {% if order.company_payer %}

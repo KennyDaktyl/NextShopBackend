@@ -441,7 +441,13 @@ class PhotoAdmin(admin.ModelAdmin):
         "category",
         "oryg_image",
     )
-    search_fields = ("name", "product__name", "category__name", "variant__name", "hero__name")
+    search_fields = (
+        "name",
+        "product__name",
+        "category__name",
+        "variant__name",
+        "hero__name",
+    )
 
 
 @admin.register(Brand)

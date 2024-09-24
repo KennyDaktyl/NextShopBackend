@@ -164,13 +164,19 @@ class Order(models.Model):
         verbose_name="Numer domu na FV", max_length=255, null=True, blank=True
     )
     invoice_local_number = models.CharField(
-        verbose_name="Numer lokalu na FV", max_length=255, null=True, blank=True
+        verbose_name="Numer lokalu na FV",
+        max_length=255,
+        null=True,
+        blank=True,
     )
     invoice_city = models.CharField(
         verbose_name="Miasto na FV", max_length=255, null=True, blank=True
     )
     invoice_postal_code = models.CharField(
-        verbose_name="Kod pocztowy na FV", max_length=255, null=True, blank=True
+        verbose_name="Kod pocztowy na FV",
+        max_length=255,
+        null=True,
+        blank=True,
     )
 
     email_notification = models.BooleanField(
