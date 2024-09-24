@@ -45,7 +45,7 @@ class ProfileAdmin(admin.ModelAdmin):
         "city",
         "postal_code",
     )
-    list_filter = ["user__is_active", "status", "newsletter"]
+    list_filter = ["user__is_active", "status", "newsletter", "send_emails"]
 
     # Definiowanie fieldsets dla sekcji
     fieldsets = (
@@ -58,6 +58,7 @@ class ProfileAdmin(admin.ModelAdmin):
                     "mobile",
                     "newsletter",
                     "price_group",
+                    "send_emails",
                 )
             },
         ),
@@ -267,6 +268,7 @@ class OrderAdmin(admin.ModelAdmin):
         "updated_date",
         "delivery_method",
         "payment_method",
+        "status",
     )
     readonly_fields = ("created_date", "updated_date", "uid")
 
