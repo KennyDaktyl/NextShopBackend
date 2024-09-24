@@ -14,9 +14,14 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3010",
     "http://51.75.64.242:3010",
     "https://new-serwiswrybnej-api.resto-app.pl",
-    "https://serwiswrybnej.pl"
+    "https://serwiswrybnej.pl",
+    "https://api-serwiswrybnej.pl",
 ]
-CSRF_TRUSTED_ORIGINS = ["https://new-serwiswrybnej-api.resto-app.pl", "https://serwiswrybnej.pl"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://new-serwiswrybnej-api.resto-app.pl",
+    "https://serwiswrybnej.pl",
+    "https://api-serwiswrybnej.pl",
+]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_HEADERS = [
     "authorization",
@@ -58,12 +63,13 @@ if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
     SESSION_COOKIE_SAMESITE = "Lax"
     CSRF_COOKIE_SECURE = False
 else:
-    SITE_URL = "https://new-serwiswrybnej-api.resto-app.pl/"
+    SITE_URL = "https://api-serwiswrybnej.pl"
     DEBUG = False
     ALLOWED_HOSTS = [
         "serwiswrybnej.pl",
         "51.75.64.242",
         "new-serwiswrybnej-api.resto-app.pl",
+        "https://api-serwiswrybnej.pl",
     ]
 
     SECURE_HSTS_SECONDS = 31536000
@@ -85,6 +91,7 @@ else:
         "http://51.75.64.242:3010",
         "https://new-serwiswrybnej-api.resto-app.pl",
         "https://serwiswrybnej.pl",
+        "https://api-serwiswrybnej.pl",
     ]
 
     CORS_ALLOW_CREDENTIALS = True
