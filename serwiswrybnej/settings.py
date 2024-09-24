@@ -69,7 +69,7 @@ else:
         "serwiswrybnej.pl",
         "51.75.64.242",
         "new-serwiswrybnej-api.resto-app.pl",
-        "https://api-serwiswrybnej.pl",
+        "api-serwiswrybnej.pl",
     ]
 
     SECURE_HSTS_SECONDS = 31536000
