@@ -18,6 +18,7 @@ from web.models.payments import Payment
 from web.models.prices import PriceGroup, ProductPrice
 from web.models.products import (Brand, Material, Product, ProductOption,
                                  ProductOptionItem, ProductVariant, Size, Tag)
+from web.utils import generate_invoice_for_order
 
 
 @admin.register(Hero)
@@ -360,40 +361,7 @@ from django.utils import timezone
 @admin.action(description="Utwórz fakturę")
 def create_invoice(modeladmin, request, queryset):
     for invoice in queryset:
-        invoice_number = (
-            invoice.override_number
-            if invoice.override_number
-            else f"faktura-{invoice.order.order_number}"
-        )
-        invoice_date = (
-            invoice.override_date
-            if invoice.override_date
-            else timezone.now().date()
-        )
-
-        pdf_filename = f"invoices/{invoice_number}.pdf"
-        pdf_path = os.path.join(settings.MEDIA_ROOT, pdf_filename)
-
-        pdf_dir = os.path.dirname(pdf_path)
-        if not os.path.exists(pdf_dir):
-            os.makedirs(pdf_dir)
-
-        html_content = render_to_string(
-            "emails/invoice.html",
-            {
-                "order": invoice.order,
-                "invoice_number": invoice_number,
-                "invoice_date": invoice_date,
-            },
-        )
-        html = HTML(string=html_content)
-        html.write_pdf(target=pdf_path)
-
-        invoice.number = invoice_number
-        invoice.override_number = invoice.override_number
-        invoice.override_date = invoice.override_date
-        invoice.pdf = pdf_filename
-        invoice.save()
+        generate_invoice_for_order(invoice.order)
 
 
 @admin.register(Invoice)
