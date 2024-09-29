@@ -11,17 +11,23 @@ def generate_invoice_for_order(order):
     current_month = timezone.now().strftime("%m")
     current_year = timezone.now().strftime("%Y")
 
-    last_invoice = Invoice.objects.filter(
-        created_time__year=timezone.now().year,
-        created_time__month=timezone.now().month,
-    ).exclude(number__isnull=True).first()
+    last_invoice = (
+        Invoice.objects.filter(
+            created_time__year=timezone.now().year,
+            created_time__month=timezone.now().month,
+        )
+        .exclude(number__isnull=True)
+        .first()
+    )
 
     if last_invoice:
-        last_invoice_number = last_invoice.override_number or last_invoice.number
+        last_invoice_number = (
+            last_invoice.override_number or last_invoice.number
+        )
         try:
-            last_number = int(last_invoice_number.split('-')[1])
+            last_number = int(last_invoice_number.split("-")[1])
         except (IndexError, ValueError) as e:
-            last_number = 0  
+            last_number = 0
         next_number = str(last_number + 1).zfill(5)
     else:
         next_number = "00001"
@@ -29,11 +35,11 @@ def generate_invoice_for_order(order):
     invoice_number = f"faktura-{next_number}-{current_month}-{current_year}"
 
     invoice, created = Invoice.objects.get_or_create(order=order)
-    
+
     if not invoice.override_number:
         invoice.number = invoice_number
     else:
-        invoice_number = invoice.override_number  
+        invoice_number = invoice.override_number
 
     invoice_date = invoice.override_date or timezone.now().date()
 
@@ -61,4 +67,3 @@ def generate_invoice_for_order(order):
     invoice.save()
 
     return invoice
-

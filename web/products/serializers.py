@@ -1,8 +1,16 @@
 from rest_framework import serializers
 
 from web.images.serializers import ThumbnailSerializer
-from web.models.products import (Brand, Category, Material, Product,
-                                 ProductOptionItem, ProductVariant, Size, Tag)
+from web.models.products import (
+    Brand,
+    Category,
+    Material,
+    Product,
+    ProductOptionItem,
+    ProductVariant,
+    Size,
+    Tag,
+)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -111,6 +119,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     size = SizeSerializer()
     color = serializers.SerializerMethodField()
     product_option = ProductOptionItemsSerializer()
+    free_delivery_threshold = serializers.FloatField()
+    free_delivery_threshold_passed = serializers.BooleanField()
 
     class Meta:
         model = Product
@@ -140,6 +150,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             "free_delivery",
             "full_path",
             "is_service",
+            "free_delivery_threshold",
+            "free_delivery_threshold_passed",
         )
 
     def get_color(self, obj):

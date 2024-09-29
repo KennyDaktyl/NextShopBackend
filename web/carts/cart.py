@@ -1,4 +1,6 @@
+from decimal import Decimal
 import uuid
+from django.conf import settings
 
 
 class Cart:
@@ -61,13 +63,18 @@ class Cart:
                 return
 
     def is_free_delivery(self):
+        has_free_delivery = False
         if self.get_items():
-            self.request.session["cart"]["free_delivery"] = any(
+            has_free_delivery = any(
                 item["free_delivery"] for item in self.get_items()
             )
-        else:
-            self.request.session["cart"]["free_delivery"] = False
-        return self.request.session["cart"]["free_delivery"]
+        if not has_free_delivery:
+            has_free_delivery = Decimal(self.get_total_price()) >= Decimal(
+                settings.FREE_DELIVERY_THRESHOLD
+            )
+        self.request.session["cart"]["free_delivery"] = has_free_delivery
+        self.save_session()
+        return has_free_delivery
 
     def get_id(self):
         return self.request.session["cart"]["id"]

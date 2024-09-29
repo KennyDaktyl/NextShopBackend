@@ -1,12 +1,9 @@
-import os
-
-from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
-from weasyprint import HTML
 
 from web.models.accounts import Profile
+
 # from web.models.carts import Cart, CartItem
 from web.models.articles import Article
 from web.models.categories import Category
@@ -16,8 +13,16 @@ from web.models.images import Photo, Thumbnail
 from web.models.orders import Invoice, Order
 from web.models.payments import Payment
 from web.models.prices import PriceGroup, ProductPrice
-from web.models.products import (Brand, Material, Product, ProductOption,
-                                 ProductOptionItem, ProductVariant, Size, Tag)
+from web.models.products import (
+    Brand,
+    Material,
+    Product,
+    ProductOption,
+    ProductOptionItem,
+    ProductVariant,
+    Size,
+    Tag,
+)
 from web.utils import generate_invoice_for_order
 
 
@@ -352,10 +357,6 @@ class OrderAdmin(admin.ModelAdmin):
         ),
         ("Timestamps", {"fields": ("created_date", "updated_date")}),
     )
-
-
-from django.template.loader import render_to_string
-from django.utils import timezone
 
 
 @admin.action(description="Utwórz fakturę")

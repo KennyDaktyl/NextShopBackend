@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
@@ -5,10 +6,14 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from web.carts.cart import Cart
 from web.models.products import Product
 
-from .serializers import (ProductDetailsSerializer, ProductListItemSerializer,
-                          ProductsPathListSerializer)
+from .serializers import (
+    ProductDetailsSerializer,
+    ProductListItemSerializer,
+    ProductsPathListSerializer,
+)
 
 
 class ProductPagination(PageNumberPagination):
@@ -67,7 +72,10 @@ class ProductDetailsView(generics.RetrieveAPIView):
     )
     def get(self, request, *args, **kwargs):
         try:
+            cart = Cart(request)
             product = Product.objects.get(slug=self.kwargs["slug"])
+            product.free_delivery_threshold = settings.FREE_DELIVERY_THRESHOLD
+            product.free_delivery_threshold_passed = cart.is_free_delivery()
             serializer = self.get_serializer(product)
             return Response(serializer.data)
         except Product.DoesNotExist:

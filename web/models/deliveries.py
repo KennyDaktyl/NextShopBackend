@@ -94,6 +94,11 @@ class Delivery(models.Model):
             )
         return ""
 
+    def get_delivery_price(self, is_free_delivery):
+        if is_free_delivery:
+            return self.price_promo, self.price_promo
+        return self.price, self.price_promo
+
 
 @receiver(models.signals.pre_save, sender=Delivery)
 def auto_delete_file_on_change(sender, instance, **kwargs):

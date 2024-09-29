@@ -267,6 +267,8 @@ if os.environ.get("ENVIRONMENT") in ["production", "staging", "dev"]:
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 STRIPE_ENDPOINT_SECRET = os.environ.get("STRIPE_ENDPOINT_SECRET")
 
+FREE_DELIVERY_THRESHOLD = 60.00
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
