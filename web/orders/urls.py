@@ -1,7 +1,12 @@
 from django.urls import path
 
-from .views import (CreateOrderView, OrderDetailsByUIDView, OrderDetailsView,
-                    OrderListView, UpdateOrderStatus)
+from .views import (
+    CreateOrderView,
+    OrderDetailsByUIDView,
+    OrderDetailsView,
+    OrderListView,
+    UpdateOrderStatus,
+)
 
 urlpatterns = [
     # Orders

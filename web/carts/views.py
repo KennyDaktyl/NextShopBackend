@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -11,9 +12,13 @@ from web.carts.cart import Cart
 from web.models.products import Product
 from web.models.products import ProductVariant as Variant
 
-from .serializers import (CartCreateSerializer, CartItemSerializer,
-                          CartUpdateSerializer, RemoveItemSerializer,
-                          UpdateCartItemQtySerializer)
+from .serializers import (
+    CartCreateSerializer,
+    CartItemSerializer,
+    CartUpdateSerializer,
+    RemoveItemSerializer,
+    UpdateCartItemQtySerializer,
+)
 
 
 class CartCreateView(GenericAPIView):
@@ -85,7 +90,8 @@ class CartCreateView(GenericAPIView):
             response = JsonResponse(
                 {
                     "cart_id": unique_cart_id,
-                    "free_delivery": product.free_delivery,
+                    "free_delivery": cart.is_free_delivery(),
+                    "free_delivery_treshold": settings.FREE_DELIVERY_THRESHOLD,
                 },
                 status=201,
             )
@@ -174,7 +180,11 @@ class CartUpdateView(GenericAPIView):
 
             cart.add_product(cart_item)
             return JsonResponse(
-                {"cart_id": cart_id, "free_delivery": product.free_delivery},
+                {
+                    "cart_id": cart_id,
+                    "free_delivery": product.free_delivery,
+                    "free_delivery_treshold": settings.FREE_DELIVERY_THRESHOLD,
+                },
                 status=200,
             )
         return JsonResponse(serializer.errors, status=400)
@@ -185,15 +195,28 @@ class GetCartItemsView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         cart = Cart(request)
-        cart_items = cart.get_items()
-        free_delivery = cart.is_free_delivery()
+        if cart:
+            cart_items = cart.get_items()
+            free_delivery = cart.is_free_delivery()
+            cart_items_serializer = CartItemSerializer(
+                cart_items, many=True, context={"request": request}
+            )
+            return JsonResponse(
+                {
+                    "cart_items": cart_items_serializer.data,
+                    "free_delivery": free_delivery,
+                    "free_delivery_treshold": settings.FREE_DELIVERY_THRESHOLD,
+                },
+                status=200,
+            )
         cart_items_serializer = CartItemSerializer(
-            cart_items, many=True, context={"request": request}
+            [], many=True, context={"request": request}
         )
         return JsonResponse(
             {
-                "cart_items": cart_items_serializer.data,
-                "free_delivery": free_delivery,
+                "cart_items": cart_items_serializer,
+                "free_delivery": False,
+                "free_delivery_treshold": settings.FREE_DELIVERY_THRESHOLD,
             },
             status=200,
         )

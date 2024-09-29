@@ -45,7 +45,7 @@ def revalidate_product_cache_thumbnail(sender, instance, **kwargs):
 
     if hasattr(instance, "_product_slug") and instance._product_slug:
         tags.append(f"product-{instance._product_slug}")
-        tags.append(f"products")
+        tags.append("products")
 
     if hasattr(instance, "_category_slug") and instance._category_slug:
         tags.append(f"products-{instance._category_slug}")

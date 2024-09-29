@@ -5,12 +5,16 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import (GenericAPIView, ListAPIView,
-                                     RetrieveAPIView)
+from rest_framework.generics import (
+    GenericAPIView,
+    ListAPIView,
+    RetrieveAPIView,
+)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
+from web.carts.cart import Cart
 from web.constants import STATUS_FOR_SEND_EMAIL
 from web.functions import send_email_order_status
 from web.models.deliveries import Delivery
@@ -48,10 +52,17 @@ class CreateOrderView(GenericAPIView):
         order_serializer = self.get_serializer(data=request.data)
 
         if order_serializer.is_valid():
+            cart = Cart(request)
+
             if delivery_method_id:
                 delivery_method = get_object_or_404(
                     Delivery, pk=delivery_method_id
                 )
+
+                is_free_delivery = cart.is_free_delivery() if cart else False
+                if is_free_delivery:
+                    delivery_method.price = delivery_method.price_promo
+
                 order_serializer.validated_data["delivery_method"] = (
                     delivery_method
                 )
@@ -71,9 +82,21 @@ class CreateOrderView(GenericAPIView):
             if request.user.is_authenticated:
                 order_serializer.validated_data["client"] = request.user
 
+            order_serializer.validated_data["amount"] = (
+                delivery_method.price
+                + payment_method.price
+                + Decimal(cart.get_total_price())
+            )
+            order_serializer.validated_data["delivery_price"] = (
+                delivery_method.price
+            )
+            order_serializer.validated_data["payment_price"] = (
+                payment_method.price
+            )
             order = Order.objects.create(
                 **order_serializer.validated_data,
             )
+
             return Response(
                 {"order_uid": order.uid}, status=status.HTTP_201_CREATED
             )
