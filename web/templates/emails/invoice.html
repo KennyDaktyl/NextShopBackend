@@ -197,6 +197,7 @@
         <td>{{ item.price|mul:item.quantity|floatformat:2 }}</td>
       </tr>
       {% endfor %}
+      {% if not order.delivery_method.in_store_pickup %}
       <tr>
         <td>{{ forloop.counter|add:"1" }}</td>
         <td>Usługa kurierska</td>
@@ -209,6 +210,7 @@
         <td>{{ order.delivery_price|vat_value|floatformat:2 }}</td>
         <td>{{ order.delivery_price|floatformat:2 }}</td>
       </tr>
+      {% endif %}
       {% if order.payment_price %}
       <tr>
         <td>{{ forloop.counter|add:"2" }}</td>

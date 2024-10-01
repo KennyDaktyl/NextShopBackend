@@ -71,6 +71,8 @@ class CreateOrderView(GenericAPIView):
                 payment_method = get_object_or_404(
                     Payment, pk=payment_method_id
                 )
+                if delivery_method.in_store_pickup:
+                    payment_method.price = payment_method.price_promo
                 order_serializer.validated_data["payment_method"] = (
                     payment_method
                 )

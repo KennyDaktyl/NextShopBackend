@@ -7,7 +7,7 @@ from weasyprint import HTML
 from web.models.orders import Invoice
 
 
-def generate_invoice_for_order(order):
+def generate_invoice_for_order(order, admin=False):
     current_month = timezone.now().strftime("%m")
     current_year = timezone.now().strftime("%Y")
 
@@ -20,19 +20,28 @@ def generate_invoice_for_order(order):
         .first()
     )
 
-    if last_invoice:
-        last_invoice_number = (
-            last_invoice.override_number or last_invoice.number
+    if admin:
+        invoice_number = (
+            order.invoice.override_number
+            if order.invoice.override_number
+            else order.invoice.number
         )
-        try:
-            last_number = int(last_invoice_number.split("-")[1])
-        except (IndexError, ValueError) as e:
-            last_number = 0
-        next_number = str(last_number + 1).zfill(5)
     else:
-        next_number = "00001"
+        if last_invoice:
+            last_invoice_number = (
+                last_invoice.override_number or last_invoice.number
+            )
+            try:
+                last_number = int(last_invoice_number.split("-")[1])
+            except (IndexError, ValueError) as e:
+                last_number = 0
+            next_number = str(last_number + 1).zfill(5)
+        else:
+            next_number = "00001"
 
-    invoice_number = f"faktura-{next_number}-{current_month}-{current_year}"
+        invoice_number = (
+            f"faktura-{next_number}-{current_month}-{current_year}"
+        )
 
     invoice, created = Invoice.objects.get_or_create(order=order)
 
