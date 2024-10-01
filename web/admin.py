@@ -362,7 +362,7 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.action(description="Utwórz fakturę")
 def create_invoice(modeladmin, request, queryset):
     for invoice in queryset:
-        generate_invoice_for_order(invoice.order)
+        generate_invoice_for_order(invoice.order, admin=True)
 
 
 @admin.register(Invoice)

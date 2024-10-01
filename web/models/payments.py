@@ -15,6 +15,12 @@ class Payment(models.Model):
     price = models.DecimalField(
         max_digits=10, verbose_name="Cena", decimal_places=2
     )
+    price_promo = models.DecimalField(
+        max_digits=10,
+        verbose_name="Cena promocyjna",
+        decimal_places=2,
+        default=0,
+    )
     payment_on_delivery = models.BooleanField(
         verbose_name="Czy to płatność przy odbiorze?", default=False
     )
