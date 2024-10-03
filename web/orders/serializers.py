@@ -100,7 +100,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class CreateOrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True)
-
+    make_invoice = serializers.BooleanField()
+    
     class Meta:
         model = Order
         exclude = ["created_date", "updated_date", "client", "status"]
