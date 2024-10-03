@@ -16,6 +16,7 @@ class PaymentMethodsSerializer(serializers.ModelSerializer):
             "price",
             "payment_on_delivery",
             "payment_online",
+            "bank_transfer",
         )
 
 

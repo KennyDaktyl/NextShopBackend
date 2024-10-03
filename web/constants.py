@@ -18,7 +18,7 @@ ORDER_STATUS = (
     (1, _("W trakcie płatności")),
     (2, _("Płatności anulowana")),
     (3, _("Opłacone")),
-    (4, _("Płatność trwa weryfikacja")),
+    (4, _("Trwa weryfikacja płatności")),
     (5, _("Do zapłaty")),
     (6, _("Płatność nieudana")),
     (7, _("Błąd płatności Stripe")),
