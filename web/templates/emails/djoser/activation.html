@@ -1,0 +1,28 @@
+{% load i18n %}
+
+{% block subject %}
+{% blocktrans %}Aktywacja konta na {{ site_name }}{% endblocktrans %}
+{% endblock subject %}
+
+{% block text_body %}
+{% blocktrans %}Otrzymujesz ten e-mail, ponieważ musisz dokończyć proces aktywacji konta na {{ site_name }}.{% endblocktrans %}
+
+{% trans "Proszę przejść do poniższej strony, aby aktywować konto:" %}
+{{ protocol }}://{{ domain }}/{{ url|safe }}
+
+{% trans "Dziękujemy za korzystanie z naszego serwisu!" %}
+
+{% blocktrans %}Zespół {{ site_name }}{% endblocktrans %}
+{% endblock text_body %}
+
+{% block html_body %}
+<p>{% blocktrans %}Otrzymujesz ten e-mail, ponieważ musisz dokończyć proces aktywacji konta na {{ site_name }}.{% endblocktrans %}</p>
+
+<p>{% trans "Proszę przejść do poniższej strony, aby aktywować konto:" %}</p>
+<p><a href="{{ protocol }}://{{ domain }}/{{ url|safe }}">{{ protocol }}://{{ domain }}/{{ url|safe }}</a></p>
+
+<p>{% trans "Dziękujemy za korzystanie z naszego serwisu!" %}</p>
+
+<p>{% blocktrans %}Zespół {{ site_name }}{% endblocktrans %}</p>
+
+{% endblock html_body %}

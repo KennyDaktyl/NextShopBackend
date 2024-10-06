@@ -1,0 +1,21 @@
+{% load i18n %}
+
+{% block subject %}
+{% blocktrans %}{{ site_name }} - Twoje konto zostało pomyślnie utworzone i aktywowane!{% endblocktrans %}
+{% endblock %}
+
+{% block text_body %}
+{% trans "Twoje konto zostało utworzone i jest gotowe do użycia!" %}
+
+{% trans "Dziękujemy za korzystanie z naszego serwisu!" %}
+
+{% blocktrans %}Zespół {{ site_name }}{% endblocktrans %}
+{% endblock text_body %}
+
+{% block html_body %}
+<p>{% trans "Twoje konto zostało utworzone i jest gotowe do użycia!" %}</p>
+
+<p>{% trans "Dziękujemy za korzystanie z naszego serwisu!" %}</p>
+
+<p>{% blocktrans %}Zespół {{ site_name }}{% endblocktrans %}</p>
+{% endblock html_body %}
