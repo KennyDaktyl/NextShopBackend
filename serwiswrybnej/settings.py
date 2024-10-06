@@ -141,6 +141,7 @@ INSTALLED_APPS = [
     "djoser",
     "corsheaders",
     "csp",
+    "anymail"
 ]
 
 CSP_DEFAULT_SRC = ("'self'",)
@@ -252,14 +253,22 @@ LANGUAGES = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+ANYMAIL = {
+    "MAILGUN_API_KEY": os.environ.get("MAILGUN_API_KEY"),
+    "MAILGUN_SENDER_DOMAIN": os.environ.get("MAILGUN_DOMAIN_NAME"),
+    "MAILGUN_API_URL": "https://api.eu.mailgun.net/v3",
+}
+
 EMAIL_USE_TLS = True
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
-EMAIL_HOST_USER = os.environ.get("EMAIL_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+# EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD")
+EMAIL_HOST_PASSWORD = os.environ.get("MAILGUN_API_KEY")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
 SERVER_EMAIL = os.environ.get("EMAIL_HOST")
 DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_USER")
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 if os.environ.get("ENVIRONMENT") in ["production", "staging", "dev"]:
     EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "").lower() == "false"
 
@@ -328,6 +337,13 @@ DJOSER = {
     },
     "EMAIL_ACTIVATION_SUBJECT": "Aktywacja konta w serwisie",
     "EMAIL_PASSWORD_RESET_SUBJECT": "Resetowanie hasła do konta",
+    'EMAIL': {
+        'activation': 'web.djoser_templates.ActivationEmail',
+        'confirmation': 'web.djoser_templates.ConfirmationEmail',
+        'password_changed_confirmation': 'web.djoser_templates.PasswordChangedConfirmationEmail',
+        'password_reset': 'web.djoser_templates.PasswordResetEmail',
+        
+    },
 }
 
 LOGGING = {
@@ -356,6 +372,10 @@ LOGGING = {
             "handlers": ["console", "file"],
             "level": "DEBUG",
             "propagate": False,
+        },
+        'django.core.mail.backends.smtp': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
         },
     },
 }

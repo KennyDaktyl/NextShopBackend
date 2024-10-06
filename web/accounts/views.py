@@ -65,6 +65,7 @@ class UserRegistrationViewSet(UserViewSet):
             f"Użytkownik: {user.username} został zarejestrowany w systemie"
         )
         send_activation_info_for_owner(email_title, email_message, user)
+        
 
     @action(["post"], detail=False)
     def activation(self, request, *args, **kwargs):
