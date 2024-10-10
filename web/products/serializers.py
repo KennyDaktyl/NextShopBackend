@@ -1,6 +1,7 @@
+from django.conf import settings
 from rest_framework import serializers
 
-from web.images.serializers import ThumbnailSerializer
+from web.images.serializers import ThumbnailSerializer, ThumbnailURLSerializer
 from web.models.products import (
     Brand,
     Category,
@@ -214,3 +215,64 @@ class ProductOnFirstPageSerializer(serializers.ModelSerializer):
             "show_variant_label",
             "full_path",
         )
+
+
+class ProductGoogleMerchantSerializer(serializers.ModelSerializer):
+    brand = serializers.CharField(source='brand.name', default='')
+    category = serializers.CharField(source='category.name', default='')
+    image = ThumbnailURLSerializer()
+    availability = serializers.SerializerMethodField()
+    condition = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
+    link = serializers.SerializerMethodField() 
+    google_product_category = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField() 
+    
+    class Meta:
+        model = Product
+        fields = (
+            'id',
+            'name',
+            'description',
+            'link',
+            'image',
+            'price',
+            'availability',
+            'condition',
+            'brand',
+            'category',
+            'google_product_category'
+        )
+    
+    def get_description(self, obj):
+        if obj.description:
+            return obj.description
+        else:
+            return "Produkt z kategorii " + obj.category.name
+        
+    def get_availability(self, obj):
+        return 'in stock' if obj.qty > 0 else 'out of stock'
+
+    def get_condition(self, obj):
+        return 'new'
+
+    def get_price(self, obj):
+        return f"{obj.current_price} PLN"
+    
+    def get_link(self, obj):
+        return f"{settings.DOMAIN}{obj.full_path}"
+    
+    def get_image(self, obj):
+        return obj.image.url
+    
+    def get_google_product_category(self, obj):
+        if not obj.google_product_category:
+            if 'klucz' in obj.name.lower():
+                return '852'  
+            elif 'pieczątka' in obj.name.lower():
+                return '6003' 
+            else:
+                return '852'  
+        else:
+            return obj.google_product_category
+        

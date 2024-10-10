@@ -98,20 +98,20 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class CreateOrderSerializer(serializers.ModelSerializer):
-    order_items = OrderItemSerializer(many=True)
-    make_invoice = serializers.BooleanField()
+# class CreateOrderSerializer(serializers.ModelSerializer):
+#     order_items = OrderItemSerializer(many=True)
+#     make_invoice = serializers.BooleanField()
     
-    class Meta:
-        model = Order
-        exclude = ["created_date", "updated_date", "client", "status"]
+#     class Meta:
+#         model = Order
+#         exclude = ["created_date", "updated_date", "client", "status"]
 
-    def create(self, validated_data):
-        order_items_data = validated_data.pop("order_items")
-        order = Order.objects.create(**validated_data)
-        for order_item_data in order_items_data:
-            OrderItem.objects.create(order=order, **order_item_data)
-        return order
+#     def create(self, validated_data):
+#         order_items_data = validated_data.pop("order_items")
+#         order = Order.objects.create(**validated_data)
+#         for order_item_data in order_items_data:
+#             OrderItem.objects.create(order=order, **order_item_data)
+#         return order
 
 
 class DecimalField(serializers.Field):

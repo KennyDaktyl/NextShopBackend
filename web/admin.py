@@ -10,7 +10,7 @@ from web.models.categories import Category
 from web.models.deliveries import Delivery
 from web.models.heros import Hero
 from web.models.images import Photo, Thumbnail
-from web.models.orders import Invoice, Order
+from web.models.orders import Invoice, Order, OrderItem
 from web.models.payments import Payment
 from web.models.prices import PriceGroup, ProductPrice
 from web.models.products import (
@@ -247,6 +247,21 @@ class PaymentAdmin(admin.ModelAdmin):
     list_filter = ("is_active",)
 
 
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "order",
+        "product",
+        "name",
+        "qty",
+        "price",
+        "discount",
+    )
+    search_fields = ("name", "order__order_number")
+    list_filter = ("order__created_date",)
+    
+    
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (

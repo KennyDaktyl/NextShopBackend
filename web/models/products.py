@@ -120,6 +120,12 @@ class Product(models.Model):
         db_index=True,
         related_name="products",
     )
+    google_product_category = models.CharField(
+        verbose_name="Kategoria produktu w Google Merchant",
+        max_length=255,
+        blank=True,
+        null=True,
+    )
     prev_category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,

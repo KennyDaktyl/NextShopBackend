@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db.models import Q
+from django.views.generic import TemplateView
+
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.pagination import PageNumberPagination
@@ -11,6 +13,7 @@ from web.models.products import Product
 
 from .serializers import (
     ProductDetailsSerializer,
+    ProductGoogleMerchantSerializer,
     ProductListItemSerializer,
     ProductsPathListSerializer,
 )
@@ -85,4 +88,21 @@ class ProductDetailsView(generics.RetrieveAPIView):
             )
 
 
+class ProductFeedXMLView(TemplateView):
+    template_name = "products/feed_google.xml"  # Ścieżka do Twojego szablonu XML
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        products = Product.objects.filter(is_active=True, is_service=False)
+        serializer = ProductGoogleMerchantSerializer(products, many=True, context={'request': self.request})
+        context['products'] = serializer.data
+        context['channel_title'] = 'Serwis w Rybnej'
+        context['channel_link'] = "https://serwiswrybnej.pl"
+        context['channel_description'] = 'Feed produktów w sklepie Serwis w Rybnej'
+        
+        return context
+
+
 products_paths_list = ProductsPathListView.as_view()
+products_feed_xml = ProductFeedXMLView.as_view()
