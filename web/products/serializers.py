@@ -1,6 +1,7 @@
 from django.conf import settings
 from rest_framework import serializers
 
+from django.db.models import Avg
 from web.images.serializers import ThumbnailSerializer, ThumbnailURLSerializer
 from web.models.products import (
     Brand,
@@ -8,6 +9,7 @@ from web.models.products import (
     Material,
     Product,
     ProductOptionItem,
+    ProductReview,
     ProductVariant,
     Size,
     Tag,
@@ -110,6 +112,14 @@ class ProductsPathListSerializer(serializers.ModelSerializer):
         fields = ("full_path", "modified_date")
 
 
+class ProductReviewSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()  # Możemy wyświetlać nazwę użytkownika lub e-mail
+
+    class Meta:
+        model = ProductReview
+        fields = ['user', 'rating', 'comment', 'created_at']
+        
+
 class ProductDetailsSerializer(serializers.ModelSerializer):
     images = ThumbnailSerializer(many=True)
     variants = ProductVariantSerializer(many=True)
@@ -122,7 +132,10 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     product_option = ProductOptionItemsSerializer()
     free_delivery_threshold = serializers.FloatField()
     free_delivery_threshold_passed = serializers.BooleanField()
-
+    average_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    reviews = ProductReviewSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Product
         fields = (
@@ -153,10 +166,22 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             "is_service",
             "free_delivery_threshold",
             "free_delivery_threshold_passed",
+            "average_rating",
+            "review_count",
+            "reviews",
         )
 
     def get_color(self, obj):
         return obj.get_color_display()
+    
+    def get_average_rating(self, obj):
+        reviews = obj.reviews.all()
+        if reviews.exists():
+            return round(reviews.aggregate(Avg('rating'))['rating__avg'], 1)
+        return 0
+
+    def get_review_count(self, obj):
+        return obj.reviews.count()
 
 
 class ProductListItemSerializer(serializers.ModelSerializer):
@@ -170,6 +195,9 @@ class ProductListItemSerializer(serializers.ModelSerializer):
     # full_image_url = serializers.SerializerMethodField()
     image = ThumbnailSerializer()
     variants = ProductListVariantSerializer(many=True)
+    average_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    reviews = ProductReviewSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
@@ -189,9 +217,21 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             "variant_label",
             "full_path",
             "is_service",
+            "average_rating",
+            "review_count",
+            "reviews",
         )
 
+    def get_average_rating(self, obj):
+        reviews = obj.reviews.all()
+        if reviews.exists():
+            return round(reviews.aggregate(Avg('rating'))['rating__avg'], 1)
+        return 0
 
+    def get_review_count(self, obj):
+        return obj.reviews.count()
+    
+    
 class ProductOnFirstPageSerializer(serializers.ModelSerializer):
     category = ProductCategorySerializer()
     current_price = serializers.DecimalField(
