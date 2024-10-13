@@ -1,8 +1,9 @@
 from rest_framework import serializers
+from django.db.models import Avg
 
 from web.images.serializers import ThumbnailSerializer
 from web.models.categories import Category
-from web.products.serializers import ProductOnFirstPageSerializer
+from web.products.serializers import ProductOnFirstPageSerializer, ProductReviewSerializer
 
 
 class CategorySerializer(serializers.ModelSerializer):

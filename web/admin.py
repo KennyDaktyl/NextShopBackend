@@ -19,6 +19,7 @@ from web.models.products import (
     Product,
     ProductOption,
     ProductOptionItem,
+    ProductReview,
     ProductVariant,
     Size,
     Tag,
@@ -479,3 +480,16 @@ class ArticleAdmin(admin.ModelAdmin):
     search_fields = ("name", "category__name")
     list_filter = ("created_date",)
     readonly_fields = ("created_date", "modified_date")
+
+
+@admin.register(ProductReview)
+class ProductReviewAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "product",
+        "user",
+        "rating",
+        "created_at",
+    )
+    search_fields = ("product__name", "user__username")
+    list_filter = ("created_at",)
