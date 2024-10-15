@@ -135,6 +135,8 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "name",
+        "meta_title",
+        "meta_description",
         "parent",
         "description",
         "is_active",
