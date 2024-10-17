@@ -313,15 +313,15 @@ class Product(models.Model):
     @property
     def min_price_last_30(self):
         thirty_days_ago = timezone.now() - timedelta(days=30)
-        current_price = self.current_price
+
         min_price_query = (
-            self.prices.filter(created_date__gte=thirty_days_ago)
-            .exclude(price=current_price)
+            self.prices.filter(
+                expired_date__gte=thirty_days_ago  
+            )
             .aggregate(min_price=Min("price"))["min_price"]
         )
-        return (
-            min_price_query if min_price_query is not None else current_price
-        )
+
+        return min_price_query if min_price_query is not None else self.current_price
 
     @property
     def images(self):

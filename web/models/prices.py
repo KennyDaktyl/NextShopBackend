@@ -18,12 +18,30 @@ class ProductPrice(models.Model):
         default=timezone.now,
         db_index=True,
     )
-
+    expired_date = models.DateTimeField(
+        verbose_name="Data wygaśnięcia ceny",
+        blank=True,
+        null=True,
+        db_index=True,
+    )
+    
     class Meta:
         verbose_name = "Cena produktu"
         verbose_name_plural = "Ceny produktów"
         ordering = ["-product__name", "-created_date"]
 
+    def save(self, *args, **kwargs):
+        if not self.pk:  
+            last_price = ProductPrice.objects.filter(
+                product=self.product, expired_date__isnull=True
+            ).order_by('-created_date').first()
+
+            if last_price:
+                last_price.expired_date = timezone.now()
+                last_price.save()
+
+        super().save(*args, **kwargs)
+    
     def __str__(self):
         return f"{self.product.name} - {self.price} zł"
 
