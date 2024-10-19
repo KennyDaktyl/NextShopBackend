@@ -116,6 +116,13 @@ class Category(models.Model):
         # Zapisujemy nową instancję kategorii
         super().save(*args, **kwargs)
 
+        if not self.oryg_image or old_image != self.oryg_image:
+            self.thumbnails = {}
+            thumbs = self.category_thumbnails.filter(
+                    main=True, order=1
+                )
+            if thumbs:
+                thumbs.delete()
         # Generujemy miniaturki tylko po zapisaniu nowej kategorii lub zmianie obrazu
         if old_image != self.oryg_image and self.oryg_image:
             self.thumbnails = generate_thumbnails(
