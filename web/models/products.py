@@ -477,9 +477,10 @@ class ProductVariant(models.Model):
 
 class ProductReview(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='reviews')
+    name = models.CharField(max_length=255, verbose_name="Imię", blank=True, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     rating = models.PositiveSmallIntegerField() 
-    comment = models.TextField(null=True, blank=True) 
+    message = models.TextField(null=True, blank=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
