@@ -67,7 +67,11 @@ pytz==2024.1
 PyYAML==6.0.1
 requests==2.32.3
 requests-oauthlib==2.0.0
+<<<<<<< Updated upstream
 sentry-sdk==2.14.0
+=======
+sentry-sdk==2.17.0
+>>>>>>> Stashed changes
 setuptools==70.0.0
 six==1.16.0
 social-auth-app-django==5.4.1

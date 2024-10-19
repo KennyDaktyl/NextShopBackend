@@ -191,6 +191,8 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ["on_first_page", "is_service"]
     readonly_fields = ("created_date", "modified_date")
 
+    autocomplete_fields = ['category', 'prev_category']
+
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         if "category" in form.base_fields:
