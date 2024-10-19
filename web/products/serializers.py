@@ -13,6 +13,7 @@ from web.models.products import (
     ProductVariant,
     Size,
     Tag,
+    ProductReview
 )
 
 
@@ -113,13 +114,20 @@ class ProductsPathListSerializer(serializers.ModelSerializer):
 
 
 class ProductReviewSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()  # Możemy wyświetlać nazwę użytkownika lub e-mail
-
+    name = serializers.CharField(max_length=255)
+    
     class Meta:
         model = ProductReview
-        fields = ['user', 'rating', 'comment', 'created_at']
-        
+        fields = ['id', 'product', 'name', 'user', 'rating', 'message', 'created_at', 'updated_at']
+        read_only_fields = ['name', 'user', 'created_at', 'updated_at']
 
+    def validate_rating(self, value):
+        """Walidacja dla oceny (rating) - musi być w zakresie od 1 do 5."""
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("Ocena musi być w zakresie od 1 do 5.")
+        return value
+    
+    
 class ProductDetailsSerializer(serializers.ModelSerializer):
     images = ThumbnailSerializer(many=True)
     variants = ProductVariantSerializer(many=True)
@@ -182,8 +190,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
 
     def get_review_count(self, obj):
         return obj.reviews.count()
-
-
+    
+    
 class ProductListItemSerializer(serializers.ModelSerializer):
     category = ProductCategorySerializer()
     current_price = serializers.DecimalField(
@@ -315,4 +323,6 @@ class ProductGoogleMerchantSerializer(serializers.ModelSerializer):
                 return '852'  
         else:
             return obj.google_product_category
-        
+
+
+

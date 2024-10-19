@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db.models import Q
 from django.views.generic import TemplateView
+from rest_framework.views import APIView
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
@@ -15,6 +16,7 @@ from .serializers import (
     ProductDetailsSerializer,
     ProductGoogleMerchantSerializer,
     ProductListItemSerializer,
+    ProductReviewSerializer,
     ProductsPathListSerializer,
 )
 
@@ -104,5 +106,17 @@ class ProductFeedXMLView(TemplateView):
         return context
 
 
+class ProductReviewCreateView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = ProductReviewSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=None)
+            return Response({"message": "Review sent successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
 products_paths_list = ProductsPathListView.as_view()
 products_feed_xml = ProductFeedXMLView.as_view()
+add_review = ProductReviewCreateView.as_view()
