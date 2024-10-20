@@ -5,9 +5,11 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from web.articles.serializers import ArticlesListSerializer
 from web.categories.serializers import CategoryListOnFirstPageSerializer
 from web.front.serializers import ContactEmailSerializer, HeroSerializer
 from web.functions import send_email_by_django
+from web.models.articles import Article
 from web.models.categories import Category
 from web.models.heros import Hero
 
@@ -41,8 +43,12 @@ class FirstPageView(GenericAPIView):
             heros, many=True, context={"request": request}
         ).data
 
+        articles = Article.objects.all().order_by("-created_date")[:3]
+        articles_serialized = ArticlesListSerializer(
+            articles, many=True, context={"request": request}
+        ).data
         return Response(
-            {"categories": categories_serialized, "heros": heros_serialized},
+            {"categories": categories_serialized, "heros": heros_serialized, "articles": articles_serialized},
             status=status.HTTP_200_OK,
         )
 
