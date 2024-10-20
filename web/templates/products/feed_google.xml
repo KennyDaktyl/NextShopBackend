@@ -18,6 +18,9 @@
       <g:brand>{{ product.brand }}</g:brand>
       <g:google_product_category>{{ product.google_product_category }}</g:google_product_category>
       <g:product_type>{{ product.category }}</g:product_type>
+
+      <g:pickup_method>buy</g:pickup_method>
+      <g:pickup_availability>available_for_pickup</g:pickup_availability>
     </item>
     {% endfor %}
   </channel>
