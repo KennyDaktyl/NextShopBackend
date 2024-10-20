@@ -314,13 +314,15 @@ class ProductGoogleMerchantSerializer(serializers.ModelSerializer):
         return obj.image.url
     
     def get_google_product_category(self, obj):
+        product_name = obj.name.lower()
         if not obj.google_product_category:
-            if 'klucz' in obj.name.lower():
-                return '852'  
-            elif 'pieczątka' in obj.name.lower():
-                return '6003' 
+            if 'klucz' in product_name:
+                return '5123'  # Kategoria dla kluczy
+            elif 'pieczątka' in product_name:
+                return '5278'  # Kategoria dla pieczątek
             else:
-                return '852'  
+                print(f"Domyślna kategoria dla: {obj.name}")  # Debugowanie
+                return None
         else:
             return obj.google_product_category
 
