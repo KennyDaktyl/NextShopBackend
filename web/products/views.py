@@ -99,7 +99,7 @@ class ProductFeedXMLView(TemplateView):
         products = Product.objects.filter(is_active=True, is_service=False)
         serializer = ProductGoogleMerchantSerializer(products, many=True, context={'request': self.request})
         context['products'] = serializer.data
-        context['channel_title'] = 'Serwis w Rybnej'
+        context['channel_title'] = 'Dorabianie Kluczy i Wyrób Pieczątek - Serwis w Rybnej | Naprawa Telefonów'
         context['channel_link'] = "https://serwiswrybnej.pl"
         context['channel_description'] = 'Feed produktów w sklepie Serwis w Rybnej'
         
