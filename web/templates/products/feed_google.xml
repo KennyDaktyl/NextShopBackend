@@ -12,7 +12,7 @@
       <g:description>{{ product.description }}</g:description>
       <g:link>{{ product.link }}</g:link>
       <g:image_link>{{ product.image.url }}</g:image_link>
-      <g:price>{{ product.price }} PLN</g:price>
+      <g:price>{{ product.price }}</g:price>
       <g:availability>{{ product.availability }}</g:availability>
       <g:condition>{{ product.condition }}</g:condition>
       <g:brand>{{ product.brand }}</g:brand>

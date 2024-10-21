@@ -306,7 +306,7 @@ class ProductGoogleMerchantSerializer(serializers.ModelSerializer):
         return 'new'
 
     def get_price(self, obj):
-        return f"{obj.current_price} PLN"
+        return f"{obj.current_price:.2f} PLN"
     
     def get_link(self, obj):
         return f"{settings.DOMAIN}{obj.full_path}"
