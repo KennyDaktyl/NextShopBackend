@@ -12,7 +12,7 @@
       <g:description>{{ product.description }}</g:description>
       <g:link>{{ product.link }}</g:link>
       <g:image_link>{{ product.image.url }}</g:image_link>
-      <g:price>{{ product.price }}</g:price>
+      <g:price>{{ product.price }} PLN</g:price>
       <g:availability>{{ product.availability }}</g:availability>
       <g:condition>{{ product.condition }}</g:condition>
       <g:brand>{{ product.brand }}</g:brand>
@@ -21,6 +21,17 @@
 
       <g:pickup_method>buy</g:pickup_method>
       <g:pickup_availability>available_for_pickup</g:pickup_availability>
+      <g:store_code>RYBNA01</g:store_code>
+      <g:quantity>{{ product.qty }}</g:quantity>
+
+      <g:location_id>RYBNA01</g:location_id>
+      <g:address>
+        <g:street_address>ul. Wspólna 2</g:street_address>
+        <g:city>Rybna</g:city>
+        <g:region>Małopolskie</g:region>
+        <g:postal_code>32-061</g:postal_code>
+        <g:country>Polska</g:country>
+      </g:address>
     </item>
     {% endfor %}
   </channel>
