@@ -285,6 +285,7 @@ class ProductGoogleMerchantSerializer(serializers.ModelSerializer):
             'link',
             'image',
             'price',
+            'qty',
             'availability',
             'condition',
             'brand',

@@ -18,12 +18,11 @@
       <g:brand>{{ product.brand }}</g:brand>
       <g:google_product_category>{{ product.google_product_category }}</g:google_product_category>
       <g:product_type>{{ product.category }}</g:product_type>
-
       <g:pickup_method>buy</g:pickup_method>
       <g:pickup_availability>available_for_pickup</g:pickup_availability>
+      <g:pickup_sla>same day</g:pickup_sla>
       <g:store_code>RYBNA01</g:store_code>
       <g:quantity>{{ product.qty }}</g:quantity>
-
       <g:location_id>RYBNA01</g:location_id>
       <g:address>
         <g:street_address>ul. Wspólna 2</g:street_address>
