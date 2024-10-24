@@ -16,6 +16,7 @@ from .serializers import (
     LoginSerializer,
     UserAddressDataSerializer,
     UserAddressSerializer,
+    UserDataSerializer,
     UserFullDataSerializer,
     UserInvoiceDataSerializer,
     UserMainDataSerializer,
@@ -115,6 +116,16 @@ class UserRegistrationViewSet(UserViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class UserDataView(GenericAPIView):
+    serializer_class = UserDataSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        serializer = UserDataSerializer(user)
+        return Response(serializer.data)
+    
+    
 class UserProfileView(GenericAPIView):
     serializer_class = UserAddressDataSerializer
     permission_classes = [IsAuthenticated]

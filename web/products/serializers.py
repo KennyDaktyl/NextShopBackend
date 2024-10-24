@@ -119,7 +119,7 @@ class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
         fields = ['id', 'product', 'name', 'user', 'rating', 'message', 'created_at', 'updated_at']
-        read_only_fields = ['name', 'user', 'created_at', 'updated_at']
+        read_only_fields = ['name', 'created_at', 'updated_at']
 
     def validate_rating(self, value):
         """Walidacja dla oceny (rating) - musi być w zakresie od 1 do 5."""

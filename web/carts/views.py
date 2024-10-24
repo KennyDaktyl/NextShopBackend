@@ -192,7 +192,7 @@ class CartUpdateView(GenericAPIView):
 
 class GetCartItemsView(GenericAPIView):
     permission_classes = [AllowAny]
-
+    
     def get(self, request, *args, **kwargs):
         cart = Cart(request)
         if cart:
