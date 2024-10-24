@@ -476,7 +476,7 @@ class ProductVariant(models.Model):
 
 
 class ProductReview(models.Model):
-    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='reviews')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='reviews', db_index=True)
     name = models.CharField(max_length=255, verbose_name="Imię", blank=True, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     rating = models.PositiveSmallIntegerField() 
@@ -485,6 +485,9 @@ class ProductReview(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        indexes = [
+            models.Index(fields=['product']),
+        ]
         unique_together = ('product', 'user') 
         verbose_name = "Opinia o produkcie"
         verbose_name_plural = "Opinie o produkcie"
