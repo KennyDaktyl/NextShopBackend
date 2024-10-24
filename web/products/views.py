@@ -66,7 +66,9 @@ class ProductsPathListView(generics.ListAPIView):
 
 
 class ProductDetailsView(generics.RetrieveAPIView):
-    queryset = Product.objects.filter(is_active=True)
+    queryset = Product.objects.filter(is_active=True).prefetch_related(
+        'reviews', 'variants', 'category', 'tags', 'brand'
+    ).select_related('material', 'size')
     serializer_class = ProductDetailsSerializer
     permission_classes = [AllowAny]
     lookup_field = "slug"
@@ -78,9 +80,11 @@ class ProductDetailsView(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         try:
             cart = Cart(request)
-            product = Product.objects.get(slug=self.kwargs["slug"])
+            product = self.get_object() 
+            
             product.free_delivery_threshold = settings.FREE_DELIVERY_THRESHOLD
             product.free_delivery_threshold_passed = cart.is_free_delivery()
+            
             serializer = self.get_serializer(product)
             return Response(serializer.data)
         except Product.DoesNotExist:
@@ -88,6 +92,7 @@ class ProductDetailsView(generics.RetrieveAPIView):
                 {"message": "Product not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
 
 
 class ProductFeedXMLView(TemplateView):
