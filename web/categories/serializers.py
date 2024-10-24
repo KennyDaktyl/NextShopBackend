@@ -6,11 +6,35 @@ from web.models.categories import Category
 from web.products.serializers import ProductOnFirstPageSerializer, ProductReviewSerializer
 
 
-class CategorySerializer(serializers.ModelSerializer):
+
+class CategoryListingSerializer(serializers.ModelSerializer):
     is_parent = serializers.SerializerMethodField()
     full_path = serializers.SerializerMethodField()
-    back_link = serializers.SerializerMethodField()
     image = ThumbnailSerializer()
+
+    class Meta:
+        model = Category
+        fields = (
+            "id",
+            "name",
+            "item_label",
+            "full_path",
+            "image",
+            "is_parent",
+            "products_count",
+            "has_children",
+        )
+
+    def get_full_path(self, obj):
+        return obj.get_full_path()
+
+    def get_is_parent(self, obj):
+        return obj.children.exists()
+    
+    
+class CategorySerializer(CategoryListingSerializer):
+   
+    back_link = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
@@ -32,12 +56,6 @@ class CategorySerializer(serializers.ModelSerializer):
             "back_link",
             "image",
         )
-
-    def get_is_parent(self, obj):
-        return obj.children.exists()
-
-    def get_full_path(self, obj):
-        return obj.get_full_path()
 
     def get_back_link(self, obj):
         return obj.get_back_link()
