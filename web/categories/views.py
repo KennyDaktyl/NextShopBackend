@@ -10,6 +10,7 @@ from web.products.serializers import ProductListItemSerializer
 from web.products.views import ProductPagination
 
 from .serializers import (
+    CategoryListingSerializer,
     CategoryMetaDataSerializer,
     CategoryPathSerializer,
     CategorySerializer,
@@ -42,9 +43,14 @@ class MenuItemsView(generics.RetrieveAPIView):
         )
         context = {"request": request}
         category_data = CategorySerializer(category, context=context).data
-        subcategories_data = CategorySerializer(
-            subcategories, many=True, context=context
-        ).data
+        if category_data["has_children"]:
+            subcategories_data = CategoryListingSerializer(
+                subcategories, many=True, context=context
+            ).data
+        else:
+            subcategories_data = CategorySerializer(
+                subcategories, many=True, context=context
+            ).data
         custom_response = {
             "name": category_data["name"],
             "meta_title": category_data["meta_title"],
