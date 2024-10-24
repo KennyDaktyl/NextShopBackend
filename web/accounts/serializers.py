@@ -70,6 +70,19 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         fields = ("username", "email", "password", "profile")
 
 
+class UserDataSerializer(BaseUserCreateSerializer):
+
+    class Meta(BaseUserCreateSerializer.Meta):
+        model = User
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+        ]
+        
+        
 class UserAddressDataSerializer(BaseUserCreateSerializer):
     profile = ProfileSerializer()
 

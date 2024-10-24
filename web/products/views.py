@@ -116,8 +116,9 @@ class ProductReviewCreateView(APIView):
 
     def post(self, request):
         serializer = ProductReviewSerializer(data=request.data)
+        
         if serializer.is_valid():
-            serializer.save(user=None)
+            serializer.save()
             return Response({"message": "Review sent successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
