@@ -21,9 +21,9 @@
       <g:pickup_method>buy</g:pickup_method>
       <g:pickup_availability>available_for_pickup</g:pickup_availability>
       <g:pickup_sla>same day</g:pickup_sla>
-      <g:store_code>RYBNA01</g:store_code>
+      <g:store_code>14210310070508145763</g:store_code>
       <g:quantity>{{ product.qty }}</g:quantity>
-      <g:location_id>RYBNA01</g:location_id>
+      <g:location_id>14210310070508145763</g:location_id>
       <g:address>
         <g:street_address>ul. Wspólna 2</g:street_address>
         <g:city>Rybna</g:city>
