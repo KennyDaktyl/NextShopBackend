@@ -78,7 +78,7 @@ class CreateOrderView(GenericAPIView):
                 )
 
             order_serializer.validated_data["cart_items"] = json.dumps(
-                request.data["cart_items"]
+                cart.get_items()
             )
 
             if request.user.is_authenticated:
@@ -89,6 +89,7 @@ class CreateOrderView(GenericAPIView):
                 + payment_method.price
                 + Decimal(cart.get_total_price())
             )
+            order_serializer.validated_data["cart_items_price"] = Decimal(cart.get_total_price())
             order_serializer.validated_data["delivery_price"] = (
                 delivery_method.price
             )
