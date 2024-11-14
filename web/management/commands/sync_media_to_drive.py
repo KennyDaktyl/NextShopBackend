@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         folder_path = settings.MEDIA_ROOT
-        i = 0
+
         if not os.path.isdir(folder_path):
             self.stdout.write(self.style.ERROR(f'Folder {folder_path} nie istnieje'))
             return
@@ -33,9 +33,13 @@ class Command(BaseCommand):
             drive_media_folder_id = self.get_or_create_drive_folder(service, 'media', settings.GOOGLE_DRIVE_FOLDER_ID)
             self.delete_drive_folder(service, drive_media_folder_id)
 
+            # Ponownie twórz folder 'media' przed rozpoczęciem przesyłania plików
+            self.stdout.write("Tworzenie nowego folderu 'media' na Google Drive...")
+            drive_media_folder_id = self.create_drive_folder(service, 'media', settings.GOOGLE_DRIVE_FOLDER_ID)
+
             # Przesyłanie całego lokalnego katalogu 'media' na Google Drive
             self.stdout.write("Przesyłanie lokalnego katalogu 'media' na Google Drive...")
-            self.upload_folder(service, folder_path, drive_media_folder_id, i)
+            self.upload_folder(service, folder_path, drive_media_folder_id)
 
             self.stdout.write(self.style.SUCCESS("Katalog 'media' został zaktualizowany na Google Drive"))
 
@@ -53,13 +57,7 @@ class Command(BaseCommand):
         if folders:
             return folders[0]['id']
         else:
-            file_metadata = {
-                'name': folder_name,
-                'mimeType': 'application/vnd.google-apps.folder',
-                'parents': [parent_id] if parent_id else []
-            }
-            folder = service.files().create(body=file_metadata, fields='id').execute()
-            return folder['id']
+            return self.create_drive_folder(service, folder_name, parent_id)
 
     def delete_drive_folder(self, service, folder_id):
         """Usuwa cały folder na Google Drive."""
@@ -72,7 +70,18 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(self.style.ERROR(f"Błąd podczas usuwania folderu: {error}"))
 
-    def upload_folder(self, service, folder_path, parent_id, i=0):
+    def create_drive_folder(self, service, folder_name, parent_id=None):
+        """Tworzy nowy folder na Google Drive."""
+        file_metadata = {
+            'name': folder_name,
+            'mimeType': 'application/vnd.google-apps.folder',
+            'parents': [parent_id] if parent_id else []
+        }
+        folder = service.files().create(body=file_metadata, fields='id').execute()
+        self.stdout.write(self.style.SUCCESS(f"Utworzono nowy folder '{folder_name}' na Google Drive"))
+        return folder['id']
+
+    def upload_folder(self, service, folder_path, parent_id):
         """Rekursywnie przesyła lokalny folder na Google Drive."""
         for root, dirs, files in os.walk(folder_path):
             relative_path = os.path.relpath(root, folder_path)
@@ -86,8 +95,8 @@ class Command(BaseCommand):
             # Przesyłanie plików w aktualnym folderze
             for file_name in files:
                 file_path = os.path.join(root, file_name)
-                self.upload_file(service, file_path, folder_id, i)
-                i += 1
+                self.upload_file(service, file_path, folder_id)
+
             # Dodanie opóźnienia po każdym katalogu
             time.sleep(self.OPERATION_DELAY)
 
@@ -102,17 +111,7 @@ class Command(BaseCommand):
         else:
             return self.create_drive_folder(service, folder_name, parent_id)
 
-    def create_drive_folder(self, service, folder_name, parent_id=None):
-        """Tworzy nowy folder na Google Drive."""
-        file_metadata = {
-            'name': folder_name,
-            'mimeType': 'application/vnd.google-apps.folder',
-            'parents': [parent_id] if parent_id else []
-        }
-        folder = service.files().create(body=file_metadata, fields='id').execute()
-        return folder['id']
-
-    def upload_file(self, service, file_path, parent_id, i):
+    def upload_file(self, service, file_path, parent_id):
         """Przesyła pojedynczy plik do określonego folderu na Google Drive z obsługą ponawiania prób."""
         file_name = os.path.basename(file_path)
         file_metadata = {
@@ -124,16 +123,17 @@ class Command(BaseCommand):
         for attempt in range(self.MAX_RETRIES):
             try:
                 service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-                self.stdout.write(self.style.SUCCESS(f"Przesłano '{file_name}' na Google Drive numer iteracji: {i}"))
+                self.stdout.write(self.style.SUCCESS(f"Przesłano '{file_name}' na Google Drive"))
                 time.sleep(self.OPERATION_DELAY)  # Opóźnienie między przesyłaniem plików
                 return
             except HttpError as error:
                 if error.resp.status in [500, 502, 503, 504, 429]:
                     self.stdout.write(self.style.WARNING(f"Błąd API {error.resp.status}. Ponawiam próbę dla '{file_name}'..."))
                     time.sleep(self.RETRY_DELAY)
-                elif error.resp.status == 302:
-                    self.stdout.write(self.style.WARNING(f"Błąd przekierowania dla '{file_name}'. Ponawiam próbę..."))
+                elif error.resp.status == 404:
+                    self.stdout.write(self.style.ERROR(f"Błąd 404 (nie znaleziono pliku) dla '{file_name}'. Sprawdzam folder..."))
                     time.sleep(self.RETRY_DELAY)
+                    parent_id = self.get_or_create_drive_folder(service, 'media', settings.GOOGLE_DRIVE_FOLDER_ID)
                 else:
                     self.stdout.write(self.style.ERROR(f"Nieudana próba przesłania '{file_name}': {error}"))
                     break
