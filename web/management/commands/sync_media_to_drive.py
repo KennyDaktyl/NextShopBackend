@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
             # Przesyłanie całego lokalnego katalogu 'media' na Google Drive
             self.stdout.write("Przesyłanie lokalnego katalogu 'media' na Google Drive...")
-            self.upload_folder(service, folder_path, drive_media_folder_id)
+            self.upload_folder(service, folder_path, drive_media_folder_id, i)
 
             self.stdout.write(self.style.SUCCESS("Katalog 'media' został zaktualizowany na Google Drive"))
 
@@ -72,7 +72,7 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(self.style.ERROR(f"Błąd podczas usuwania folderu: {error}"))
 
-    def upload_folder(self, service, folder_path, parent_id, i):
+    def upload_folder(self, service, folder_path, parent_id, i=0):
         """Rekursywnie przesyła lokalny folder na Google Drive."""
         for root, dirs, files in os.walk(folder_path):
             relative_path = os.path.relpath(root, folder_path)
@@ -88,7 +88,6 @@ class Command(BaseCommand):
                 file_path = os.path.join(root, file_name)
                 self.upload_file(service, file_path, folder_id, i)
                 i += 1
-
             # Dodanie opóźnienia po każdym katalogu
             time.sleep(self.OPERATION_DELAY)
 
