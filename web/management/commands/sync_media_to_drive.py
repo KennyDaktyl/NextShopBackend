@@ -12,6 +12,7 @@ class Command(BaseCommand):
 
     MAX_RETRIES = 3  # Maksymalna liczba prób dla zapytań do Google Drive API
     RETRY_DELAY = 2  # Czas oczekiwania między ponownymi próbami (w sekundach)
+    OPERATION_DELAY = 1  # Opóźnienie między operacjami przesyłania plików (w sekundach)
 
     def handle(self, *args, **kwargs):
         folder_path = settings.MEDIA_ROOT
@@ -27,10 +28,10 @@ class Command(BaseCommand):
             )
             service = build('drive', 'v3', credentials=credentials)
 
-            # Usuń zawartość folderu 'media' na Google Drive
-            self.stdout.write("Usuwanie zawartości folderu 'media' na Google Drive...")
+            # Usuń cały folder 'media' na Google Drive
+            self.stdout.write("Usuwanie folderu 'media' na Google Drive...")
             drive_media_folder_id = self.get_or_create_drive_folder(service, 'media', settings.GOOGLE_DRIVE_FOLDER_ID)
-            self.delete_all_in_drive_folder(service, drive_media_folder_id)
+            self.delete_drive_folder(service, drive_media_folder_id)
 
             # Przesyłanie całego lokalnego katalogu 'media' na Google Drive
             self.stdout.write("Przesyłanie lokalnego katalogu 'media' na Google Drive...")
@@ -60,32 +61,16 @@ class Command(BaseCommand):
             folder = service.files().create(body=file_metadata, fields='id').execute()
             return folder['id']
 
-    def delete_all_in_drive_folder(self, service, folder_id):
-        """Usuwa wszystkie pliki i foldery w podanym folderze na Google Drive."""
-        query = f"'{folder_id}' in parents"
-        while True:
-            try:
-                results = service.files().list(q=query, spaces='drive', fields='files(id)').execute()
-                files = results.get('files', [])
-                if not files:
-                    break  # Jeśli folder jest pusty, kończymy
-
-                for file in files:
-                    for attempt in range(self.MAX_RETRIES):
-                        try:
-                            service.files().delete(fileId=file['id']).execute()
-                            self.stdout.write(self.style.SUCCESS(f"Usunięto plik o ID '{file['id']}' z Google Drive"))
-                            break
-                        except HttpError as error:
-                            if error.resp.status in [500, 502, 503, 504]:
-                                # Obsługujemy błędy serwera z ponowną próbą
-                                self.stdout.write(self.style.WARNING(f"Błąd API {error.resp.status}. Ponawiam próbę..."))
-                                time.sleep(self.RETRY_DELAY)
-                            else:
-                                raise
-            except HttpError as error:
-                self.stdout.write(self.style.ERROR(f"Błąd podczas usuwania zawartości folderu: {error}"))
-                break
+    def delete_drive_folder(self, service, folder_id):
+        """Usuwa cały folder na Google Drive."""
+        try:
+            service.files().delete(fileId=folder_id).execute()
+            self.stdout.write(self.style.SUCCESS(f"Usunięto folder 'media' na Google Drive"))
+        except HttpError as error:
+            if error.resp.status == 404:
+                self.stdout.write(self.style.WARNING("Folder 'media' już został usunięty"))
+            else:
+                self.stdout.write(self.style.ERROR(f"Błąd podczas usuwania folderu: {error}"))
 
     def upload_folder(self, service, folder_path, parent_id):
         """Rekursywnie przesyła lokalny folder na Google Drive."""
@@ -102,6 +87,9 @@ class Command(BaseCommand):
             for file_name in files:
                 file_path = os.path.join(root, file_name)
                 self.upload_file(service, file_path, folder_id)
+
+            # Dodanie opóźnienia po każdym katalogu
+            time.sleep(self.OPERATION_DELAY)
 
     def get_or_create_subfolder(self, service, folder_name, parent_id):
         """Tworzy lub pobiera istniejący podfolder na Google Drive."""
@@ -137,10 +125,14 @@ class Command(BaseCommand):
             try:
                 service.files().create(body=file_metadata, media_body=media, fields='id').execute()
                 self.stdout.write(self.style.SUCCESS(f"Przesłano '{file_name}' na Google Drive"))
+                time.sleep(self.OPERATION_DELAY)  # Opóźnienie między przesyłaniem plików
                 return
             except HttpError as error:
-                if error.resp.status in [500, 502, 503, 504]:
+                if error.resp.status in [500, 502, 503, 504, 429]:
                     self.stdout.write(self.style.WARNING(f"Błąd API {error.resp.status}. Ponawiam próbę dla '{file_name}'..."))
+                    time.sleep(self.RETRY_DELAY)
+                elif error.resp.status == 302:
+                    self.stdout.write(self.style.WARNING(f"Błąd przekierowania dla '{file_name}'. Ponawiam próbę..."))
                     time.sleep(self.RETRY_DELAY)
                 else:
                     self.stdout.write(self.style.ERROR(f"Nieudana próba przesłania '{file_name}': {error}"))
