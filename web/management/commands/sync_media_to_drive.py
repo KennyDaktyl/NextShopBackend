@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         folder_path = settings.MEDIA_ROOT
-
+        i = 0
         if not os.path.isdir(folder_path):
             self.stdout.write(self.style.ERROR(f'Folder {folder_path} nie istnieje'))
             return
@@ -112,7 +112,7 @@ class Command(BaseCommand):
         folder = service.files().create(body=file_metadata, fields='id').execute()
         return folder['id']
 
-    def upload_file(self, service, file_path, parent_id):
+    def upload_file(self, service, file_path, parent_id, i):
         """Przesyła pojedynczy plik do określonego folderu na Google Drive z obsługą ponawiania prób."""
         file_name = os.path.basename(file_path)
         file_metadata = {
@@ -124,8 +124,9 @@ class Command(BaseCommand):
         for attempt in range(self.MAX_RETRIES):
             try:
                 service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-                self.stdout.write(self.style.SUCCESS(f"Przesłano '{file_name}' na Google Drive"))
+                self.stdout.write(self.style.SUCCESS(f"Przesłano '{file_name}' na Google Drive numer iteracji: {i}"))
                 time.sleep(self.OPERATION_DELAY)  # Opóźnienie między przesyłaniem plików
+                i += 1
                 return
             except HttpError as error:
                 if error.resp.status in [500, 502, 503, 504, 429]:
