@@ -72,7 +72,7 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(self.style.ERROR(f"Błąd podczas usuwania folderu: {error}"))
 
-    def upload_folder(self, service, folder_path, parent_id):
+    def upload_folder(self, service, folder_path, parent_id, i):
         """Rekursywnie przesyła lokalny folder na Google Drive."""
         for root, dirs, files in os.walk(folder_path):
             relative_path = os.path.relpath(root, folder_path)
@@ -86,7 +86,8 @@ class Command(BaseCommand):
             # Przesyłanie plików w aktualnym folderze
             for file_name in files:
                 file_path = os.path.join(root, file_name)
-                self.upload_file(service, file_path, folder_id)
+                self.upload_file(service, file_path, folder_id, i)
+                i += 1
 
             # Dodanie opóźnienia po każdym katalogu
             time.sleep(self.OPERATION_DELAY)
@@ -126,7 +127,6 @@ class Command(BaseCommand):
                 service.files().create(body=file_metadata, media_body=media, fields='id').execute()
                 self.stdout.write(self.style.SUCCESS(f"Przesłano '{file_name}' na Google Drive numer iteracji: {i}"))
                 time.sleep(self.OPERATION_DELAY)  # Opóźnienie między przesyłaniem plików
-                i += 1
                 return
             except HttpError as error:
                 if error.resp.status in [500, 502, 503, 504, 429]:
