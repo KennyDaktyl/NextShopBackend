@@ -437,7 +437,6 @@ class PhotoAdmin(admin.ModelAdmin):
         "product__name",
         "category__name",
         "variant__name",
-        "hero__name",
     )
 
 

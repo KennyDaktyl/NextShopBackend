@@ -187,7 +187,7 @@ class Product(models.Model):
         verbose_name="Zdjęcie główne", upload_to="products", blank=True
     )
     image_alt = models.CharField(
-        verbose_name="Tekst alternatywny",
+        verbose_name="Tekst alternatywny zdjęcia",
         max_length=255,
         blank=True,
         null=True,
