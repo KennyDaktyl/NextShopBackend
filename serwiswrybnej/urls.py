@@ -44,6 +44,8 @@ urlpatterns = [
     # path('login/', UserLoginView.as_view(), name='user-login'),
     # path('register/', UserRegistrationViewSet, name='user-registration'),
 
+    # CMS
+    path("cms/", include("web.cms.urls")),
     # Categories
     path("api/categories/", include("web.categories.urls")),
     # Carts

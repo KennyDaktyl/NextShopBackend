@@ -1,0 +1,109 @@
+{% extends "cms/base.html" %} {% block content %}
+<div class="col-12">
+    <table class="table table-striped" style="table-layout: fixed; width: 100%">
+        <thead>
+            <tr>
+                <th scope="col" style="width: 5%">#</th>
+                <th scope="col" style="width: 25%">Nazwa</th>
+                <th scope="col" style="width: 40%">Opis</th>
+                <th scope="col" style="width: 20%">Kategoria</th>
+                <th scope="col" style="width: 10%">Cena</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in object_list %}
+            <!-- prettier-ignore -->
+            <tr onclick="window.location.href='{% url 'product_update' product.id %}';" class="clickable-row">
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ product.name }}</td>
+                <td>
+                    {% if product.description %}
+                    <span
+                        style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                        title="{{ product.description }}"
+                    >
+                        <!-- prettier-ignore -->
+                        {{ product.description|slice:":50" }}...
+                    </span>
+                    {% else %}
+                    <span class="text-muted">Brak opisu</span>
+                    {% endif %}
+                </td>
+                <td>{{ product.category.name }}</td>
+                <td>{{ product.current_price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Dynamiczna paginacja -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <!-- prettier-ignore -->
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a
+                    class="page-link"
+                    href="?page={{ page_obj.previous_page_number }}"
+                    aria-label="Previous"
+                >
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a
+                    class="page-link"
+                    href="#"
+                    tabindex="-1"
+                    aria-disabled="true"
+                >
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+
+            <!-- Numery stron -->
+            {% for num in paginator.page_range %}
+            <!-- prettier-ignore -->
+            {% if num == page_obj.number %}
+            <li class="page-item active" aria-current="page">
+                <span class="page-link">{{ num }}</span>
+            </li>
+            <!-- prettier-ignore -->
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endif %} {% endfor %}
+
+            <!-- Link do następnej strony -->
+            <!-- prettier-ignore -->
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a
+                    class="page-link"
+                    href="?page={{ page_obj.next_page_number }}"
+                    aria-label="Next"
+                >
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a
+                    class="page-link"
+                    href="#"
+                    tabindex="-1"
+                    aria-disabled="true"
+                >
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

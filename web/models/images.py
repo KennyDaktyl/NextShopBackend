@@ -134,6 +134,12 @@ class Photo(models.Model):
         else:
             title = self.name if self.name else instance.name
             self.slug = slugify(title.replace("ł", "l").replace("Ł", "L"))
+            
+            filter_kwargs = {f"{instance_name}": instance}
+            self.order = (
+                Photo.objects.filter(**filter_kwargs).count() + 1
+            )
+                
             super().save(*args, **kwargs)
             self.thumbnails = generate_thumbnails(
                 instance,
@@ -145,6 +151,7 @@ class Photo(models.Model):
                 alt=self.image_alt,
                 title=self.image_title,
             )
+            
 
         super().save(*args, **kwargs)
 
@@ -377,6 +384,7 @@ def auto_delete_file_on_change_image(instance, **kwargs):
     try:
         old_photo = Photo.objects.get(pk=instance.pk)
         old_file = old_photo.oryg_image
+        
     except Photo.DoesNotExist:
         return False
 

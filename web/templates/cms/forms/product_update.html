@@ -1,0 +1,500 @@
+{% extends 'cms/base.html' %}
+<!-- prettier-ignore -->
+{% load crispy_forms_tags %}
+<!-- prettier-ignore -->
+
+{% block content %}
+<div class="container mt-2">
+    <h2>Edytuj produkt</h2>
+
+    <!-- Wyświetlanie wygenerowanych danych -->
+    <div id="generatedSeoData" class="mt-4">
+        {% if seo_data.error %}
+        <p class="text-danger">{{ seo_data.error }}</p>
+        {% endif %}
+    </div>
+
+    <form
+        method="post"
+        enctype="multipart/form-data"
+        class="update_product_form"
+    >
+        {% csrf_token %}
+
+        <div class="col-12 d-flex justify-content-between">
+            <div class="col-6 d-flex justify-content-start flex-wrap">
+                <!-- Wyświetlenie aktualnego zdjęcia głównego -->
+                <div class="mb-3">
+                    <label for="oryg_image" class="form-label">
+                        Aktualne zdjęcie główne
+                    </label>
+                    {% if form.instance.oryg_image %}
+                    <div class="mb-2">
+                        <img
+                            src="{{ form.instance.oryg_image.url }}"
+                            alt="{{ form.instance.image_alt }}"
+                            title="{{ form.instance.image_title }}"
+                            class="img-thumbnail"
+                        />
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Brak zdjęcia głównego</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Pole do podmiany zdjęcia -->
+            <div
+                class="col-6 d-flex justify-content-start flex-wrap align-items-start"
+            >
+                <div class="mb-3 col-12">
+                    <label for="oryg_image" class="form-label">
+                        Podmień zdjęcie główne
+                    </label>
+                    {{ form.oryg_image }}
+                </div>
+                <button type="submit" class="btn btn-success">
+                    Zapisz zmiany
+                </button>
+            </div>
+        </div>
+
+        <!-- Pole "Nazwa" -->
+        <div class="mb-3">{{ form.name|as_crispy_field }}</div>
+
+        <!-- Pole "Slug" -->
+        <div class="mb-3">{{ form.slug|as_crispy_field }}</div>
+
+        <div class="col-12 d-flex flex-wrap bg-warning px-3 mb-3">
+            <button
+                id="generateSeoBtn"
+                class="btn btn-secondary mt-3 mb-3"
+                data-url="{% url 'generate_seo_data' product.id %}"
+                type="button"
+            >
+                Wygeneruj dane SEO
+            </button>
+            <!-- Pole "Meta Title" -->
+            <div class="mb-3 col-12">{{ form.meta_title|as_crispy_field }}</div>
+
+            <!-- Pole "Meta Description" -->
+            <div class="mb-3 col-12">
+                {{ form.meta_description|as_crispy_field }}
+            </div>
+
+            <!-- Pole "Opis" -->
+            <div class="mb-3 col-12">
+                {{ form.description|as_crispy_field }}
+            </div>
+
+            <!-- Pole tekstowe dla alt -->
+            <div class="mb-3 col-12">
+                <label for="image_alt" class="form-label">
+                    {{ form.image_alt.label }}
+                </label>
+                {{ form.image_alt }}
+            </div>
+
+            <!-- Pole tekstowe dla tytułu zdjęcia -->
+            <div class="mb-3 col-12">
+                <label for="image_title" class="form-label">
+                    {{ form.image_title.label }}
+                </label>
+                {{ form.image_title }}
+            </div>
+        </div>
+
+        <!-- Pole "Kategoria" -->
+        <div class="mb-3">{{ form.category|as_crispy_field }}</div>
+
+        <!-- Pole "Ilość" -->
+        <div class="mb-3">{{ form.qty|as_crispy_field }}</div>
+
+        <!-- Wyświetlanie aktualnej ceny -->
+        <div class="mb-3">
+            <h5>Aktualna cena:</h5>
+            {% if current_price %}
+            <p><strong>{{ current_price.price }} zł</strong></p>
+            <p class="text-muted">
+                Ustawiona: {{ current_price.created_date|date:"d-m-Y H:i" }}
+            </p>
+            {% else %}
+            <p class="text-muted">Brak aktywnej ceny.</p>
+            {% endif %}
+        </div>
+
+        <!-- Pole czy aktywny produkt-->
+        <div class="mb-3">{{ form.is_active|as_crispy_field }}</div>
+
+        <div class="col-12 d-flex justify-content-end">
+            <button type="submit" class="btn btn-success">Zapisz zmiany</button>
+        </div>
+    </form>
+
+    <!-- Wyświetlanie aktualnej ceny -->
+    <div class="mb-3">
+        <h5>Aktualna cena:</h5>
+        {% if current_price %}
+        <p><strong>{{ current_price.price }} zł</strong></p>
+        <p class="text-muted">
+            Ustawiona: {{ current_price.created_date|date:"d-m-Y H:i" }}
+        </p>
+        {% else %}
+        <p class="text-muted">Brak aktywnej ceny.</p>
+        {% endif %}
+    </div>
+
+    <!-- Formularz dodawania nowej ceny -->
+    <form
+        method="post"
+        action="{% url 'product_add_price' product.id %}"
+        class="mb-3"
+    >
+        {% csrf_token %}
+        <div class="mb-3">{{ price_form.price|as_crispy_field }}</div>
+        <button type="submit" class="btn btn-success">Dodaj nową cenę</button>
+    </form>
+
+    <!-- Przycisk otwierający modal -->
+    <button
+        type="button"
+        class="btn btn-primary mb-3"
+        data-bs-toggle="modal"
+        data-bs-target="#addPhotoModal"
+    >
+        Dodaj zdjęcie
+    </button>
+
+    <!-- Modal Bootstrap -->
+    <div
+        class="modal fade"
+        id="addPhotoModal"
+        tabindex="-1"
+        aria-labelledby="addPhotoModalLabel"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPhotoModalLabel">
+                        Dodaj zdjęcie do galerii
+                    </h5>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                    ></button>
+                </div>
+                <form
+                    method="post"
+                    enctype="multipart/form-data"
+                    action="{% url 'add_photo_to_gallery' product.id %}"
+                >
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="id_name" class="form-label">
+                                Nazwa zdjęcia
+                            </label>
+                            <input
+                                type="text"
+                                name="name"
+                                id="id_name"
+                                class="form-control"
+                            />
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_oryg_image" class="form-label">
+                                Plik zdjęcia
+                            </label>
+                            <input
+                                type="file"
+                                name="oryg_image"
+                                id="id_oryg_image"
+                                class="form-control"
+                            />
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_image_alt" class="form-label">
+                                Tekst alternatywny
+                            </label>
+                            <input
+                                type="text"
+                                name="image_alt"
+                                id="id_image_alt"
+                                class="form-control"
+                            />
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_image_title" class="form-label">
+                                Tytuł zdjęcia
+                            </label>
+                            <input
+                                type="text"
+                                name="image_title"
+                                id="id_image_title"
+                                class="form-control"
+                            />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            Zamknij
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            Dodaj zdjęcie
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Galeria zdjęć z możliwością zmiany kolejności -->
+    <div class="mb-3">
+        <label for="gallery" class="form-label">Galeria zdjęć:</label>
+        <ul id="gallery" class="d-flex flex-wrap list-unstyled product_gallery">
+            {% for image in gallery_images %}
+            <li class="p-2 text-center" data-id="{{ image.id }}">
+                <img
+                    src="{{ image.oryg_image.url }}"
+                    alt="{{ image.alt }}"
+                    class="img-thumbnail"
+                />
+                <div class="mt-2">
+                    <!-- Przycisk edycji -->
+                    <button
+                        class="btn btn-sm btn-warning"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editPhotoModal{{ image.id }}"
+                    >
+                        <i class="fas fa-edit"></i>
+                        Edytuj
+                    </button>
+                    <!-- Przycisk usuwania -->
+                    <form
+                        method="post"
+                        action="{% url 'delete_photo' image.id %}"
+                        class="d-inline"
+                    >
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            class="btn btn-sm btn-danger"
+                            onclick="return confirm('Czy na pewno chcesz usunąć to zdjęcie?');"
+                        >
+                            <i class="fas fa-trash"></i>
+                            Usuń
+                        </button>
+                    </form>
+                </div>
+            </li>
+
+            <!-- Modal edycji zdjęcia -->
+            <div
+                class="modal fade"
+                id="editPhotoModal{{ image.id }}"
+                tabindex="-1"
+                aria-labelledby="editPhotoModalLabel{{ image.id }}"
+                aria-hidden="true"
+            >
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5
+                                class="modal-title"
+                                id="editPhotoModalLabel{{ image.id }}"
+                            >
+                                Edytuj zdjęcie
+                            </h5>
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                            ></button>
+                        </div>
+                        <form
+                            method="post"
+                            enctype="multipart/form-data"
+                            action="{% url 'edit_photo' image.id %}"
+                        >
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label
+                                        for="id_name_{{ image.id }}"
+                                        class="form-label"
+                                    >
+                                        Nazwa zdjęcia
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        id="id_name_{{ image.id }}"
+                                        value="{{ image.name }}"
+                                        class="form-control"
+                                    />
+                                </div>
+                                <div class="mb-3">
+                                    <label
+                                        for="id_image_alt_{{ image.id }}"
+                                        class="form-label"
+                                    >
+                                        Tekst alternatywny
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="image_alt"
+                                        id="id_image_alt_{{ image.id }}"
+                                        value="{{ image.image_alt }}"
+                                        class="form-control"
+                                    />
+                                </div>
+                                <div class="mb-3">
+                                    <label
+                                        for="id_image_title_{{ image.id }}"
+                                        class="form-label"
+                                    >
+                                        Tytuł zdjęcia
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="image_title"
+                                        id="id_image_title_{{ image.id }}"
+                                        value="{{ image.image_title }}"
+                                        class="form-control"
+                                    />
+                                </div>
+                                {% comment %}
+                                <div class="mb-3">
+                                    <label
+                                        for="id_oryg_image_{{ image.id }}"
+                                        class="form-label"
+                                    >
+                                        Zamień zdjęcie
+                                    </label>
+                                    <input
+                                        type="file"
+                                        name="oryg_image"
+                                        id="id_oryg_image_{{ image.id }}"
+                                        class="form-control"
+                                    />
+                                </div>
+                                {% endcomment %}
+                            </div>
+                            <div class="modal-footer">
+                                <button
+                                    type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal"
+                                >
+                                    Zamknij
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i>
+                                    Zapisz zmiany
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted">Brak zdjęć w galerii</p>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+<!-- prettier-ignore -->
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const gallery = document.getElementById('gallery');
+        Sortable.create(gallery, {
+            animation: 150,
+            onEnd: function (event) {
+                const order = [];
+                document
+                    .querySelectorAll('#gallery li')
+                    .forEach(function (item) {
+                        order.push(item.getAttribute('data-id'));
+                    });
+
+                // Wysłanie nowej kolejności do serwera
+                fetch("{% url 'update_gallery_order' product.id %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({ order: order }),
+                }).then((response) => {
+                    if (!response.ok) {
+                        alert('Błąd podczas zapisywania kolejności!');
+                    }
+                });
+            },
+        });
+
+        document
+            .getElementById('generateSeoBtn')
+            .addEventListener('click', function () {
+                const url = this.getAttribute('data-url');
+                console.log('URL żądania:', url);
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    },
+                })
+                    .then((response) => {
+                        console.log('Status odpowiedzi:', response.status);
+                        if (!response.ok) {
+                            throw new Error('Błąd HTTP: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log('Odpowiedź z serwera:', data);
+                        if (data.success) {
+                            const seoData = data.seo_data;
+
+                            document.getElementById('id_meta_title').value =
+                                seoData.meta_title;
+                            document.getElementById(
+                                'id_meta_description',
+                            ).value = seoData.meta_description;
+                            document.getElementById('id_description').value =
+                                seoData.description;
+                            document.getElementById('id_image_alt').value =
+                                seoData.alt;
+                            document.getElementById('id_image_title').value =
+                                seoData.title;
+
+                            alert('Dane SEO zostały pomyślnie wygenerowane.');
+                        } else {
+                            alert('Nie udało się wygenerować danych SEO.');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(
+                            'Błąd podczas generowania danych SEO:',
+                            error,
+                        );
+                        alert('Wystąpił błąd podczas generowania danych SEO.');
+                    });
+            });
+    });
+</script>
+{% endblock %}

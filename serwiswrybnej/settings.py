@@ -144,23 +144,30 @@ INSTALLED_APPS = [
     "djoser",
     "corsheaders",
     "csp",
-    "anymail"
+    "anymail",
+    "crispy_forms",
+    "crispy_bootstrap5"
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"  
+CRISPY_TEMPLATE_PACK = "bootstrap5"  
 
 CSP_DEFAULT_SRC = ("'self'",)
 CSP_SCRIPT_SRC = (
     "'self'",
     "'unsafe-inline'",
-    "cdn.example.com",
+    "cdn.jsdelivr.net", 
 )
 CSP_STYLE_SRC = (
     "'self'",
+    "cdn.jsdelivr.net",
     "fonts.googleapis.com",
+    "'unsafe-inline'",
 )
 CSP_IMG_SRC = (
     "'self'",
     "data:",
-    "cdn.example.com",
+    "https://cdn.jsdelivr.net",
 )
 CSP_FONT_SRC = (
     "'self'",
@@ -168,7 +175,7 @@ CSP_FONT_SRC = (
 )
 CSP_CONNECT_SRC = (
     "'self'",
-    "api.example.com",
+    "https://cdn.jsdelivr.net",
 )
 CSP_FRAME_SRC = ("'self'",)
 CSP_OBJECT_SRC = ("'none'",)
