@@ -1,0 +1,38 @@
+.text-truncate {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+/* Klasa dla klikalnych wierszy */
+.clickable-row {
+    cursor: pointer; /* Łapka na hover */
+    user-select: none; /* Wyłączenie zaznaczania tekstu */
+}
+
+.clickable-row:hover {
+    background-color: #f2f2f2; /* Opcjonalne podświetlenie */
+}
+
+/* Zabezpieczenie dla tekstu w komórkach */
+table td,
+table th {
+    user-select: none; /* Uniemożliwienie zaznaczania tekstu */
+}
+
+.update_product_form img {
+    max-height: 250px;
+    max-width: 250px;
+}
+
+.product_gallery img:hover {
+    cursor: pointer;
+}
+
+.product_gallery img {
+    max-height: 250px;
+    max-width: 250px;
+}

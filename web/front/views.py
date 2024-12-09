@@ -21,7 +21,6 @@ class FirstPageView(GenericAPIView):
         operation_description="Retrieve details of a first page",
     )
     def get(self, request, *args, **kwargs):
-        # Pobieranie kategorii z posortowanymi podkategoriami
         categories = Category.objects.filter(
             is_active=True, on_first_page=True
         ).prefetch_related(
@@ -32,10 +31,8 @@ class FirstPageView(GenericAPIView):
                 ),
             )
         )
-        # Pobieranie aktywnych herosów
         heros = Hero.objects.filter(is_active=True)
 
-        # Serializacja kategorii i herosów
         categories_serialized = CategoryListOnFirstPageSerializer(
             categories, many=True, context={"request": request}
         ).data
