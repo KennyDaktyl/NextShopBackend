@@ -4,6 +4,7 @@ from django.views.generic import ListView, UpdateView
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.db.models import Max, Q
@@ -19,11 +20,9 @@ def generate_seo_data(request, product_id):
         product = get_object_or_404(Product, id=product_id)
         form = ProductUpdateForm(instance=product)
 
-        # Wyciąganie nazwy i URL zdjęcia
         name = product.name
         image_url = request.build_absolute_uri(product.oryg_image.url) if product.oryg_image else "brak zdjęcia"
 
-        # Generowanie danych SEO
         seo_data = form.generate_seo_data(name, image_url, product.category.name)
 
         if seo_data:
@@ -32,6 +31,7 @@ def generate_seo_data(request, product_id):
     return JsonResponse({'success': False, 'error': 'Metoda POST wymagana.'})
 
 
+@method_decorator(login_required, name='dispatch')
 class ProductListView(ListView):
     model = Product
     template_name = 'cms/product_list.html'
@@ -40,8 +40,9 @@ class ProductListView(ListView):
 
     def get_queryset(self):
         return Product.objects.filter(is_active=True).order_by('name')
-    
 
+
+@method_decorator(login_required, name='dispatch')
 class ProductUpdateView(UpdateView):
     model = Product
     form_class = ProductUpdateForm
@@ -77,11 +78,6 @@ def add_photo_to_gallery(request, product_id):
         if form.is_valid():
             photo = form.save(commit=False)
             photo.product = product
-            
-            # # Ustal kolejność (order)
-            # max_order = Photo.objects.filter(product=product).aggregate(max_order=Max('order'))['max_order']
-            # photo.order = (max_order or 0) + 1
-            
             photo.save()
             messages.success(request, 'Zdjęcie zostało pomyślnie dodane.')
             return redirect('product_update', pk=product.id)

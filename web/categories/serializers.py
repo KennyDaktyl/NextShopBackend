@@ -111,8 +111,19 @@ class CategoryListOnFirstPageSerializer(serializers.ModelSerializer):
         )
 
     def get_all_subcategories(self, obj):
-        subcategories = obj.children.filter(is_active=True).order_by("order")
-        return SubcategoryOnFirstPageSerializer(subcategories, many=True).data
+        def get_subcategories_recursive(category):
+            children = category.children.filter(is_active=True).order_by("order")
+            result = []
+            for child in children:
+                result.append(SubcategoryOnFirstPageSerializer(
+                    child, context=self.context
+                ).data)
+                result.extend(get_subcategories_recursive(child))
+            return result
+        all_subcategories = get_subcategories_recursive(obj)
+
+        all_subcategories_sorted = sorted(all_subcategories, key=lambda x: x["name"])
+        return all_subcategories_sorted
 
     def get_full_path(self, obj):
         return obj.get_full_path()
