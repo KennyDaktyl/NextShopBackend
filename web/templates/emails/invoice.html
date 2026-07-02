@@ -143,7 +143,7 @@
       <p><strong>Nabywca:</strong></p>
       <p>{{ order.company }}<br>
         {{ order.invoice_postal_code }} {{ order.invoice_city }}, {{ order.invoice_street }} {{ order.invoice_house_number }}{% if order.invoice_local_number %} / {{ order.invoice_local_number }}{% endif %}<br>
-        NIP: {{ order.nip }}
+        {% if order.nip %}NIP: {{ order.nip }}{% endif %}
       </p>
       {% if order.company_payer %}
       <p><strong>Płatnik/Odbiorca:</strong></p>
