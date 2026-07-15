@@ -10,6 +10,7 @@ from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 
 from web.accounts.views import UserLoginView, UserRegistrationViewSet
+from web.front.views import key_photo_inquiry_view
 
 
 schema_view = get_schema_view(
@@ -58,4 +59,5 @@ urlpatterns = [
     path("api/deliveries/", include("web.deliveries.urls")),
     path("api/payments/", include("web.payments.urls")),
     path("api/articles/", include("web.articles.urls")),
+    path("api/inquiries/key-photo/", key_photo_inquiry_view, name="key-photo-inquiry"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

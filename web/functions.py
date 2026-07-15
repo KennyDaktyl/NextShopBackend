@@ -6,19 +6,35 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 
-def send_email_by_django(title, email, message):
+def render_stamp_design_html(stamp_design):
+    rows = "".join(
+        f"<li>{line['text']} "
+        f"(czcionka: {line['font']}, rozmiar: {line['size']}"
+        f"{', pogrubienie' if line['bold'] else ''}"
+        f"{', kursywa' if line['italic'] else ''})</li>"
+        for line in stamp_design
+    )
+    return f"<p><strong>Projekt pieczątki:</strong></p><ol>{rows}</ol>"
+
+
+def send_email_by_django(title, email, message, phone=None, stamp_design=None):
     subject, from_email, to = (
         title,
         settings.EMAIL_HOST_USER,
         settings.EMAIL_HOST_USER,
     )
 
+    phone_html = f"<p>Telefon: <strong>{phone}</strong></p>" if phone else ""
+    stamp_design_html = render_stamp_design_html(stamp_design) if stamp_design else ""
+
     html_content = f"""
     <html>
         <head></head>
         <body>
             <p>Message from: <h3>{email}</h3></p>
+            {phone_html}
             <p>{message}</p>
+            {stamp_design_html}
         </body>
     </html>
     """
@@ -32,6 +48,50 @@ def send_email_by_django(title, email, message):
         return True
     except Exception as e:
         print(f"Error sending email: {e}")
+        return False
+
+
+def send_key_photo_inquiry_email(inquiry):
+    subject = "Nowe zgłoszenie: zdjęcie klucza do oceny"
+    from_email = settings.EMAIL_HOST_USER
+    to = settings.EMAIL_HOST_USER
+
+    photo_url = ""
+    if inquiry.photo:
+        photo_url = f"{settings.SITE_URL.rstrip('/')}{settings.MEDIA_URL}{inquiry.photo.name}"
+
+    note_html = f"<p><strong>Notatka:</strong> {inquiry.note}</p>" if inquiry.note else ""
+
+    html_content = f"""
+    <html>
+        <head></head>
+        <body>
+            <p>Klient przesłał zdjęcie klucza do oceny.</p>
+            <p>Email: <strong>{inquiry.email}</strong></p>
+            <p>Telefon: <strong>{inquiry.phone}</strong></p>
+            {note_html}
+            <p><a href="{photo_url}">Zobacz zdjęcie klucza</a></p>
+        </body>
+    </html>
+    """
+    text_content = strip_tags(html_content)
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+    msg.attach_alternative(html_content, "text/html")
+
+    if inquiry.photo:
+        inquiry.photo.seek(0)
+        msg.attach(
+            inquiry.photo.name.split("/")[-1],
+            inquiry.photo.read(),
+            "application/octet-stream",
+        )
+
+    try:
+        msg.send()
+        return True
+    except Exception as e:
+        print(f"Error sending key photo inquiry email: {e}")
         return False
 
 

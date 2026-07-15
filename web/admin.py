@@ -6,10 +6,11 @@ from web.models.accounts import Profile
 
 # from web.models.carts import Cart, CartItem
 from web.models.articles import Article
-from web.models.categories import Category
+from web.models.categories import Category, MobileServiceSettings
 from web.models.deliveries import Delivery
 from web.models.heros import Hero
 from web.models.images import Photo, Thumbnail
+from web.models.inquiries import KeyPhotoInquiry
 from web.models.orders import Invoice, Order, OrderItem
 from web.models.payments import Payment
 from web.models.prices import PriceGroup, ProductPrice
@@ -153,6 +154,20 @@ class CategoryAdmin(admin.ModelAdmin):
                 Category.objects.all().order_by("name")
             )
         return form
+
+
+@admin.register(MobileServiceSettings)
+class MobileServiceSettingsAdmin(admin.ModelAdmin):
+    list_display = (
+        "category",
+        "min_keys_qty",
+        "min_stamp_order_value",
+        "wholesale_qty",
+        "wholesale_discount_percent",
+        "delivery_time_hours",
+        "phone_number",
+    )
+    autocomplete_fields = ["category"]
 
 
 class ProductPriceInline(admin.TabularInline):
@@ -496,3 +511,11 @@ class ProductReviewAdmin(admin.ModelAdmin):
     )
     search_fields = ("product__name", "user__username")
     list_filter = ("created_at",)
+
+
+@admin.register(KeyPhotoInquiry)
+class KeyPhotoInquiryAdmin(admin.ModelAdmin):
+    list_display = ("id", "email", "phone", "created_date", "handled")
+    list_filter = ("handled", "created_date")
+    search_fields = ("email", "phone", "note")
+    readonly_fields = ("created_date",)

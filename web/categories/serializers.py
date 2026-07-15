@@ -2,9 +2,23 @@ from rest_framework import serializers
 from django.db.models import Avg
 
 from web.images.serializers import ThumbnailSerializer
-from web.models.categories import Category
+from web.models.categories import Category, MobileServiceSettings
 from web.products.serializers import ProductOnFirstPageSerializer, ProductReviewSerializer
 
+
+class MobileServiceSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MobileServiceSettings
+        fields = (
+            "min_keys_qty",
+            "min_stamp_order_value",
+            "wholesale_qty",
+            "wholesale_discount_percent",
+            "delivery_time_hours",
+            "phone_number",
+            "whatsapp_url",
+            "messenger_url",
+        )
 
 
 class CategoryListingSerializer(serializers.ModelSerializer):
@@ -18,6 +32,7 @@ class CategoryListingSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "item_label",
+            "slug",
             "full_path",
             "image",
             "is_parent",
@@ -33,8 +48,9 @@ class CategoryListingSerializer(serializers.ModelSerializer):
     
     
 class CategorySerializer(CategoryListingSerializer):
-   
+
     back_link = serializers.SerializerMethodField()
+    mobile_service_settings = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
@@ -55,10 +71,15 @@ class CategorySerializer(CategoryListingSerializer):
             "full_path",
             "back_link",
             "image",
+            "mobile_service_settings",
         )
 
     def get_back_link(self, obj):
         return obj.get_back_link()
+
+    def get_mobile_service_settings(self, obj):
+        settings = getattr(obj, "mobile_service_settings", None)
+        return MobileServiceSettingsSerializer(settings).data if settings else None
 
 
 class CategoryPathSerializer(serializers.ModelSerializer):

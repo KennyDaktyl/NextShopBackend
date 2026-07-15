@@ -231,6 +231,50 @@ class Category(models.Model):
         return f"/produkty/{self.slug}"
 
 
+class MobileServiceSettings(models.Model):
+    category = models.OneToOneField(
+        Category,
+        on_delete=models.CASCADE,
+        related_name="mobile_service_settings",
+        verbose_name="Kategoria usługi mobilnej",
+    )
+    min_keys_qty = models.PositiveIntegerField(
+        verbose_name="Minimalna liczba kluczy na dojazd bez dopłaty",
+        null=True,
+        blank=True,
+    )
+    min_stamp_order_value = models.DecimalField(
+        verbose_name="Minimalna wartość zamówienia na pieczątki bez dopłaty za dojazd",
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    wholesale_qty = models.PositiveIntegerField(
+        verbose_name="Próg ilościowy do ceny hurtowej", default=10
+    )
+    wholesale_discount_percent = models.PositiveIntegerField(
+        verbose_name="Rabat hurtowy (%)", default=15
+    )
+    delivery_time_hours = models.PositiveIntegerField(
+        verbose_name="Czas dojazdu (w godzinach)", default=2
+    )
+    phone_number = models.CharField(
+        verbose_name="Numer telefonu do kontaktu",
+        max_length=20,
+        blank=True,
+    )
+    whatsapp_url = models.URLField(verbose_name="Link WhatsApp", blank=True)
+    messenger_url = models.URLField(verbose_name="Link Messenger", blank=True)
+
+    class Meta:
+        verbose_name = "Ustawienia usługi mobilnej"
+        verbose_name_plural = "Ustawienia usług mobilnych"
+
+    def __str__(self):
+        return f"Ustawienia mobilne — {self.category.name}"
+
+
 @receiver(models.signals.pre_save, sender=Category)
 def auto_delete_file_on_change(sender, instance, **kwargs):
     if not instance.pk:

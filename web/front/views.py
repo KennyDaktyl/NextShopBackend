@@ -2,13 +2,14 @@ from django.db.models import Prefetch
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from web.articles.serializers import ArticlesListSerializer
 from web.categories.serializers import CategoryListOnFirstPageSerializer
-from web.front.serializers import ContactEmailSerializer, HeroSerializer
-from web.functions import send_email_by_django
+from web.front.serializers import ContactEmailSerializer, HeroSerializer, KeyPhotoInquirySerializer
+from web.functions import send_email_by_django, send_key_photo_inquiry_email
 from web.models.articles import Article
 from web.models.categories import Category
 from web.models.heros import Hero
@@ -78,9 +79,31 @@ class SendContactEmailView(GenericAPIView):
             title = serializer.validated_data.get("title")
             email = serializer.validated_data.get("email")
             message = serializer.validated_data.get("message")
-            send_email_by_django(title, email, message)
+            phone = serializer.validated_data.get("phone")
+            stamp_design = serializer.validated_data.get("stamp_design")
+            send_email_by_django(title, email, message, phone=phone, stamp_design=stamp_design)
             return Response(
                 {"message": "Email sent successfully"},
+                status=status.HTTP_200_OK,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class KeyPhotoInquiryView(GenericAPIView):
+    permission_classes = [AllowAny]
+    parser_classes = [MultiPartParser, FormParser]
+    serializer_class = KeyPhotoInquirySerializer
+
+    @swagger_auto_schema(
+        operation_description="Submit a key photo for a duplication feasibility check",
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            inquiry = serializer.save()
+            send_key_photo_inquiry_email(inquiry)
+            return Response(
+                {"message": "Zgłoszenie zostało wysłane"},
                 status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -89,3 +112,4 @@ class SendContactEmailView(GenericAPIView):
 first_page_view = FirstPageView.as_view()
 contact_view = ContactView.as_view()
 senf_contact_email = SendContactEmailView.as_view()
+key_photo_inquiry_view = KeyPhotoInquiryView.as_view()

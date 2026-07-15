@@ -55,6 +55,7 @@ class MenuItemsView(generics.RetrieveAPIView):
             "name": category_data["name"],
             "meta_title": category_data["meta_title"],
             "meta_description": category_data["meta_description"],
+            "h1_tag": category_data["h1_tag"],
             "item_label": category_data["item_label"],
             "slug": category_data["slug"],
             "description": category_data["description"],
@@ -63,6 +64,7 @@ class MenuItemsView(generics.RetrieveAPIView):
             "has_children": category_data["has_children"],
             "full_path": category_data["full_path"],
             "image": category_data["image"],
+            "mobile_service_settings": category_data["mobile_service_settings"],
             "items": subcategories_data,
         }
         return Response(custom_response)
