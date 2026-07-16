@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.db.models import Avg
 
 from web.images.serializers import ThumbnailSerializer
-from web.models.categories import Category, MobileServiceSettings
+from web.models.categories import Category, MobileServiceSettings, ServiceLocality
 from web.products.serializers import ProductOnFirstPageSerializer, ProductReviewSerializer
 
 
@@ -18,6 +18,17 @@ class MobileServiceSettingsSerializer(serializers.ModelSerializer):
             "phone_number",
             "whatsapp_url",
             "messenger_url",
+        )
+
+
+class ServiceLocalitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceLocality
+        fields = (
+            "name",
+            "slug",
+            "region_label",
+            "local_note",
         )
 
 

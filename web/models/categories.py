@@ -275,6 +275,27 @@ class MobileServiceSettings(models.Model):
         return f"Ustawienia mobilne — {self.category.name}"
 
 
+class ServiceLocality(models.Model):
+    name = models.CharField(verbose_name="Nazwa miejscowości / dzielnicy", max_length=100)
+    slug = models.SlugField(verbose_name="Slug", max_length=100, unique=True)
+    region_label = models.CharField(
+        verbose_name="Etykieta regionu (gmina / dzielnica)", max_length=150
+    )
+    local_note = models.TextField(
+        verbose_name="Opis lokalny (unikalny fragment treści SEO)",
+    )
+    order = models.PositiveIntegerField(verbose_name="Kolejność", default=0)
+    is_active = models.BooleanField(verbose_name="Aktywna", default=True)
+
+    class Meta:
+        ordering = ("order", "name")
+        verbose_name = "Miejscowość obsługi mobilnej"
+        verbose_name_plural = "Miejscowości obsługi mobilnej"
+
+    def __str__(self):
+        return self.name
+
+
 @receiver(models.signals.pre_save, sender=Category)
 def auto_delete_file_on_change(sender, instance, **kwargs):
     if not instance.pk:

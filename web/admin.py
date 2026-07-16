@@ -6,7 +6,7 @@ from web.models.accounts import Profile
 
 # from web.models.carts import Cart, CartItem
 from web.models.articles import Article
-from web.models.categories import Category, MobileServiceSettings
+from web.models.categories import Category, MobileServiceSettings, ServiceLocality
 from web.models.deliveries import Delivery
 from web.models.heros import Hero
 from web.models.images import Photo, Thumbnail
@@ -168,6 +168,14 @@ class MobileServiceSettingsAdmin(admin.ModelAdmin):
         "phone_number",
     )
     autocomplete_fields = ["category"]
+
+
+@admin.register(ServiceLocality)
+class ServiceLocalityAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "region_label", "order", "is_active")
+    list_filter = ("is_active", "region_label")
+    search_fields = ("name", "region_label")
+    prepopulated_fields = {"slug": ("name",)}
 
 
 class ProductPriceInline(admin.TabularInline):

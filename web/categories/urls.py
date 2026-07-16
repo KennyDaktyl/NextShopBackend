@@ -4,6 +4,7 @@ from web.categories.views import (
     CategoryMetaDataView,
     MenuItemsView,
     ProductsByCategorySlugView,
+    ServiceLocalityListView,
     categories_path_list,
 )
 
@@ -27,5 +28,10 @@ urlpatterns = [
         "category-meta/<slug:slug>/",
         CategoryMetaDataView.as_view(),
         name="category-meta",
+    ),
+    path(
+        "service-localities/",
+        ServiceLocalityListView.as_view(),
+        name="service-localities",
     ),
 ]

@@ -4,7 +4,7 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from web.models.categories import Category
+from web.models.categories import Category, ServiceLocality
 from web.models.products import Product
 from web.products.serializers import ProductListItemSerializer
 from web.products.views import ProductPagination
@@ -15,7 +15,17 @@ from .serializers import (
     CategoryPathSerializer,
     CategorySerializer,
     ProductsByCategorySerializer,
+    ServiceLocalitySerializer,
 )
+
+
+class ServiceLocalityListView(generics.ListAPIView):
+    serializer_class = ServiceLocalitySerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+
+    def get_queryset(self):
+        return ServiceLocality.objects.filter(is_active=True)
 
 
 class MenuItemsView(generics.RetrieveAPIView):
