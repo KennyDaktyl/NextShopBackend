@@ -27,6 +27,8 @@ from web.models.products import (
 )
 from web.utils import generate_invoice_for_order
 
+STATUS_COMPLETED = 13  # "Zrealizowane", patrz web.constants.ORDER_STATUS
+
 
 @admin.register(Hero)
 class HeroAdmin(admin.ModelAdmin):
@@ -290,8 +292,16 @@ class OrderItemAdmin(admin.ModelAdmin):
     list_filter = ("order__created_date",)
     
     
+@admin.action(description="Oznacz jako Zrealizowane")
+def mark_orders_as_completed(modeladmin, request, queryset):
+    for order in queryset:
+        order.status = STATUS_COMPLETED
+        order.save()
+
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
+    actions = [mark_orders_as_completed]
     list_display = (
         "id",
         "order_number",
