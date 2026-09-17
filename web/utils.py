@@ -44,6 +44,7 @@ def generate_invoice_for_order(order, admin=False):
         )
 
     invoice, created = Invoice.objects.get_or_create(order=order)
+    old_pdf_name = invoice.pdf.name if invoice.pdf else None
 
     if not invoice.override_number:
         invoice.number = invoice_number
@@ -71,6 +72,11 @@ def generate_invoice_for_order(order, admin=False):
     )
     html = HTML(string=html_content)
     html.write_pdf(target=pdf_path)
+
+    if old_pdf_name and old_pdf_name != pdf_filename:
+        old_pdf_path = os.path.join(settings.MEDIA_ROOT, old_pdf_name)
+        if os.path.isfile(old_pdf_path):
+            os.remove(old_pdf_path)
 
     invoice.pdf = pdf_filename
     invoice.save()

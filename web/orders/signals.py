@@ -18,6 +18,15 @@ def oder_create_or_update_signals(sender, instance, created, **kwargs):
         generate_invoice_for_order(instance)
         instance.invoice_created = True
         instance.save(update_fields=["invoice_created"])
+    elif (
+        instance.make_invoice
+        and instance.invoice_created
+        and getattr(instance, "is_paid_changed", False)
+    ):
+        # Status "Opłacone" zmienił się po tym, jak faktura została już
+        # wystawiona - trzeba przerenderować PDF, żeby pokazywał
+        # "Zapłacono" zamiast "Do zapłaty" (lub odwrotnie).
+        generate_invoice_for_order(instance)
 
     if instance.client is not None:
         if not instance.client.profile.send_emails:

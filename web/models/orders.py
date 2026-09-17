@@ -213,10 +213,13 @@ class Order(models.Model):
                 + "koszyk/zamowienie-szczegoly?order_uid="
                 + str(self.uid)
             )
+        self.is_paid_changed = False
         if self.pk:
             old_order_data = Order.objects.get(pk=self.pk)
             if old_order_data.status != self.status:
                 self.prev_status = old_order_data.status
+            if old_order_data.is_paid != self.is_paid:
+                self.is_paid_changed = True
         super().save(*args, **kwargs)
 
 
