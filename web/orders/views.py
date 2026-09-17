@@ -73,6 +73,20 @@ class CreateOrderView(GenericAPIView):
                 )
                 if delivery_method.in_store_pickup:
                     payment_method.price = payment_method.price_promo
+                else:
+                    # Wybór formy płatności jest dostępny wyłącznie dla
+                    # odbioru osobistego - w innym przypadku wymuszamy
+                    # domyślną płatność online, niezależnie od tego, co
+                    # przyszło z frontendu.
+                    online_payment_method = (
+                        Payment.objects.filter(
+                            is_active=True, payment_online=True
+                        )
+                        .order_by("order", "name")
+                        .first()
+                    )
+                    if online_payment_method:
+                        payment_method = online_payment_method
                 order_serializer.validated_data["payment_method"] = (
                     payment_method
                 )
