@@ -309,7 +309,7 @@ class ProductGoogleMerchantSerializer(serializers.ModelSerializer):
         return f"{obj.current_price:.2f} PLN"
     
     def get_link(self, obj):
-        return f"{settings.DOMAIN}{obj.full_path}"
+        return f"https://{settings.DOMAIN}{obj.full_path}"
     
     def get_image(self, obj):
         return obj.image.url

@@ -47,10 +47,9 @@ CORS_ALLOW_METHODS = [
 
 if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
     SITE_URL = "http://127.0.0.1:8000/"
-    DOMAIN="http://127.0.0.1:3000"
+    DOMAIN="127.0.0.1:3000"
     DEBUG = True
     ALLOWED_HOSTS = ["*"]
-    DOMAIN="http://127.0.0.1:3000"
     CORS_ALLOW_CREDENTIALS = True
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:3000",
@@ -66,7 +65,7 @@ if os.environ.get("ENVIRONMENT") in ["local", "dev"]:
     CSRF_COOKIE_SECURE = False
 else:
     SITE_URL = "https://api.serwiswrybnej.pl"
-    DOMAIN="https://serwiswrybnej.pl"
+    DOMAIN="serwiswrybnej.pl"
     DEBUG = False
     ALLOWED_HOSTS = [
         "serwiswrybnej.pl",
