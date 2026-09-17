@@ -270,18 +270,15 @@ ANYMAIL = {
     "MAILGUN_API_URL": "https://api.eu.mailgun.net/v3",
 }
 
-EMAIL_USE_TLS = True
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-# EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD")
-EMAIL_HOST_PASSWORD = os.environ.get("MAILGUN_API_KEY")
-EMAIL_PORT = os.environ.get("EMAIL_PORT")
-SERVER_EMAIL = os.environ.get("EMAIL_HOST")
-DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_USER")
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
-if os.environ.get("ENVIRONMENT") in ["production", "staging", "dev"]:
-    EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "").lower() == "false"
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "true").lower() == "true"
+EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "false").lower() == "true"
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
