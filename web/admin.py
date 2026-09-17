@@ -272,9 +272,9 @@ class DeliveryAdmin(admin.ModelAdmin):
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "price", "is_active")
+    list_display = ("id", "name", "price", "pickup_only", "is_active")
     search_fields = ("name",)
-    list_filter = ("is_active",)
+    list_filter = ("is_active", "pickup_only")
 
 
 @admin.register(OrderItem)

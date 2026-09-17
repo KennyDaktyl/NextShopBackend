@@ -30,6 +30,10 @@ class Payment(models.Model):
     bank_transfer = models.BooleanField(
         verbose_name="Czy to przelew bankowy?", default=False
     )
+    pickup_only = models.BooleanField(
+        verbose_name="Czy dostępna tylko dla odbioru osobistego?",
+        default=False,
+    )
     payment_deferral = models.IntegerField(
         verbose_name="Dni na opłacenie", default=14
     )

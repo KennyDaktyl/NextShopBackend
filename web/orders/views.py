@@ -73,11 +73,11 @@ class CreateOrderView(GenericAPIView):
                 )
                 if delivery_method.in_store_pickup:
                     payment_method.price = payment_method.price_promo
-                elif payment_method.payment_on_delivery:
-                    # Płatność gotówką jest dostępna wyłącznie dla odbioru
-                    # osobistego - w innym przypadku wymuszamy domyślną
-                    # płatność online, niezależnie od tego, co przyszło
-                    # z frontendu.
+                elif payment_method.pickup_only:
+                    # Ta forma płatności jest dostępna wyłącznie dla
+                    # odbioru osobistego - w innym przypadku wymuszamy
+                    # domyślną płatność online, niezależnie od tego, co
+                    # przyszło z frontendu.
                     online_payment_method = (
                         Payment.objects.filter(
                             is_active=True, payment_online=True
