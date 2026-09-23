@@ -1,3 +1,4 @@
+import base64
 import json
 
 from django.conf import settings
@@ -5,19 +6,29 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
+ALIGN_LABELS = {
+    "left": "do lewej",
+    "center": "do środka",
+    "right": "do prawej",
+}
+
 
 def render_stamp_design_html(stamp_design):
     rows = "".join(
         f"<li>{line['text']} "
         f"(czcionka: {line['font']}, rozmiar: {line['size']}"
         f"{', pogrubienie' if line['bold'] else ''}"
-        f"{', kursywa' if line['italic'] else ''})</li>"
+        f"{', kursywa' if line['italic'] else ''}"
+        ", wyrównanie: "
+        f"{ALIGN_LABELS.get(line.get('align', 'center'), 'do środka')})</li>"
         for line in stamp_design
     )
     return f"<p><strong>Projekt pieczątki:</strong></p><ol>{rows}</ol>"
 
 
-def send_email_by_django(title, email, message, phone=None, stamp_design=None):
+def send_email_by_django(
+    title, email, message, phone=None, stamp_design=None, stamp_image=None
+):
     subject, from_email, to = (
         title,
         settings.EMAIL_HOST_USER,
@@ -42,6 +53,13 @@ def send_email_by_django(title, email, message, phone=None, stamp_design=None):
 
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
     msg.attach_alternative(html_content, "text/html")
+
+    if stamp_image:
+        try:
+            image_bytes = base64.b64decode(stamp_image)
+            msg.attach("projekt-pieczatki.jpg", image_bytes, "image/jpeg")
+        except (ValueError, TypeError) as e:
+            print(f"Error attaching stamp image: {e}")
 
     try:
         msg.send()

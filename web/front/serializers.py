@@ -44,6 +44,9 @@ class StampDesignLineSerializer(serializers.Serializer):
     size = serializers.IntegerField()
     bold = serializers.BooleanField()
     italic = serializers.BooleanField()
+    align = serializers.ChoiceField(
+        choices=["left", "center", "right"], required=False, default="center"
+    )
 
 
 class ContactEmailSerializer(serializers.Serializer):
@@ -52,6 +55,7 @@ class ContactEmailSerializer(serializers.Serializer):
     message = serializers.CharField()
     phone = serializers.CharField(required=False, allow_blank=True)
     stamp_design = StampDesignLineSerializer(many=True, required=False, min_length=1, max_length=8)
+    stamp_image = serializers.CharField(required=False, allow_blank=True)
 
 
 class KeyPhotoInquirySerializer(serializers.ModelSerializer):

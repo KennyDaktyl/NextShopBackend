@@ -81,7 +81,15 @@ class SendContactEmailView(GenericAPIView):
             message = serializer.validated_data.get("message")
             phone = serializer.validated_data.get("phone")
             stamp_design = serializer.validated_data.get("stamp_design")
-            send_email_by_django(title, email, message, phone=phone, stamp_design=stamp_design)
+            stamp_image = serializer.validated_data.get("stamp_image")
+            send_email_by_django(
+                title,
+                email,
+                message,
+                phone=phone,
+                stamp_design=stamp_design,
+                stamp_image=stamp_image,
+            )
             return Response(
                 {"message": "Email sent successfully"},
                 status=status.HTTP_200_OK,
