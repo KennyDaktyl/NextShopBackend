@@ -3,11 +3,18 @@ import re
 from rest_framework import serializers
 
 from web.images.serializers import ThumbnailSerializer
+from web.models.footer_links import FooterLink
 from web.models.heros import Hero
 from web.models.inquiries import KeyPhotoInquiry
 
 PHONE_REGEX = re.compile(r"^(\+48[\s-]?)?(\d[\s-]?){9}$")
 MAX_PHOTO_SIZE = 10 * 1024 * 1024  # 10 MB
+
+
+class FooterLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FooterLink
+        fields = ("name", "url", "description", "link_type")
 
 
 def validate_phone_number(value):

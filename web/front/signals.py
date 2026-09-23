@@ -5,6 +5,7 @@ import requests
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
+from web.models.footer_links import FooterLink
 from web.models.heros import Hero
 
 
@@ -19,6 +20,25 @@ def revalidate_hero_cache(sender, instance, **kwargs):
         first_page_tag = "first-page"
         tags.append(first_page_tag)
 
+        response = requests.post(next_js_url, json={"tags": tags})
+        response.raise_for_status()
+        logger.info(
+            f"Successfully revalidated cache for instance {instance} and tags {tags}"
+        )
+    except requests.exceptions.RequestException as e:
+        logger.error(
+            f"Error revalidating cache for instance {instance.id}: {e}"
+        )
+
+
+@receiver(post_save, sender=FooterLink)
+@receiver(post_delete, sender=FooterLink)
+def revalidate_footer_links_cache(sender, instance, **kwargs):
+    next_js_url = (
+        os.environ.get("NEXTJS_BASE_URL") + "/api/webhooks/revalidate"
+    )
+    try:
+        tags = ["footer-links"]
         response = requests.post(next_js_url, json={"tags": tags})
         response.raise_for_status()
         logger.info(

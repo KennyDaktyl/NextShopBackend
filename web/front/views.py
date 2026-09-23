@@ -1,17 +1,23 @@
 from django.db.models import Prefetch
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from web.articles.serializers import ArticlesListSerializer
 from web.categories.serializers import CategoryListOnFirstPageSerializer
-from web.front.serializers import ContactEmailSerializer, HeroSerializer, KeyPhotoInquirySerializer
+from web.front.serializers import (
+    ContactEmailSerializer,
+    FooterLinkSerializer,
+    HeroSerializer,
+    KeyPhotoInquirySerializer,
+)
 from web.functions import send_email_by_django, send_key_photo_inquiry_email
 from web.models.articles import Article
 from web.models.categories import Category
+from web.models.footer_links import FooterLink
 from web.models.heros import Hero
 
 
@@ -49,6 +55,15 @@ class FirstPageView(GenericAPIView):
             {"categories": categories_serialized, "heros": heros_serialized, "articles": articles_serialized},
             status=status.HTTP_200_OK,
         )
+
+
+class FooterLinkListView(ListAPIView):
+    serializer_class = FooterLinkSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+
+    def get_queryset(self):
+        return FooterLink.objects.filter(is_active=True)
 
 
 class ContactView(GenericAPIView):
@@ -121,5 +136,6 @@ class KeyPhotoInquiryView(GenericAPIView):
 
 first_page_view = FirstPageView.as_view()
 contact_view = ContactView.as_view()
+footer_links_view = FooterLinkListView.as_view()
 senf_contact_email = SendContactEmailView.as_view()
 key_photo_inquiry_view = KeyPhotoInquiryView.as_view()

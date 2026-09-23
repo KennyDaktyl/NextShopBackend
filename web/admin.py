@@ -8,6 +8,7 @@ from web.models.accounts import Profile
 from web.models.articles import Article
 from web.models.categories import Category, MobileServiceSettings, ServiceLocality
 from web.models.deliveries import Delivery
+from web.models.footer_links import FooterLink
 from web.models.heros import Hero
 from web.models.images import Photo, Thumbnail
 from web.models.inquiries import KeyPhotoInquiry
@@ -178,6 +179,14 @@ class ServiceLocalityAdmin(admin.ModelAdmin):
     list_filter = ("is_active", "region_label")
     search_fields = ("name", "region_label")
     prepopulated_fields = {"slug": ("name",)}
+
+
+@admin.register(FooterLink)
+class FooterLinkAdmin(admin.ModelAdmin):
+    list_display = ("name", "url", "link_type", "order", "is_active")
+    list_filter = ("link_type", "is_active")
+    list_editable = ("order", "is_active")
+    search_fields = ("name", "url")
 
 
 class ProductPriceInline(admin.TabularInline):
