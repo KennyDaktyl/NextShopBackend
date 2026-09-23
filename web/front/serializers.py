@@ -56,6 +56,9 @@ class ContactEmailSerializer(serializers.Serializer):
     phone = serializers.CharField(required=False, allow_blank=True)
     stamp_design = StampDesignLineSerializer(many=True, required=False, min_length=1, max_length=8)
     stamp_image = serializers.CharField(required=False, allow_blank=True)
+    stamp_color = serializers.ChoiceField(
+        choices=["black", "red", "green", "blue"], required=False, default="black"
+    )
 
 
 class KeyPhotoInquirySerializer(serializers.ModelSerializer):

@@ -82,6 +82,7 @@ class SendContactEmailView(GenericAPIView):
             phone = serializer.validated_data.get("phone")
             stamp_design = serializer.validated_data.get("stamp_design")
             stamp_image = serializer.validated_data.get("stamp_image")
+            stamp_color = serializer.validated_data.get("stamp_color")
             send_email_by_django(
                 title,
                 email,
@@ -89,6 +90,7 @@ class SendContactEmailView(GenericAPIView):
                 phone=phone,
                 stamp_design=stamp_design,
                 stamp_image=stamp_image,
+                stamp_color=stamp_color,
             )
             return Response(
                 {"message": "Email sent successfully"},

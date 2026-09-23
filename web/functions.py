@@ -12,6 +12,13 @@ ALIGN_LABELS = {
     "right": "do prawej",
 }
 
+COLOR_LABELS = {
+    "black": "czarny",
+    "red": "czerwony",
+    "green": "zielony",
+    "blue": "niebieski",
+}
+
 
 def render_stamp_design_html(stamp_design):
     rows = "".join(
@@ -27,7 +34,13 @@ def render_stamp_design_html(stamp_design):
 
 
 def send_email_by_django(
-    title, email, message, phone=None, stamp_design=None, stamp_image=None
+    title,
+    email,
+    message,
+    phone=None,
+    stamp_design=None,
+    stamp_image=None,
+    stamp_color=None,
 ):
     subject, from_email, to = (
         title,
@@ -37,6 +50,11 @@ def send_email_by_django(
 
     phone_html = f"<p>Telefon: <strong>{phone}</strong></p>" if phone else ""
     stamp_design_html = render_stamp_design_html(stamp_design) if stamp_design else ""
+    stamp_color_html = (
+        f"<p>Kolor tuszu: <strong>{COLOR_LABELS.get(stamp_color, stamp_color)}</strong></p>"
+        if stamp_color
+        else ""
+    )
 
     html_content = f"""
     <html>
@@ -45,6 +63,7 @@ def send_email_by_django(
             <p>Message from: <h3>{email}</h3></p>
             {phone_html}
             <p>{message}</p>
+            {stamp_color_html}
             {stamp_design_html}
         </body>
     </html>
