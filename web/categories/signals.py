@@ -30,6 +30,9 @@ def revalidate_product_cache_category(sender, instance, **kwargs):
         categories_link_path = "categories-path"
         tags.append(categories_link_path)
 
+        mega_menu_tag = "mega-menu"
+        tags.append(mega_menu_tag)
+
         current_category = instance
         while current_category:
             products_category = f"products-{current_category.slug}"
