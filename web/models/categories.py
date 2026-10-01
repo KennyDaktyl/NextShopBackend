@@ -281,6 +281,18 @@ class ServiceLocality(models.Model):
     region_label = models.CharField(
         verbose_name="Etykieta regionu (gmina / dzielnica)", max_length=150
     )
+    name_to = models.CharField(
+        verbose_name="Odmiana: dokąd (np. „do Alwerni”, „na Krowodrzę”)",
+        max_length=120,
+        blank=True,
+        default="",
+    )
+    name_in = models.CharField(
+        verbose_name="Odmiana: gdzie (np. „w Alwerni”, „na Krowodrzy”)",
+        max_length=120,
+        blank=True,
+        default="",
+    )
     local_note = models.TextField(
         verbose_name="Opis lokalny (unikalny fragment treści SEO)",
     )

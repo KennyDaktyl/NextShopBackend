@@ -175,7 +175,7 @@ class MobileServiceSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(ServiceLocality)
 class ServiceLocalityAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "region_label", "order", "is_active")
+    list_display = ("name", "name_to", "name_in", "slug", "region_label", "order", "is_active")
     list_filter = ("is_active", "region_label")
     search_fields = ("name", "region_label")
     prepopulated_fields = {"slug": ("name",)}

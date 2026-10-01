@@ -28,6 +28,8 @@ class ServiceLocalitySerializer(serializers.ModelSerializer):
             "name",
             "slug",
             "region_label",
+            "name_to",
+            "name_in",
             "local_note",
         )
 
