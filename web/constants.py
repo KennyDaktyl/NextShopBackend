@@ -52,4 +52,7 @@ VARIANT_COLORS = (
 # Zrealizowane, Anulowane) wysyła klientowi e-mail - tylko dla zamówień
 # z wysyłką (nie odbiór osobisty). Inne zmiany statusu - bez maila.
 STATUS_FOR_SEND_EMAIL = [3, 9, 12, 13, 14]
+# Statusy ustawiane przez sklep (admin, webhook Stripe). Frontend klienta
+# (np. odświeżenie strony po złożeniu zamówienia) nie może ich już zmienić.
+STATUS_LOCKED_FOR_CLIENT = [3, 5, 9, 10, 11, 12, 13, 14]
 STATUS_TO_MAKE_INVOICE = [3, 5, 8, 9, 12, 13]

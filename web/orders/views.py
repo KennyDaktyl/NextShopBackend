@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from web.carts.cart import Cart
+from web.constants import STATUS_LOCKED_FOR_CLIENT
 from web.models.deliveries import Delivery
 from web.models.orders import Order
 from web.models.payments import Payment
@@ -191,19 +192,42 @@ class UpdateOrderStatus(GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        try:
+            new_status = int(new_status)
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "Invalid status."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         if checkout_session_id:
             instance.checkout_session_id = checkout_session_id
-            instance.save()
+            instance.save(update_fields=["checkout_session_id"])
 
-        # E-mail o zmianie statusu wysyła sygnał post_save zamówienia.
         if (
             new_status == 3
             and instance.payment_method.payment_online
             and not instance.is_paid
         ):
-            instance.status = 4
-        else:
-            instance.status = new_status
+            new_status = 4
+
+        if instance.status in STATUS_LOCKED_FOR_CLIENT:
+            # Zamówienie jest już opłacone / wysłane / zakończone przez
+            # sklep - np. odświeżenie strony zamówienia nie może cofnąć
+            # statusu ustawionego w adminie.
+            return Response(
+                {"detail": "Order status locked, not changed."},
+                status=status.HTTP_200_OK,
+            )
+
+        if new_status == instance.status:
+            return Response(
+                {"detail": "Order status unchanged."},
+                status=status.HTTP_200_OK,
+            )
+
+        # E-mail o zmianie statusu wysyła sygnał post_save zamówienia.
+        instance.status = new_status
         instance.save()
 
         return Response(
