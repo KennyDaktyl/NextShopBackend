@@ -50,17 +50,14 @@ def generate_invoice_for_order(order, admin=False):
             order=order
         )
         if not invoice.number:
-            now = timezone.localtime()
+            now = timezone.now()
             invoice.number = _next_invoice_number(
                 now.strftime("%m"), now.strftime("%Y")
             )
             invoice.save(update_fields=["number"])
 
     invoice_number = invoice.override_number or invoice.number
-    invoice_date = (
-        invoice.override_date
-        or timezone.localtime(invoice.created_time).date()
-    )
+    invoice_date = invoice.override_date or invoice.created_time.date()
     old_pdf_name = invoice.pdf.name if invoice.pdf else None
 
     unique_uuid = uuid.uuid4()
