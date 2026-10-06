@@ -73,7 +73,9 @@ class StripeWebhookView(View):
                 else:
                     order.status = 4
                 order.save()
-                send_email_order_status(order)
+                # Przy opłaceniu (status 3) e-mail wysyła sygnał post_save.
+                if order.status != 3:
+                    send_email_order_status(order)
             except Order.DoesNotExist:
                 pass
 

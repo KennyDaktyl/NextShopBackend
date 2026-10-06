@@ -382,6 +382,7 @@ class OrderAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "inpost_box_id",
+                    "tracking_number",
                     "street",
                     "house_number",
                     "local_number",

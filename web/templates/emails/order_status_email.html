@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Potwierdzenie zamówienia</title>
+    <title>{% if status_changed %}Zmiana statusu zamówienia{% else %}Potwierdzenie zamówienia{% endif %}</title>
     <style>
         /* Stylizacja globalna */
         body {
@@ -136,6 +136,19 @@
             border-top: 1px solid #ddd;
         }
 
+        .status-box {
+            padding: 12px 16px;
+            margin: 16px 0;
+            background-color: #eef5ff;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+
+        .status-box.status-cancelled {
+            background-color: #fdeeee;
+            border-left-color: #dc3545;
+        }
+
         .footer {
             font-size: 12px;
             color: #999;
@@ -145,9 +158,43 @@
 </head>
 <body>
     <div class="container">
+        {% if status_changed %}
+        <h1>Zmieniono status zamówienia #{{ order.order_number }}</h1>
+        <p>Drogi Kliencie <span class="text-bold">{{ order.client_name }}</span>,</p>
+        <div class="status-box{% if order.status == 14 %} status-cancelled{% endif %}">
+            <p><strong>Nowy status zamówienia:</strong>
+                <span class="badge badge-status">{{ order.get_status_display }}</span>
+            </p>
+            {% if order.status == 3 %}
+                <p>Otrzymaliśmy płatność za Twoje zamówienie. Przystępujemy do jego realizacji.</p>
+            {% elif order.status == 9 %}
+                <p>Twoje zamówienie zostało przekazane do dostawy.</p>
+            {% elif order.status == 12 %}
+                {% if order.delivery_method.inpost_box %}
+                    <p>Twoja paczka czeka na odbiór w paczkomacie{% if order.inpost_box_id %} {{ order.inpost_box_id }}{% endif %}.</p>
+                {% else %}
+                    <p>Twoja paczka jest gotowa do odbioru.</p>
+                {% endif %}
+            {% elif order.status == 13 %}
+                <p>Twoje zamówienie zostało zrealizowane. Dziękujemy za zakupy!</p>
+            {% elif order.status == 14 %}
+                <p>Twoje zamówienie zostało anulowane. Jeśli masz pytania, skontaktuj się z nami.</p>
+            {% endif %}
+        </div>
+        {% if order.tracking_number and not order.delivery_method.in_store_pickup %}
+        <div class="status-box">
+            <p><strong>Numer przesyłki InPost:</strong> {{ order.tracking_number }}</p>
+            <p>Status paczki możesz sprawdzić na stronie InPost:
+                <a href="https://inpost.pl/sledzenie-przesylek?number={{ order.tracking_number|urlencode }}">śledź przesyłkę</a>
+            </p>
+        </div>
+        {% endif %}
+        <p>Poniżej szczegóły Twojego zamówienia:</p>
+        {% else %}
         <h1>Potwierdzenie zamówienia #{{ order.order_number }}</h1>
         <p>Drogi Kliencie <span class="text-bold">{{ order.client_name }}</span>,</p>
         <p>Dziękujemy za złożenie zamówienia w naszym sklepie. Oto szczegóły Twojego zamówienia:</p>
+        {% endif %}
         
         <h2>Dane zamówienia:</h2>
         <ul>
@@ -170,6 +217,9 @@
             <li><strong>Sposób dostawy:</strong> {{ order.delivery_method.name }}</li>
             {% if order.inpost_box_id and order.delivery_method.inpost_box %}
                 <li><strong>Id paczkomatu:</strong> {{ order.inpost_box_id }}</li>
+            {% endif %}
+            {% if order.tracking_number and not order.delivery_method.in_store_pickup %}
+                <li><strong>Numer przesyłki InPost:</strong> {{ order.tracking_number }}</li>
             {% endif %}
             <li><strong>Sposób płatności:</strong> {{ order.payment_method.name }}</li>
             <a href="{{ order.link }}" ><strong>Link do zamówienia:</strong></a>

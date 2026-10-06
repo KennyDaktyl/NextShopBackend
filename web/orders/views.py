@@ -15,8 +15,6 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from web.carts.cart import Cart
-from web.constants import STATUS_FOR_SEND_EMAIL
-from web.functions import send_email_order_status
 from web.models.deliveries import Delivery
 from web.models.orders import Order
 from web.models.payments import Payment
@@ -197,25 +195,16 @@ class UpdateOrderStatus(GenericAPIView):
             instance.checkout_session_id = checkout_session_id
             instance.save()
 
+        # E-mail o zmianie statusu wysyła sygnał post_save zamówienia.
         if (
-            new_status != instance.status
-            and not checkout_session_id
-            and instance.email_notification
-            and new_status in STATUS_FOR_SEND_EMAIL
+            new_status == 3
+            and instance.payment_method.payment_online
+            and not instance.is_paid
         ):
-            instance.status = new_status
-            instance.save()
-            send_email_order_status(instance)
+            instance.status = 4
         else:
-            if (
-                new_status == 3
-                and instance.payment_method.payment_online
-                and not instance.is_paid
-            ):
-                instance.status = 4
-            else:
-                instance.status = new_status
-            instance.save()
+            instance.status = new_status
+        instance.save()
 
         return Response(
             {"detail": "Order status updated successfully."},

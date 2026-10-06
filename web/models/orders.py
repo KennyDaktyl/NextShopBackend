@@ -195,6 +195,12 @@ class Order(models.Model):
     link = models.URLField(
         verbose_name="Link do zamówienia", null=True, blank=True
     )
+    tracking_number = models.CharField(
+        verbose_name="Numer przesyłki InPost",
+        max_length=64,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = "Zamówienie"
@@ -214,10 +220,12 @@ class Order(models.Model):
                 + str(self.uid)
             )
         self.is_paid_changed = False
+        self.is_status_changed = False
         if self.pk:
             old_order_data = Order.objects.get(pk=self.pk)
             if old_order_data.status != self.status:
                 self.prev_status = old_order_data.status
+                self.is_status_changed = True
             if old_order_data.is_paid != self.is_paid:
                 self.is_paid_changed = True
         super().save(*args, **kwargs)

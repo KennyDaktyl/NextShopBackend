@@ -137,8 +137,14 @@ def send_activation_info_for_owner(title, message, user):
     return True
 
 
-def send_email_order_status(order):
-    subject = f"Zamówienie w Serwisie w Rybnej nr: {order.order_number} Zmiana statusu"
+def send_email_order_status(order, status_changed=False):
+    if status_changed:
+        subject = (
+            f"Zmieniono status zamówienia nr {order.order_number} "
+            f"na: {order.get_status_display()} - Serwis w Rybnej"
+        )
+    else:
+        subject = f"Zamówienie w Serwisie w Rybnej nr: {order.order_number} Zmiana statusu"
     from_email = settings.EMAIL_HOST_USER
     to = [
         settings.EMAIL_HOST_USER,
@@ -161,6 +167,7 @@ def send_email_order_status(order):
         {
             "order": order,
             "cart_items": cart_items,
+            "status_changed": status_changed,
         },
     )
 

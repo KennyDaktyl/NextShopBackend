@@ -48,5 +48,8 @@ VARIANT_COLORS = (
 )
 
 
-STATUS_FOR_SEND_EMAIL = [3, 5, 9, 12, 14]
+# Zmiana statusu na jeden z tych (Opłacone, W dostawie, Gotowe do odbioru,
+# Zrealizowane, Anulowane) wysyła klientowi e-mail - tylko dla zamówień
+# z wysyłką (nie odbiór osobisty). Inne zmiany statusu - bez maila.
+STATUS_FOR_SEND_EMAIL = [3, 9, 12, 13, 14]
 STATUS_TO_MAKE_INVOICE = [3, 5, 8, 9, 12, 13]
