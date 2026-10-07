@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import timedelta
 
 from django import template
@@ -55,3 +56,12 @@ def multiply(value, arg):
         return float(value) * float(arg)
     except (ValueError, TypeError):
         return value
+
+
+@register.filter
+def invoice_number_display(value):
+    """faktura-00002-10-2026 -> 00002/10/2026 (tylko do wyświetlania)."""
+    match = re.match(r"^faktura-(\d+)-(\d{2})-(\d{4})$", str(value or ""))
+    if not match:
+        return value
+    return "/".join(match.groups())

@@ -146,7 +146,7 @@
         {% if order.nip %}NIP: {{ order.nip }}{% endif %}
       </p>
       {% if order.company_payer %}
-      <p><strong>Płatnik/Odbiorca:</strong></p>
+      <p><strong>Odbiorca:</strong></p>
       <p>{{ order.company_payer }}</p>
       {% endif %}
     </div>
@@ -161,7 +161,7 @@
     </div>
   </div>
 
-  <h4>Faktura VAT {% if not invoice_number %}{{ order.invoice.number }}{% else %}{{ invoice_number }}{% endif %}</h4>
+  <h4>Faktura VAT nr {% if not invoice_number %}{{ order.invoice.number|invoice_number_display }}{% else %}{{ invoice_number|invoice_number_display }}{% endif %}</h4>
 
   {% with items=order.order_items.all has_discount=order.has_discount %}
   <table>
@@ -171,17 +171,12 @@
         <th>Nazwa towaru lub usługi</th>
         <th>Jm.</th>
         <th>Ilość</th>
-        <th>Cena netto</th>
+        <th>Cena jedn. brutto{% if has_discount %} przed rabatem{% endif %}</th>
         {% if has_discount %}
         <th>Rabat</th>
-        <th>Cena netto po rabacie</th>
-        <th>Wartość netto po rabacie</th>
-        {% else %}
-        <th>Cena brutto</th>
-        <th>Wartość netto</th>
+        <th>Cena jedn. brutto po rabacie</th>
         {% endif %}
         <th>Stawka VAT</th>
-        <th>Kwota VAT</th>
         <th>Wartość brutto{% if has_discount %} po rabacie{% endif %}</th>
       </tr>
     </thead>
@@ -196,17 +191,34 @@
         </td>
         <td>szt.</td>
         <td>{{ item.qty }}</td>
-        <td>{{ item.price_net|floatformat:2 }}</td>
+        <td>{{ item.price_gross|floatformat:2 }}</td>
         {% if has_discount %}
         <td>{{ item.discount|floatformat:"-2" }}%</td>
-        <td>{{ item.price_net_after_discount|floatformat:2 }}</td>
-        {% else %}
-        <td>{{ item.price_gross|floatformat:2 }}</td>
+        <td>{{ item.price_gross_after_discount|floatformat:2 }}</td>
         {% endif %}
-        <td>{{ item.value_net_after_discount|floatformat:2 }}</td>
         <td>{{ item.vat_rate }}%</td>
-        <td>{{ item.vat_value|floatformat:2 }}</td>
         <td>{{ item.value_gross_after_discount|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Stawka VAT</th>
+        <th>Wartość netto</th>
+        <th>Kwota VAT</th>
+        <th>Wartość brutto</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in order.vat_summary %}
+      <tr>
+        <td>{{ row.rate }}%</td>
+        <td>{{ row.net|floatformat:2 }}</td>
+        <td>{{ row.vat|floatformat:2 }}</td>
+        <td>{{ row.gross|floatformat:2 }}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -224,15 +236,15 @@
     </tr>
     {% endif %}
     <tr>
-      <th>Podstawowy podatek VAT 23%</th>
-      <td>{{ order.vat_amount|floatformat:2 }}</td>
-    </tr>
-    <tr>
-      <th>Wartość netto{% if has_discount %} po rabacie{% endif %}</th>
+      <th>Wartość netto</th>
       <td>{{ order.net_amount|floatformat:2 }}</td>
     </tr>
     <tr>
-      <th>Wartość brutto{% if has_discount %} po rabacie{% endif %}</th>
+      <th>Kwota VAT</th>
+      <td>{{ order.vat_amount|floatformat:2 }}</td>
+    </tr>
+    <tr>
+      <th>Wartość brutto</th>
       <td>{{ order.amount|floatformat:2 }}</td>
     </tr>
   </table>
@@ -248,9 +260,9 @@
       <th>Termin płatności:</th>
       <td>
         {% if not invoice_date %}
-          {{ order.payment_method.payment_deferral }} dni {{ order.invoice.created_time|date_add:order.payment_method.payment_deferral }}
+          {{ order.payment_method.payment_deferral }} dni (do {{ order.invoice.created_time|date_add:order.payment_method.payment_deferral|date:"d.m.Y" }})
         {% else %}
-          {{ order.payment_method.payment_deferral }} dni {{ invoice_date|date_add:order.payment_method.payment_deferral }}
+          {{ order.payment_method.payment_deferral }} dni (do {{ invoice_date|date_add:order.payment_method.payment_deferral|date:"d.m.Y" }})
         {% endif %}
       </td>
     </tr>

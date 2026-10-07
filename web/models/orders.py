@@ -328,16 +328,33 @@ class Order(models.Model):
         return self.regular_amount - self.amount
 
     @property
+    def vat_summary(self):
+        """Zestawienie według stawek VAT, liczone od sumy brutto w stawce.
+
+        Metoda "od brutto" (art. 106e ust. 8): VAT = brutto * s / (100 + s)
+        od sumy wartości sprzedaży w danej stawce, a nie suma VAT pozycji.
+        """
+        gross_by_rate = {}
+        for item in self.order_items.all():
+            gross_by_rate[item.vat_rate] = (
+                gross_by_rate.get(item.vat_rate, Decimal("0.00"))
+                + item.value_gross_after_discount
+            )
+        summary = []
+        for rate, gross in sorted(gross_by_rate.items(), reverse=True):
+            vat = round_money(gross * rate / (100 + rate))
+            summary.append(
+                {"rate": rate, "net": gross - vat, "vat": vat, "gross": gross}
+            )
+        return summary
+
+    @property
     def net_amount(self):
-        """Suma netto po rabacie - suma wartości netto pozycji."""
-        return sum(
-            (item.value_net_after_discount for item in self.order_items.all()),
-            Decimal("0.00"),
-        )
+        return sum((row["net"] for row in self.vat_summary), Decimal("0.00"))
 
     @property
     def vat_amount(self):
-        return self.amount - self.net_amount
+        return sum((row["vat"] for row in self.vat_summary), Decimal("0.00"))
 
 
 def round_money(value):
