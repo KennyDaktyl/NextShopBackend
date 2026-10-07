@@ -1,10 +1,10 @@
 from django.db import transaction
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 from web.constants import STATUS_FOR_SEND_EMAIL
 from web.functions import send_email_order_status
-from web.models.orders import Invoice, Order
+from web.models.orders import Invoice, Order, OrderItem
 from web.utils import generate_invoice_for_order
 
 STATUS_TO_MAKE_INVOICE = [3, 5, 8, 9, 12, 13]
@@ -26,6 +26,7 @@ def oder_create_or_update_signals(sender, instance, created, **kwargs):
     # instance.save(update_fields=...) poniżej je resetuje.
     is_status_changed = getattr(instance, "is_status_changed", False)
     is_paid_changed = getattr(instance, "is_paid_changed", False)
+    is_totals_changed = getattr(instance, "is_totals_changed", False)
 
     if (
         instance.make_invoice
@@ -38,11 +39,11 @@ def oder_create_or_update_signals(sender, instance, created, **kwargs):
     elif (
         instance.make_invoice
         and instance.invoice_created
-        and is_paid_changed
+        and (is_paid_changed or is_totals_changed)
     ):
-        # Status "Opłacone" zmienił się po tym, jak faktura została już
-        # wystawiona - trzeba przerenderować PDF, żeby pokazywał
-        # "Zapłacono" zamiast "Do zapłaty" (lub odwrotnie).
+        # Status "Opłacone" lub kwoty (np. rabat) zmieniły się po tym, jak
+        # faktura została już wystawiona - przerenderowujemy PDF z tym
+        # samym numerem.
         generate_invoice_for_order(instance)
 
     if (
@@ -53,3 +54,12 @@ def oder_create_or_update_signals(sender, instance, created, **kwargs):
     ):
         order_pk = instance.pk
         transaction.on_commit(lambda: send_status_changed_email(order_pk))
+
+
+@receiver(post_save, sender=OrderItem)
+@receiver(post_delete, sender=OrderItem)
+def order_item_changed(sender, instance, **kwargs):
+    # Zapis przez update() - bez ponownego wywołania sygnałów Order.
+    order = Order.objects.filter(pk=instance.order_id).first()
+    if order is not None:
+        order.update_totals()

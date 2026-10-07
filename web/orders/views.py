@@ -2,6 +2,7 @@ import json
 from decimal import Decimal
 
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -17,7 +18,8 @@ from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 from web.carts.cart import Cart
 from web.constants import STATUS_LOCKED_FOR_CLIENT
 from web.models.deliveries import Delivery
-from web.models.orders import Order
+from web.models.orders import Order, OrderItem
+from web.models.products import Product
 from web.models.payments import Payment
 
 from .serializers import CreateOrderSerializer, OrderSerializer
@@ -37,6 +39,49 @@ class DecimalEncoder(DjangoJSONEncoder):
         if isinstance(obj, Decimal):
             return str(obj)
         return super(DecimalEncoder, self).default(obj)
+
+
+def create_order_items(order, cart_items, delivery_method, payment_method):
+    """Tworzy pozycje zamówienia z koszyka, dostawy i opłaty za płatność."""
+    product_ids = {item["id"] for item in cart_items}
+    existing_ids = set(
+        Product.objects.filter(id__in=product_ids).values_list("id", flat=True)
+    )
+    items = [
+        OrderItem(
+            order=order,
+            item_type=OrderItem.TYPE_PRODUCT,
+            product_id=item["id"] if item["id"] in existing_ids else None,
+            name=item["name"],
+            variant=item.get("variant"),
+            selected_option=item.get("selected_option"),
+            info=item.get("info"),
+            qty=item["quantity"],
+            price_gross=Decimal(str(item["price"])),
+        )
+        for item in cart_items
+    ]
+    if not delivery_method.in_store_pickup or delivery_method.price:
+        items.append(
+            OrderItem(
+                order=order,
+                item_type=OrderItem.TYPE_DELIVERY,
+                name="Usługa kurierska",
+                price_gross=delivery_method.price,
+            )
+        )
+    if payment_method.price:
+        items.append(
+            OrderItem(
+                order=order,
+                item_type=OrderItem.TYPE_PAYMENT,
+                name="Płatność za pobraniem",
+                price_gross=payment_method.price,
+            )
+        )
+    # save() zamiast bulk_create - liczy cenę netto i przelicza sumy.
+    for item in items:
+        item.save()
 
 
 class CreateOrderView(GenericAPIView):
@@ -109,9 +154,13 @@ class CreateOrderView(GenericAPIView):
             order_serializer.validated_data["payment_price"] = (
                 payment_method.price
             )
-            order = Order.objects.create(
-                **order_serializer.validated_data,
-            )
+            with transaction.atomic():
+                order = Order.objects.create(
+                    **order_serializer.validated_data,
+                )
+                create_order_items(
+                    order, cart.get_items(), delivery_method, payment_method
+                )
 
             return Response(
                 {"order_uid": order.uid}, status=status.HTTP_201_CREATED

@@ -239,6 +239,26 @@
                 </tr>
             </thead>
             <tbody>
+                {% for item in order_items %}
+                <tr>
+                    <td class="text-bold">
+                        {{ item.name }}<br>
+                    </td>
+                    <td>{{ item.qty }}</td>
+                    <td>
+                        {% if item.discount %}<s>{{ item.price_gross|floatformat:2 }} zł</s><br>{{ item.price_gross_after_discount|floatformat:2 }} zł (-{{ item.discount|floatformat:"-2" }}%){% else %}{{ item.price_gross|floatformat:2 }} zł{% endif %}
+                    </td>
+                    <td>
+                        {% if item.variant %}<small>{{ item.variant }}</small>{% endif %}
+                        {% if item.variant and item.selected_option %}<small><br></small>{% endif %}
+                        {% if item.selected_option %}<small>{{ item.selected_option }}</small>{% endif %}
+                        </td>
+                    <td>{{ item.qty }} * {{ item.price_gross_after_discount|floatformat:2 }} = {{ item.value_gross_after_discount|floatformat:2 }} zł</td>
+                    <td>
+                        {% if item.info %} <span class="text-small-bold">Info:</span> {{ item.info }} {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
                 {% for item in cart_items %}
                 <tr>
                     <td class="text-bold">
@@ -257,13 +277,14 @@
                     </td>
                 </tr>
                 {% endfor %}
+                {% endfor %}
             </tbody>
         </table>
 
         <h2>Podsumowanie:</h2>
         <table class="summary-table">
             <tr>
-                <th>Cena produktów:</th>
+                <th>Cena produktów{% if order.has_discount %} po rabacie{% endif %}:</th>
                 <td>{{ order.cart_items_price }} zł</td>
             </tr>
             {% if order.delivery_price %}
@@ -278,10 +299,10 @@
                 <td>{{ order.payment_price }} zł</td>
             </tr>
             {% endif %}
-            {% if order.discount %}
+            {% if order.has_discount %}
             <tr>
-                <th>Rabat:</th>
-                <td>{{ order.discount }} zł</td>
+                <th>Rabat (uwzględniony w cenach):</th>
+                <td>-{{ order.discount_amount|floatformat:2 }} zł{% if order.discount %} ({{ order.discount|floatformat:"-2" }}% na produkty){% endif %}</td>
             </tr>
             {% endif %}
             <tr class="summary-row">

@@ -163,6 +163,7 @@
 
   <h4>Faktura VAT {% if not invoice_number %}{{ order.invoice.number }}{% else %}{{ invoice_number }}{% endif %}</h4>
 
+  {% with items=order.order_items.all has_discount=order.has_discount %}
   <table>
     <thead>
       <tr>
@@ -171,15 +172,21 @@
         <th>Jm.</th>
         <th>Ilość</th>
         <th>Cena netto</th>
+        {% if has_discount %}
+        <th>Rabat</th>
+        <th>Cena netto po rabacie</th>
+        <th>Wartość netto po rabacie</th>
+        {% else %}
         <th>Cena brutto</th>
         <th>Wartość netto</th>
+        {% endif %}
         <th>Stawka VAT</th>
         <th>Kwota VAT</th>
-        <th>Wartość brutto</th>
+        <th>Wartość brutto{% if has_discount %} po rabacie{% endif %}</th>
       </tr>
     </thead>
     <tbody>
-      {% for item in order.cart_items|json_loads %}
+      {% for item in items %}
       <tr>
         <td>{{ forloop.counter }}</td>
         <td>{{ item.name }}<br>
@@ -188,60 +195,48 @@
           {% if item.selected_option %}<small>{{ item.selected_option }}</small>{% endif %}
         </td>
         <td>szt.</td>
-        <td>{{ item.quantity }}</td>
-        <td>{{ item.price|div:1.23|floatformat:2 }}</td>
-        <td>{{ item.price|floatformat:2 }}</td>
-        <td>{{ item.price|div:1.23|mul:item.quantity|floatformat:2 }}</td>
-        <td>23%</td>
-        <td>{{ item.price|mul:item.quantity|vat_value|floatformat:2 }}</td>
-        <td>{{ item.price|mul:item.quantity|floatformat:2 }}</td>
+        <td>{{ item.qty }}</td>
+        <td>{{ item.price_net|floatformat:2 }}</td>
+        {% if has_discount %}
+        <td>{{ item.discount|floatformat:"-2" }}%</td>
+        <td>{{ item.price_net_after_discount|floatformat:2 }}</td>
+        {% else %}
+        <td>{{ item.price_gross|floatformat:2 }}</td>
+        {% endif %}
+        <td>{{ item.value_net_after_discount|floatformat:2 }}</td>
+        <td>{{ item.vat_rate }}%</td>
+        <td>{{ item.vat_value|floatformat:2 }}</td>
+        <td>{{ item.value_gross_after_discount|floatformat:2 }}</td>
       </tr>
       {% endfor %}
-      {% if not order.delivery_method.in_store_pickup %}
-      <tr>
-        <td>{{ forloop.counter|add:"1" }}</td>
-        <td>Usługa kurierska</td>
-        <td>szt.</td>
-        <td>1</td>
-        <td>{{ order.delivery_price|div:1.23|floatformat:2 }}</td>
-        <td>{{ order.delivery_price|floatformat:2 }}</td>
-        <td>{{ order.delivery_price|div:1.23|floatformat:2 }}</td>
-        <td>23%</td>
-        <td>{{ order.delivery_price|vat_value|floatformat:2 }}</td>
-        <td>{{ order.delivery_price|floatformat:2 }}</td>
-      </tr>
-      {% endif %}
-      {% if order.payment_price %}
-      <tr>
-        <td>{{ forloop.counter|add:"2" }}</td>
-        <td>Płatność za pobraniem</td>
-        <td>szt.</td>
-        <td>1</td>
-        <td>{{ order.payment_price|div:1.23|floatformat:2 }}</td>
-        <td>{{ order.payment_price|floatformat:2 }}</td>
-        <td>{{ order.payment_price|div:1.23|floatformat:2 }}</td>
-        <td>23%</td>
-        <td>{{ order.payment_price|vat_value|floatformat:2 }}</td>
-        <td>{{ order.payment_price|floatformat:2 }}</td>
-      </tr>
-      {% endif %}
     </tbody>
   </table>
 
   <table class="summary-table">
+    {% if has_discount %}
+    <tr>
+      <th>Wartość brutto przed rabatem</th>
+      <td>{{ order.regular_amount|floatformat:2 }}</td>
+    </tr>
+    <tr>
+      <th>Rabat</th>
+      <td>-{{ order.discount_amount|floatformat:2 }}</td>
+    </tr>
+    {% endif %}
     <tr>
       <th>Podstawowy podatek VAT 23%</th>
-      <td>{{ order.amount|vat_value|floatformat:2 }}</td>
+      <td>{{ order.vat_amount|floatformat:2 }}</td>
     </tr>
     <tr>
-      <th>Wartość netto</th>
-      <td>{{ order.amount|div:1.23|floatformat:2 }}</td>
+      <th>Wartość netto{% if has_discount %} po rabacie{% endif %}</th>
+      <td>{{ order.net_amount|floatformat:2 }}</td>
     </tr>
     <tr>
-      <th>Wartość brutto</th>
+      <th>Wartość brutto{% if has_discount %} po rabacie{% endif %}</th>
       <td>{{ order.amount|floatformat:2 }}</td>
     </tr>
   </table>
+  {% endwith %}
 
   <table class="summary-table">
     <tr>

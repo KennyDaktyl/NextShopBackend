@@ -1,3 +1,4 @@
+import json
 from decimal import Decimal, InvalidOperation
 from urllib.parse import urljoin
 
@@ -17,9 +18,89 @@ from web.payments.serializers import (
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    price_net_after_discount = serializers.DecimalField(
+        max_digits=10, decimal_places=2, read_only=True
+    )
+    price_gross_after_discount = serializers.DecimalField(
+        max_digits=10, decimal_places=2, read_only=True
+    )
+    value_net_after_discount = serializers.DecimalField(
+        max_digits=10, decimal_places=2, read_only=True
+    )
+    value_gross_after_discount = serializers.DecimalField(
+        max_digits=10, decimal_places=2, read_only=True
+    )
+
     class Meta:
         model = OrderItem
-        fields = "__all__"
+        fields = (
+            "id",
+            "item_type",
+            "product",
+            "name",
+            "variant",
+            "selected_option",
+            "info",
+            "qty",
+            "price_net",
+            "price_gross",
+            "vat_rate",
+            "discount",
+            "price_net_after_discount",
+            "price_gross_after_discount",
+            "value_net_after_discount",
+            "value_gross_after_discount",
+        )
+
+
+def cart_items_from_order_items(order):
+    """Lista produktów w formacie dawnego JSON-a cart_items.
+
+    Frontend parsuje cart_items jako string JSON, więc budujemy go z pozycji
+    zamówienia (ceny po rabacie), a zdjęcie i link bierzemy z zapisanego
+    przy składaniu zamówienia koszyka.
+    """
+    products = [
+        item
+        for item in order.order_items.all()
+        if item.item_type == OrderItem.TYPE_PRODUCT
+    ]
+    snapshot = order.cart_items
+    if isinstance(snapshot, str):
+        try:
+            snapshot = json.loads(snapshot)
+        except ValueError:
+            snapshot = []
+    if not products:
+        return json.dumps(snapshot or [])
+
+    snapshot_by_key = {
+        (el.get("name"), el.get("variant"), el.get("selected_option")): el
+        for el in snapshot or []
+        if isinstance(el, dict)
+    }
+    result = []
+    for item in products:
+        original = snapshot_by_key.get(
+            (item.name, item.variant, item.selected_option), {}
+        )
+        result.append(
+            {
+                "id": item.product_id,
+                "name": item.name,
+                "slug": original.get("slug")
+                or (item.product.slug if item.product else ""),
+                "price": str(item.price_gross_after_discount),
+                "variant": item.variant,
+                "selected_option": item.selected_option,
+                "quantity": item.qty,
+                "image": original.get("image"),
+                "url": original.get("url")
+                or (item.product.full_path if item.product else ""),
+                "info": item.info,
+            }
+        )
+    return json.dumps(result)
 
 
 class InvoiceSerializer(serializers.Serializer):
@@ -51,6 +132,8 @@ class OrdersUserSerializer(serializers.ModelSerializer):
     delivery_method = DeliveriesForOrderSerializer()
     payment_method = PaymentMethodsForOrdersSerializer()
     invoice = InvoiceSerializer()
+    cart_items = serializers.SerializerMethodField()
+    order_items = OrderItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = Order
@@ -68,6 +151,8 @@ class OrdersUserSerializer(serializers.ModelSerializer):
             "payment_price",
             "cart_items_price",
             "cart_items",
+            "order_items",
+            "discount",
             "is_paid",
             "inpost_box_id",
             "street",
@@ -86,16 +171,24 @@ class OrdersUserSerializer(serializers.ModelSerializer):
             "invoice_postal_code",
         )
 
+    def get_cart_items(self, obj):
+        return cart_items_from_order_items(obj)
+
 
 class OrderSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     delivery_method = DeliveriesSerializer()
     payment_method = PaymentMethodsSerializer()
     invoice = InvoiceSerializer()
+    cart_items = serializers.SerializerMethodField()
+    order_items = OrderItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = Order
         fields = "__all__"
+
+    def get_cart_items(self, obj):
+        return cart_items_from_order_items(obj)
 
 
 # class CreateOrderSerializer(serializers.ModelSerializer):

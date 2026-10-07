@@ -159,7 +159,7 @@ def send_email_order_status(order, status_changed=False):
 
     try:
         cart_items = json.loads(order.cart_items)
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, TypeError):
         cart_items = []
 
     html_content = render_to_string(
@@ -167,6 +167,11 @@ def send_email_order_status(order, status_changed=False):
         {
             "order": order,
             "cart_items": cart_items,
+            "order_items": [
+                item
+                for item in order.order_items.all()
+                if item.item_type == item.TYPE_PRODUCT
+            ],
             "status_changed": status_changed,
         },
     )

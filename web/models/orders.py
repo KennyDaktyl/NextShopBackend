@@ -1,7 +1,9 @@
 import os
 import uuid
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 
@@ -63,7 +65,18 @@ class Order(models.Model):
         null=True,
     )
     discount = models.DecimalField(
-        max_digits=10, verbose_name="Rabat", decimal_places=2, default=0
+        max_digits=10,
+        verbose_name="Rabat (%)",
+        decimal_places=2,
+        default=0,
+        validators=[
+            MinValueValidator(Decimal("0")),
+            MaxValueValidator(Decimal("100")),
+        ],
+        help_text=(
+            "Rabat procentowy naliczany od ceny regularnej na wszystkie "
+            "produkty w zamówieniu (bez dostawy i opłaty za płatność)."
+        ),
     )
     info = models.TextField(
         verbose_name="Informacje do zamówienia", null=True, blank=True
@@ -221,6 +234,8 @@ class Order(models.Model):
             )
         self.is_paid_changed = False
         self.is_status_changed = False
+        self.is_discount_changed = False
+        self.is_totals_changed = False
         if self.pk:
             old_order_data = Order.objects.get(pk=self.pk)
             if old_order_data.status != self.status:
@@ -228,46 +243,249 @@ class Order(models.Model):
                 self.is_status_changed = True
             if old_order_data.is_paid != self.is_paid:
                 self.is_paid_changed = True
+            if old_order_data.discount != self.discount:
+                self.is_discount_changed = True
+            # Sumy liczymy przed zapisem, żeby sygnał post_save (faktura)
+            # widział już kwoty po rabacie.
+            if kwargs.get("update_fields") is None:
+                if self.is_discount_changed:
+                    self.apply_discount_to_items()
+                self.recalculate_totals()
+                self.is_totals_changed = self.totals != old_order_data.totals
         super().save(*args, **kwargs)
+
+    def apply_discount_to_items(self):
+        """Ustawia rabat zamówienia na wszystkich pozycjach-produktach."""
+        self.order_items.filter(item_type=OrderItem.TYPE_PRODUCT).update(
+            discount=self.discount
+        )
+
+    def recalculate_totals(self):
+        """Przelicza kwoty zamówienia na podstawie pozycji.
+
+        Zamówienia bez pozycji zostawiamy bez zmian. Zwraca True, jeśli
+        kwoty zostały przeliczone.
+        """
+        items = list(self.order_items.all())
+        if not items:
+            return False
+
+        def total(item_type):
+            return sum(
+                (
+                    item.value_gross_after_discount
+                    for item in items
+                    if item.item_type == item_type
+                ),
+                Decimal("0.00"),
+            )
+
+        self.cart_items_price = total(OrderItem.TYPE_PRODUCT)
+        self.delivery_price = total(OrderItem.TYPE_DELIVERY)
+        self.payment_price = total(OrderItem.TYPE_PAYMENT)
+        self.amount = sum(
+            (item.value_gross_after_discount for item in items),
+            Decimal("0.00"),
+        )
+        has_discount = any(item.discount for item in items)
+        self.amount_with_discount = self.amount if has_discount else None
+        return True
+
+    def update_totals(self):
+        """Przelicza i zapisuje kwoty bez wywoływania sygnałów Order."""
+        if self.recalculate_totals():
+            Order.objects.filter(pk=self.pk).update(
+                amount=self.amount,
+                amount_with_discount=self.amount_with_discount,
+                cart_items_price=self.cart_items_price,
+                delivery_price=self.delivery_price,
+                payment_price=self.payment_price,
+            )
+
+    @property
+    def totals(self):
+        return (
+            self.amount,
+            self.cart_items_price,
+            self.delivery_price,
+            self.payment_price,
+        )
+
+    @property
+    def has_discount(self):
+        return any(item.discount for item in self.order_items.all())
+
+    @property
+    def regular_amount(self):
+        """Suma brutto wszystkich pozycji przed rabatem."""
+        return sum(
+            (item.value_gross for item in self.order_items.all()),
+            Decimal("0.00"),
+        )
+
+    @property
+    def discount_amount(self):
+        return self.regular_amount - self.amount
+
+    @property
+    def net_amount(self):
+        """Suma netto po rabacie - suma wartości netto pozycji."""
+        return sum(
+            (item.value_net_after_discount for item in self.order_items.all()),
+            Decimal("0.00"),
+        )
+
+    @property
+    def vat_amount(self):
+        return self.amount - self.net_amount
+
+
+def round_money(value):
+    return Decimal(value).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
 class OrderItem(models.Model):
+    TYPE_PRODUCT = 0
+    TYPE_DELIVERY = 1
+    TYPE_PAYMENT = 2
+    ITEM_TYPES = (
+        (TYPE_PRODUCT, "Produkt"),
+        (TYPE_DELIVERY, "Dostawa"),
+        (TYPE_PAYMENT, "Opłata za płatność"),
+    )
+
     order = models.ForeignKey(
         "Order",
-        verbose_name="Koszyk",
+        verbose_name="Zamówienie",
         on_delete=models.CASCADE,
         db_index=True,
         related_name="order_items",
     )
+    item_type = models.IntegerField(
+        verbose_name="Rodzaj pozycji",
+        choices=ITEM_TYPES,
+        default=TYPE_PRODUCT,
+    )
     product = models.ForeignKey(
         "Product",
         verbose_name="Produkt",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         db_index=True,
         related_name="items",
+        null=True,
+        blank=True,
     )
     name = models.CharField(
         verbose_name="Nazwa", max_length=255, db_index=True
     )
-    qty = models.IntegerField(verbose_name="Ilość", default=1)
-    price = models.DecimalField(
-        max_digits=10, verbose_name="Cena", decimal_places=2
+    variant = models.CharField(
+        verbose_name="Wariant", max_length=255, null=True, blank=True
     )
-    discount = models.IntegerField(verbose_name="Rabat", default=0)
+    selected_option = models.CharField(
+        verbose_name="Opcja", max_length=255, null=True, blank=True
+    )
+    qty = models.IntegerField(verbose_name="Ilość", default=1)
+    price_net = models.DecimalField(
+        max_digits=10,
+        verbose_name="Cena netto",
+        decimal_places=2,
+        default=0,
+        help_text="Liczona automatycznie z ceny brutto. Zmień tylko cenę "
+        "netto, aby przeliczyć cenę brutto.",
+    )
+    price_gross = models.DecimalField(
+        max_digits=10, verbose_name="Cena brutto", decimal_places=2, default=0
+    )
+    vat_rate = models.IntegerField(verbose_name="Stawka VAT (%)", default=23)
+    discount = models.DecimalField(
+        max_digits=5,
+        verbose_name="Rabat (%)",
+        decimal_places=2,
+        default=0,
+        validators=[
+            MinValueValidator(Decimal("0")),
+            MaxValueValidator(Decimal("100")),
+        ],
+    )
     info = models.TextField(verbose_name="Komentarz", null=True, blank=True)
 
     class Meta:
-        verbose_name = "Produkt w zamówieniu"
-        verbose_name_plural = "Produkty w zamówieniu"
-        ordering = ["name"]
+        verbose_name = "Pozycja zamówienia"
+        verbose_name_plural = "Pozycje zamówienia"
+        ordering = ["item_type", "id"]
 
     def __str__(self):
         if self.discount:
             return (
                 self.name
-                + f" {self.qty} x {self.price} zł ({self.discount}% rabatu)"
+                + f" {self.qty} x {self.price_gross} zł"
+                + f" ({self.discount}% rabatu)"
             )
-        return self.name + f" {self.qty} x {self.price} zł"
+        return self.name + f" {self.qty} x {self.price_gross} zł"
+
+    def save(self, *args, **kwargs):
+        # Źródłem prawdy jest cena brutto (Product.price to cena brutto).
+        # Cenę brutto liczymy z netto tylko wtedy, gdy ręcznie zmieniono
+        # wyłącznie cenę netto.
+        old = None
+        if self.pk:
+            old = (
+                OrderItem.objects.filter(pk=self.pk)
+                .values("price_net", "price_gross", "vat_rate")
+                .first()
+            )
+        if old is None:
+            net_edited = not self.price_gross and self.price_net
+        else:
+            net_edited = (
+                old["price_net"] != self.price_net
+                and old["price_gross"] == self.price_gross
+                and old["vat_rate"] == self.vat_rate
+            )
+        if net_edited:
+            self.price_gross = round_money(
+                Decimal(self.price_net) * self.vat_multiplier
+            )
+        else:
+            self.price_net = self.net_from_gross(self.price_gross)
+        super().save(*args, **kwargs)
+
+    @property
+    def vat_multiplier(self):
+        return 1 + Decimal(self.vat_rate) / 100
+
+    def net_from_gross(self, gross):
+        return round_money(Decimal(gross) / self.vat_multiplier)
+
+    @property
+    def price_gross_after_discount(self):
+        return round_money(
+            Decimal(self.price_gross) * (100 - Decimal(self.discount)) / 100
+        )
+
+    @property
+    def price_net_after_discount(self):
+        return self.net_from_gross(self.price_gross_after_discount)
+
+    @property
+    def value_gross(self):
+        return round_money(Decimal(self.price_gross) * self.qty)
+
+    @property
+    def value_net(self):
+        return self.net_from_gross(self.value_gross)
+
+    @property
+    def value_gross_after_discount(self):
+        return round_money(self.price_gross_after_discount * self.qty)
+
+    @property
+    def value_net_after_discount(self):
+        return self.net_from_gross(self.value_gross_after_discount)
+
+    @property
+    def vat_value(self):
+        return self.value_gross_after_discount - self.value_net_after_discount
 
 
 class Invoice(models.Model):

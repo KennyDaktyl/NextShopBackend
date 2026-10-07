@@ -286,21 +286,91 @@ class PaymentAdmin(admin.ModelAdmin):
     list_filter = ("is_active", "pickup_only")
 
 
+ORDER_ITEM_COMPUTED_FIELDS = (
+    "price_net_after_discount",
+    "price_gross_after_discount",
+    "value_net_after_discount",
+    "value_gross_after_discount",
+)
+
+
+def regenerate_invoice_if_issued(order):
+    if order.make_invoice and order.invoice_created:
+        generate_invoice_for_order(order)
+
+
+class OrderItemComputedFieldsMixin:
+    @admin.display(description="Cena netto po rabacie")
+    def price_net_after_discount(self, obj):
+        return obj.price_net_after_discount if obj.pk else "-"
+
+    @admin.display(description="Cena brutto po rabacie")
+    def price_gross_after_discount(self, obj):
+        return obj.price_gross_after_discount if obj.pk else "-"
+
+    @admin.display(description="Wartość netto po rabacie")
+    def value_net_after_discount(self, obj):
+        return obj.value_net_after_discount if obj.pk else "-"
+
+    @admin.display(description="Wartość brutto po rabacie")
+    def value_gross_after_discount(self, obj):
+        return obj.value_gross_after_discount if obj.pk else "-"
+
+
+class OrderItemInline(OrderItemComputedFieldsMixin, admin.TabularInline):
+    model = OrderItem
+    extra = 0
+    fields = (
+        "item_type",
+        "name",
+        "variant",
+        "selected_option",
+        "product",
+        "qty",
+        "price_net",
+        "price_gross",
+        "vat_rate",
+        "discount",
+    ) + ORDER_ITEM_COMPUTED_FIELDS
+    readonly_fields = ORDER_ITEM_COMPUTED_FIELDS
+    autocomplete_fields = ("product",)
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        # Nowa pozycja domyślnie dostaje rabat zamówienia.
+        if obj is not None:
+            formset.form.base_fields["discount"].initial = obj.discount
+        return formset
+
+
 @admin.register(OrderItem)
-class OrderItemAdmin(admin.ModelAdmin):
+class OrderItemAdmin(OrderItemComputedFieldsMixin, admin.ModelAdmin):
     list_display = (
         "id",
         "order",
-        "product",
+        "item_type",
         "name",
         "qty",
-        "price",
+        "price_net",
+        "price_gross",
         "discount",
+        "value_gross_after_discount",
     )
     search_fields = ("name", "order__order_number")
-    list_filter = ("order__created_date",)
-    
-    
+    list_filter = ("item_type", "order__created_date")
+    readonly_fields = ORDER_ITEM_COMPUTED_FIELDS
+    autocomplete_fields = ("order", "product")
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        regenerate_invoice_if_issued(obj.order)
+
+    def delete_model(self, request, obj):
+        order = obj.order
+        super().delete_model(request, obj)
+        regenerate_invoice_if_issued(order)
+
+
 @admin.action(description="Oznacz jako Zrealizowane")
 def mark_orders_as_completed(modeladmin, request, queryset):
     for order in queryset:
@@ -338,7 +408,8 @@ class OrderAdmin(admin.ModelAdmin):
         "payment_method",
         "status",
     )
-    readonly_fields = ("created_date", "updated_date", "uid")
+    readonly_fields = ("created_date", "updated_date", "uid", "cart_items")
+    inlines = [OrderItemInline]
 
     fieldsets = (
         (
@@ -353,18 +424,24 @@ class OrderAdmin(admin.ModelAdmin):
                     "client_name",
                     "client_email",
                     "client_mobile",
+                    "discount",
                     "amount",
                     "amount_with_discount",
-                    "discount",
+                    "cart_items_price",
+                    "delivery_price",
+                    "payment_price",
                     "info",
                     "delivery_method",
                     "payment_method",
-                    "payment_price",
-                    "delivery_price",
-                    "cart_items_price",
-                    "cart_items",
                     "link",
                 )
+            },
+        ),
+        (
+            "Koszyk w chwili złożenia zamówienia (archiwum)",
+            {
+                "classes": ("collapse",),
+                "fields": ("cart_items",),
             },
         ),
         (
@@ -420,6 +497,34 @@ class OrderAdmin(admin.ModelAdmin):
         ),
         ("Timestamps", {"fields": ("created_date", "updated_date")}),
     )
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj)
+        # Kwoty wynikają z pozycji zamówienia.
+        if obj is not None and obj.order_items.exists():
+            readonly_fields += (
+                "amount",
+                "amount_with_discount",
+                "cart_items_price",
+                "delivery_price",
+                "payment_price",
+            )
+        return readonly_fields
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        order = form.instance
+        # Zmianę samego rabatu obsługuje już Order.save() i sygnał post_save.
+        if not any(formset.has_changed() for formset in formsets):
+            return
+        if getattr(order, "is_discount_changed", False) or (
+            not change and order.discount
+        ):
+            # Edytowane w tym samym zapisie pozycje mogły nadpisać rabat
+            # starą wartością z formularza.
+            order.apply_discount_to_items()
+        order.update_totals()
+        regenerate_invoice_if_issued(order)
 
 
 @admin.action(description="Utwórz fakturę")
