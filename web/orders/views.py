@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from web.carts.cart import Cart
-from web.constants import STATUS_LOCKED_FOR_CLIENT
+from web.constants import STATUS_AWAITING_PAYMENT, STATUS_LOCKED_FOR_CLIENT
 from web.models.deliveries import Delivery
 from web.models.orders import Order, OrderItem
 from web.models.products import Product
@@ -142,6 +142,7 @@ class CreateOrderView(GenericAPIView):
             if request.user.is_authenticated:
                 order_serializer.validated_data["client"] = request.user
 
+
             order_serializer.validated_data["amount"] = (
                 delivery_method.price
                 + payment_method.price
@@ -161,6 +162,13 @@ class CreateOrderView(GenericAPIView):
                 create_order_items(
                     order, cart.get_items(), delivery_method, payment_method
                 )
+                if not payment_method.payment_online:
+                    # Płatność offline - zamówienie jest złożone od razu.
+                    # Status ustawiamy tutaj (po pozycjach - faktura), a nie
+                    # dopiero żądaniem z frontendu, żeby e-mail
+                    # z potwierdzeniem nie zależał od przeglądarki klienta.
+                    order.status = STATUS_AWAITING_PAYMENT
+                    order.save()
 
             return Response(
                 {"order_uid": order.uid}, status=status.HTTP_201_CREATED

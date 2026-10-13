@@ -193,7 +193,40 @@
         {% else %}
         <h1>Potwierdzenie zamówienia #{{ order.order_number }}</h1>
         <p>Drogi Kliencie <span class="text-bold">{{ order.client_name }}</span>,</p>
-        <p>Dziękujemy za złożenie zamówienia w naszym sklepie. Oto szczegóły Twojego zamówienia:</p>
+        <p>Dziękujemy za złożenie zamówienia w naszym sklepie.</p>
+        <div class="status-box">
+            <p><strong>Status zamówienia:</strong>
+                <span class="badge badge-status">{{ order.get_status_display }}</span>
+            </p>
+            {% if order.is_paid or order.status == 3 %}
+                <p>Otrzymaliśmy płatność. Przystępujemy do realizacji zamówienia.</p>
+            {% elif order.status == 4 %}
+                <p>Weryfikujemy Twoją płatność. Po jej zaksięgowaniu przystąpimy do realizacji zamówienia.</p>
+            {% elif order.payment_method.bank_transfer %}
+                <p>Zamówienie czeka na wpłatę. Realizację rozpoczniemy po zaksięgowaniu przelewu.</p>
+            {% elif order.payment_method.pickup_only or order.payment_method.payment_on_delivery %}
+                <p>Za zamówienie zapłacisz przy odbiorze ({{ order.payment_method.name }}).</p>
+            {% else %}
+                <p>Przystępujemy do realizacji zamówienia.</p>
+            {% endif %}
+        </div>
+        {% if order.payment_method.bank_transfer and not order.is_paid %}
+        <div class="status-box">
+            <p><strong>Dane do przelewu:</strong></p>
+            <p>
+                <strong>Odbiorca:</strong> Michał Pielak Miktel<br>
+                <strong>Numer konta:</strong> 21 1020 2906 0000 1702 0373 8333<br>
+                <strong>Kwota:</strong> {{ order.amount }} zł<br>
+                <strong>Tytuł przelewu:</strong> Zamówienie #{{ order.order_number }}
+            </p>
+        </div>
+        {% endif %}
+        {% if order.delivery_method.in_store_pickup %}
+        <div class="status-box">
+            <p><strong>Odbiór osobisty:</strong> 32-061 Rybna, ul. Wspólna 2. Przed przyjazdem prosimy o telefon: 506 029 980.</p>
+        </div>
+        {% endif %}
+        <p>Poniżej szczegóły Twojego zamówienia:</p>
         {% endif %}
         
         <h2>Dane zamówienia:</h2>

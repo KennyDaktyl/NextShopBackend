@@ -137,7 +137,18 @@ def send_activation_info_for_owner(title, message, user):
     return True
 
 
-def send_email_order_status(order, status_changed=False):
+def _order_email_subjects(order, status_changed, confirmation):
+    """Zwraca (temat dla klienta, temat dla sklepu)."""
+    if confirmation:
+        client_subject = (
+            f"Potwierdzenie zamówienia nr {order.order_number} - Serwis w Rybnej"
+        )
+        shop_subject = (
+            f"Nowe zamówienie nr {order.order_number}: {order.amount} zł, "
+            f"{order.payment_method.name}, {order.delivery_method.name} "
+            f"({order.get_status_display()})"
+        )
+        return client_subject, shop_subject
     if status_changed:
         subject = (
             f"Zmieniono status zamówienia nr {order.order_number} "
@@ -145,17 +156,24 @@ def send_email_order_status(order, status_changed=False):
         )
     else:
         subject = f"Zamówienie w Serwisie w Rybnej nr: {order.order_number} Zmiana statusu"
-    from_email = settings.EMAIL_HOST_USER
-    to = [
-        settings.EMAIL_HOST_USER,
-    ]
+    return subject, subject
 
-    if order.client and order.client.profile.send_emails:
-        to.append(order.client_email)
-    elif order.client is None:
-        to.append(order.client_email)
-    else:
-        pass
+
+def send_email_order_status(order, status_changed=False, confirmation=False):
+    """Wysyła e-mail o zamówieniu do sklepu i (jeśli włączone) do klienta.
+
+    Każdy odbiorca jest wysyłany osobno - błąd wysyłki do jednego nie
+    blokuje drugiego. Zwraca liczbę wysłanych wiadomości.
+    """
+    client_subject, shop_subject = _order_email_subjects(
+        order, status_changed, confirmation
+    )
+    from_email = settings.EMAIL_HOST_USER
+    recipients = [(settings.EMAIL_HOST_USER, shop_subject)]
+    # E-maile o zamówieniu są transakcyjne - o wysyłce do klienta decyduje
+    # przełącznik na zamówieniu, nie zgoda na maile w profilu.
+    if order.email_notification and order.client_email:
+        recipients.append((order.client_email, client_subject))
 
     try:
         cart_items = json.loads(order.cart_items)
@@ -172,22 +190,32 @@ def send_email_order_status(order, status_changed=False):
                 for item in order.order_items.all()
                 if item.item_type == item.TYPE_PRODUCT
             ],
-            "status_changed": status_changed,
+            "status_changed": status_changed and not confirmation,
         },
     )
+    text_content = strip_tags(html_content)
 
-    for email in to:
-        msg = EmailMultiAlternatives(
-            subject, html_content, from_email, [email]
-        )
-        msg.attach_alternative(html_content, "text/html")
-
-        if hasattr(order, "invoice") and order.invoice.pdf:
-            order.invoice.pdf.seek(0)
-            msg.attach(
-                f"faktura-{order.order_number}.pdf",
-                order.invoice.pdf.read(),
-                "application/pdf",
+    sent = 0
+    for email, subject in recipients:
+        try:
+            msg = EmailMultiAlternatives(
+                subject, text_content, from_email, [email]
             )
+            msg.attach_alternative(html_content, "text/html")
 
-        msg.send()
+            if hasattr(order, "invoice") and order.invoice.pdf:
+                order.invoice.pdf.seek(0)
+                msg.attach(
+                    f"faktura-{order.order_number}.pdf",
+                    order.invoice.pdf.read(),
+                    "application/pdf",
+                )
+
+            msg.send()
+            sent += 1
+        except Exception as e:
+            print(
+                f"Error sending order email ({order.order_number}) "
+                f"to {email}: {e}"
+            )
+    return sent

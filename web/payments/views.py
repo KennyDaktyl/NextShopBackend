@@ -11,7 +11,6 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from web.functions import send_email_order_status
 from web.models.orders import Order
 from web.models.payments import Payment
 
@@ -72,10 +71,9 @@ class StripeWebhookView(View):
                     order.payment_date = timezone.now()
                 else:
                     order.status = 4
+                # E-maile (potwierdzenie / zmiana statusu) wysyła sygnał
+                # post_save zamówienia.
                 order.save()
-                # Przy opłaceniu (status 3) e-mail wysyła sygnał post_save.
-                if order.status != 3:
-                    send_email_order_status(order)
             except Order.DoesNotExist:
                 pass
 

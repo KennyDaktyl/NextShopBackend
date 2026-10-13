@@ -195,6 +195,10 @@ class Order(models.Model):
     email_notification = models.BooleanField(
         verbose_name="Czy wysyłac email", default=True
     )
+    confirmation_email_sent = models.BooleanField(
+        verbose_name="Wysłano e-mail z potwierdzeniem zamówienia",
+        default=False,
+    )
 
     overriden_invoice_number = models.CharField(
         verbose_name="Nadpisz numer faktury",

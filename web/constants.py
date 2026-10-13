@@ -52,6 +52,14 @@ VARIANT_COLORS = (
 # Zrealizowane, Anulowane) wysyła klientowi e-mail - tylko dla zamówień
 # z wysyłką (nie odbiór osobisty). Inne zmiany statusu - bez maila.
 STATUS_FOR_SEND_EMAIL = [3, 9, 12, 13, 14]
+# Statusy oznaczające, że klient zakończył składanie zamówienia (Opłacone,
+# Trwa weryfikacja płatności, Do zapłaty, W trakcie realizacji). Pierwsze
+# wejście w jeden z nich wysyła - raz - e-mail z potwierdzeniem zamówienia
+# do sklepu i klienta, niezależnie od sposobu dostawy i płatności.
+STATUS_ORDER_PLACED = [3, 4, 5, 8]
+# Status startowy zamówienia z płatnością offline (przelew tradycyjny,
+# gotówka / karta przy odbiorze).
+STATUS_AWAITING_PAYMENT = 5
 # Statusy ustawiane przez sklep (admin, webhook Stripe). Frontend klienta
 # (np. odświeżenie strony po złożeniu zamówienia) nie może ich już zmienić.
 STATUS_LOCKED_FOR_CLIENT = [3, 5, 9, 10, 11, 12, 13, 14]
