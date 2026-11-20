@@ -1,7 +1,8 @@
 """Komenda create_gate_remotes: podgląd nic nie zapisuje, --apply tworzy kategorię
-i 13 zamienników z własnymi plikami zdjęć, ponowne uruchomienie nic nie zmienia,
+i 13 pilotów z własnymi plikami zdjęć, ponowne uruchomienie nic nie zmienia,
 a pozycje usługowe zostają nietknięte."""
 
+import os
 import re
 import shutil
 import tempfile
@@ -122,10 +123,9 @@ class CreateGateRemotesTests(TestCase):
 
         hormann = Brand.objects.get(pk=self.hormann.pk)
         self.assertEqual((hormann.name, hormann.slug), ("Hörmann", "hormann"))
-        self.assertEqual(Brand.objects.get(slug="zamiennik").pk, self.zamiennik.pk)
         self.assertEqual(
             set(Brand.objects.exclude(slug=None).values_list("name", flat=True)),
-            {"Zamiennik", "Nice", "CAME", "FAAC", "BFT", "Beninca", "Somfy", "Hörmann"},
+            {"Nice", "CAME", "FAAC", "BFT", "Beninca", "Somfy", "Hörmann"},
         )
 
         products = self.gate_products()
@@ -137,7 +137,7 @@ class CreateGateRemotesTests(TestCase):
             self.assertFalse(p.is_service)
             self.assertEqual(p.qty, 1)
             self.assertEqual(p.current_price, Decimal("69.00"))
-            self.assertEqual(p.brand_id, self.zamiennik.pk)
+            self.assertIsNone(p.brand_id)  # marka dopiero po potwierdzeniu oryginalności
             self.assertEqual(p.compatible_brand.slug, remote["compatible"])
             self.assertEqual(p.gtin, "")
             self.assertLessEqual(len(p.meta_title), 60)
@@ -212,18 +212,18 @@ class CreateGateRemotesTests(TestCase):
         self.assertIn("od 69 zł", Category.objects.get(slug="piloty-do-bram").meta_description)
 
     def test_refuses_slug_owned_by_service(self):
-        Product.objects.filter(pk=self.smilo_service).update(slug="pilot-nice-smilo-zamiennik")
+        Product.objects.filter(pk=self.smilo_service).update(slug="pilot-nice-smilo")
         with self.assertRaisesMessage(Exception, "należy do usługi"):
             run("--apply")
         self.assertFalse(Category.objects.filter(slug="piloty-do-bram").exists())
 
     def test_api_exposes_new_fields(self):
         run("--apply")
-        response = self.client.get("/api/products/pilot-faac-xt4-868-slh-lr-zamiennik/")
+        response = self.client.get("/api/products/pilot-faac-xt4-868-slh-lr/")
         self.assertEqual(response.status_code, 200)
         body = response.json()
         self.assertEqual(body["sku"], "PB-FAAC-XT4-868")
-        self.assertEqual(body["brand"]["slug"], "zamiennik")
+        self.assertIsNone(body["brand"])
         self.assertEqual(body["compatible_brand"]["name"], "FAAC")
         self.assertIn({"name": "Częstotliwość", "value": "868,35 MHz"}, body["specifications"])
         self.assertTrue(body["faqs"][0]["question"].startswith("Jak dodać pilot FAAC XT4"))
@@ -234,3 +234,44 @@ class CreateGateRemotesTests(TestCase):
         self.assertEqual(listing["count"], 13)
         self.assertEqual(listing["results"][0]["qty"], 1)
         self.assertTrue(listing["results"][0]["short_description"])
+
+    def assert_no_replacement_word(self):
+        for p in self.gate_products():
+            texts = [p.name, p.h1_tag, p.slug, p.meta_title, p.meta_description, p.description,
+                     p.short_description, p.seo_text, p.image_alt, p.image_title, p.oryg_image.name]
+            texts += list(p.faqs.values_list("question", flat=True)) + list(p.faqs.values_list("answer", flat=True))
+            texts += [f"{n} {v}" for n, v in p.specifications.values_list("name", "value")]
+            texts += [f"{t.oryg_image.name} {t.alt} {t.title}" for t in Thumbnail.objects.filter(product=p)]
+            texts += [f"{ph.oryg_image.name} {ph.image_alt} {ph.slug}" for ph in p.photos.all()]
+            for text in texts:
+                self.assertNotRegex(text or "", r"(?i)zamiennik|nieoryginal|oryginaln", p.sku)
+        category = Category.objects.get(slug="piloty-do-bram")
+        for text in (category.meta_title, category.meta_description, category.description, category.seo_text):
+            self.assertNotRegex(text, r"(?i)zamiennik|oryginaln")
+
+    def test_no_replacement_wording(self):
+        run("--apply")
+        self.assert_no_replacement_word()
+
+    def test_rename_from_previous_slugs_and_files(self):
+        # Stan po pierwszym wdrożeniu: slugi i pliki z „-zamiennik”.
+        old = [{**r, "slug": f"{r['slug']}-zamiennik", "name": f"{r['name']} – zamiennik",
+                "label": f"{r['label']} zamiennik"} for r in self.remotes]
+        with mock.patch.object(data, "REMOTES", old):
+            run("--apply")
+        space = self.gate_products().get(sku="PB-CAME-025")
+        old_files = [space.oryg_image.path] + [ph.oryg_image.path for ph in space.photos.all()]
+        old_files += [t.oryg_image.path for t in Thumbnail.objects.filter(product=space)]
+        counts = (Product.objects.count(), ProductPrice.objects.count())
+
+        output = run("--apply")
+        self.assertIn("Zapisano", output)
+        self.assertEqual(counts, (Product.objects.count(), ProductPrice.objects.count()))
+        self.assert_no_replacement_word()
+        space.refresh_from_db()
+        self.assertEqual(space.slug, "pilot-came-space")
+        self.assertEqual(space.photos.count(), 2)
+        self.assertEqual(Thumbnail.objects.filter(product=space).count(), 9)  # 3 rozmiary x 3 zdjęcia
+        for path in old_files:
+            self.assertFalse(os.path.exists(path), path)
+        self.assertIn("Liczba zmian: 0", run("--apply"))

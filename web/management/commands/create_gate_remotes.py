@@ -1,4 +1,4 @@
-"""Tworzy kategorię „Piloty do bram”, producentów i 13 produktów-zamienników.
+"""Tworzy kategorię „Piloty do bram”, producentów i 13 pilotów do bram.
 
 Bez --apply działa w transakcji wycofywanej na końcu (podgląd: nic nie zapisuje,
 nie kopiuje plików i nie wysyła rewalidacji). Z --apply zapisuje wszystko w jednej
@@ -13,13 +13,16 @@ krótkiego opisu, FAQ i tytułu zdjęcia.
 
 Zdjęcie: plik oryginału z pozycji usługowej jest kopiowany jako NOWY plik
 (products/{slug}.{ext}), więc zmiana lub usunięcie zdjęcia usługi nie wpływa
-na produkt. Miniatury generuje Product.save().
+na produkt. Miniatury generuje Product.save(). Gdy slug się zmieni, plik
+i miniatury są zapisywane ponownie pod nową nazwą (stare pliki usuwają sygnały).
 
 Uwaga: Product.save() nadpisuje slug na „{nazwa}-id-{id}” przy tworzeniu
 i przy zmianie nazwy, dlatego nazwy i sluga zmieniamy przez QuerySet.update().
 """
 
+import copy
 import os
+import re
 from decimal import Decimal
 from unittest import mock
 
@@ -73,14 +76,14 @@ def product_texts(remote, brand_name, price):
         "seo_text": data.build_seo_text(remote, brand_name),
         "meta_title": meta_title(remote, price),
         "meta_description": remote["meta_description"].format(price=price),
-        "image_alt": f"Pilot do bramy {label} – zamiennik, {remote['color']}",
-        "image_title": f"{label} (zamiennik) – pilot do bramy, {price} zł",
+        "image_alt": f"Pilot do bramy {label}, {remote['color']}",
+        "image_title": f"{label} – pilot do bramy, {price} zł",
         "google_product_category": data.GOOGLE_PRODUCT_CATEGORY,
     }
 
 
 class Command(BaseCommand):
-    help = "Tworzy/synchronizuje kategorię „Piloty do bram” i 13 pilotów-zamienników."
+    help = "Tworzy/synchronizuje kategorię „Piloty do bram” i 13 pilotów do bram."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -92,6 +95,7 @@ class Command(BaseCommand):
         self.changes = []
         self.warnings = []
         self.touched_products = set()
+        self.old_slugs = {}  # pk -> poprzedni slug (do rewalidacji starego adresu)
         self.report_rows = []
 
         try:
@@ -185,7 +189,7 @@ class Command(BaseCommand):
         wanted = {
             "item_label": c["item_label"],
             "h1_tag": c["h1_tag"],
-            "meta_title": c["meta_title"],
+            "meta_title": c["meta_title"].format(price=price),
             "meta_description": c["meta_description"].format(price=price),
             "description": c["description"].format(price=price),
             "seo_text": c["seo_text"],
@@ -228,7 +232,6 @@ class Command(BaseCommand):
             product = Product(
                 name=remote["name"],
                 category=self.category,
-                brand=self.brands["zamiennik"],
                 is_service=False,
                 qty=data.DEFAULT_QTY,
             )
@@ -237,6 +240,8 @@ class Command(BaseCommand):
             self.change(f"Produkt: utworzono {remote['slug']} (id {product.pk})")
 
         if product.slug != remote["slug"]:
+            if product.slug and not re.search(r"-id-\d+$", product.slug):
+                self.old_slugs[product.pk] = product.slug
             Product.objects.filter(pk=product.pk).update(slug=remote["slug"])
             self.change(f"{remote['slug']}: slug")
         product.refresh_from_db()
@@ -248,7 +253,8 @@ class Command(BaseCommand):
             **texts,
             "sku": remote["sku"],
             "category_id": self.category.pk,
-            "brand_id": self.brands["zamiennik"].pk,
+            # Marka = producent dopiero po potwierdzeniu oryginalności, inaczej pusta.
+            "brand_id": compatible.pk if remote.get("brand_is_manufacturer") else None,
             "compatible_brand_id": compatible.pk,
             "is_service": False,
         }
@@ -313,6 +319,26 @@ class Command(BaseCommand):
             product.save()
             return
 
+        stem = os.path.splitext(os.path.basename(product.oryg_image.name))[0]
+        # Django dokleja „_XXXXXXX”, gdy plik o tej nazwie już istnieje – to nadal aktualna nazwa.
+        if not re.fullmatch(rf"{re.escape(remote['slug'])}(_[A-Za-z0-9]{{7}})?", stem):
+            # Slug się zmienił – zapisujemy plik pod nową nazwą; save() usunie stary plik
+            # i stare miniatury, a nowe wygeneruje z nazwą wg sluga.
+            ext = os.path.splitext(product.oryg_image.name)[1].lower()
+            self.change(
+                f"{remote['slug']}: zdjęcie – nowa nazwa {product.oryg_image.name} → products/{remote['slug']}{ext}"
+            )
+            self.touched_products.add(product.pk)
+            if not self.apply:
+                return
+            with product.oryg_image.open("rb") as f:
+                content = f.read()
+            product.oryg_image.save(
+                f"{remote['slug']}{ext}", ContentFile(content), save=False
+            )
+            product.save()
+            return
+
         # Zdjęcie już jest – synchronizujemy alt/title w miniaturach głównych.
         thumbs = Thumbnail.objects.filter(product=product, main=True, is_variant=False)
         stale = thumbs.exclude(alt=product.image_alt, title=product.image_title)
@@ -322,30 +348,59 @@ class Command(BaseCommand):
             self.touched_products.add(product.pk)
 
     def sync_photos(self, product, remote):
-        if not remote.get("copy_photos") or product.photos.exists():
+        if not remote.get("copy_photos"):
+            return
+        existing = list(product.photos.all())
+        pattern = re.compile(rf"^{re.escape(remote['slug'])}-\d+(_[A-Za-z0-9]+)?\.\w+$")
+        current = all(
+            pattern.match(os.path.basename(p.oryg_image.name))
+            and (p.image_alt or "").startswith(f"Pilot do bramy {remote['label']},")
+            for p in existing
+        )
+        if existing and current:
+            return
+        if existing:
+            # Nazwy plików/alt po starym slugu – usuwamy zdjęcia i ich miniatury
+            # (miniatury dodatkowych zdjęć są przypięte do produktu, main=False).
+            self.change(f"{remote['slug']}: dodatkowe zdjęcia – ponownie pod nową nazwą")
+            self.touched_products.add(product.pk)
+            if not self.apply:
+                return
+            sources = [(p.oryg_image.name, p.image_alt) for p in existing]
+            contents = []
+            for photo in existing:
+                with photo.oryg_image.open("rb") as f:
+                    contents.append(f.read())
+            Thumbnail.objects.filter(product=product, main=False, is_variant=False).delete()
+            for photo in existing:
+                photo.delete()
+            for index, ((name, alt), content) in enumerate(zip(sources, contents), start=1):
+                suffix = alt.split(",")[-1].strip() if alt else f"zdjęcie {index}"
+                self.create_photo(product, remote, index, suffix, os.path.splitext(name)[1].lower(), content)
             return
         source_photos = list(
             Photo.objects.filter(product_id=remote["service_id"]).order_by("id")
         )
         for index, source in enumerate(source_photos, start=1):
             suffix = (source.image_alt or "").split("025", 1)[-1].strip(" -–") or f"zdjęcie {index}"
-            alt = f"Pilot do bramy {remote['label']} – zamiennik, {suffix}"
             ext = os.path.splitext(source.oryg_image.name)[1].lower()
             self.change(f"{remote['slug']}: dodatkowe zdjęcie „{suffix}” (kopia {source.oryg_image.name})")
             self.touched_products.add(product.pk)
             if not self.apply:
                 continue
-            photo = Photo(
-                product=product,
-                name=f"{remote['slug']}-{suffix}",
-                image_alt=alt,
-                image_title=alt,
-            )
             with source.oryg_image.open("rb") as f:
-                photo.oryg_image.save(
-                    f"{remote['slug']}-{index}{ext}", ContentFile(f.read()), save=False
-                )
-            photo.save()
+                self.create_photo(product, remote, index, suffix, ext, f.read())
+
+    def create_photo(self, product, remote, index, suffix, ext, content):
+        alt = f"Pilot do bramy {remote['label']}, {suffix}"
+        photo = Photo(
+            product=product,
+            name=f"{remote['slug']}-{suffix}",
+            image_alt=alt,
+            image_title=alt,
+        )
+        photo.oryg_image.save(f"{remote['slug']}-{index}{ext}", ContentFile(content), save=False)
+        photo.save()
 
     def sync_related(self, product, model, wanted, label):
         fields = list(wanted[0].keys()) if wanted else []
@@ -369,6 +424,11 @@ class Command(BaseCommand):
 
         for product in Product.objects.filter(pk__in=self.touched_products):
             revalidate_product_cache_product(sender=Product, instance=product)
+            if product.pk in self.old_slugs:
+                # Stary adres ma własny tag cache – bez tego serwowałby starą treść.
+                old = copy.copy(product)
+                old.slug = self.old_slugs[product.pk]
+                revalidate_product_cache_product(sender=Product, instance=old)
         revalidate_product_cache_category(sender=Category, instance=self.category)
         self.stdout.write(
             f"Wysłano rewalidację cache frontendu ({len(self.touched_products)} produktów + kategoria)."
