@@ -16,7 +16,7 @@ uruchomieniu komendy (cena 69 zł jest tymczasowa).
 SERVICE_URL = "/uslugi/mobilne-kodowanie-pilotow-do-bram"
 PHONE = "506 029 980"
 ADDRESS = "ul. Wspólna 2 w Rybnej"
-HOURS = "pn–pt 8–17"
+HOURS = "po wcześniejszym umówieniu"  # brak stałych godzin otwarcia
 DEFAULT_PRICE = "69.00"
 DEFAULT_QTY = 1
 GOOGLE_PRODUCT_CATEGORY = "6741"  # Dom i ogród > Sprzęt AGD > Piloty i klawiatury do bram garażowych

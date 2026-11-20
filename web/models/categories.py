@@ -231,6 +231,26 @@ class Category(models.Model):
         return f"/produkty/{self.slug}"
 
 
+class CategoryFAQ(models.Model):
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        related_name="faqs",
+        verbose_name="Kategoria",
+    )
+    question = models.CharField(verbose_name="Pytanie", max_length=255)
+    answer = models.TextField(verbose_name="Odpowiedź (tekst, dozwolony link <a>)")
+    order = models.PositiveIntegerField(verbose_name="Kolejność", default=0)
+
+    class Meta:
+        verbose_name = "FAQ kategorii"
+        verbose_name_plural = "FAQ kategorii"
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return self.question
+
+
 class MobileServiceSettings(models.Model):
     category = models.OneToOneField(
         Category,

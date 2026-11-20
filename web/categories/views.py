@@ -75,6 +75,8 @@ class MenuItemsView(generics.RetrieveAPIView):
             "full_path": category_data["full_path"],
             "image": category_data["image"],
             "mobile_service_settings": category_data["mobile_service_settings"],
+            "breadcrumbs": category_data["breadcrumbs"],
+            "faqs": category_data["faqs"],
             "items": subcategories_data,
         }
         return Response(custom_response)

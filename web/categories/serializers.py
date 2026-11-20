@@ -2,7 +2,12 @@ from rest_framework import serializers
 from django.db.models import Avg
 
 from web.images.serializers import ThumbnailSerializer
-from web.models.categories import Category, MobileServiceSettings, ServiceLocality
+from web.models.categories import (
+    Category,
+    CategoryFAQ,
+    MobileServiceSettings,
+    ServiceLocality,
+)
 from web.products.serializers import ProductOnFirstPageSerializer, ProductReviewSerializer
 
 
@@ -60,10 +65,18 @@ class CategoryListingSerializer(serializers.ModelSerializer):
         return obj.children.exists()
     
     
+class CategoryFAQSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoryFAQ
+        fields = ("question", "answer")
+
+
 class CategorySerializer(CategoryListingSerializer):
 
     back_link = serializers.SerializerMethodField()
     mobile_service_settings = serializers.SerializerMethodField()
+    breadcrumbs = serializers.SerializerMethodField()
+    faqs = CategoryFAQSerializer(many=True, read_only=True)
 
     class Meta:
         model = Category
@@ -85,10 +98,22 @@ class CategorySerializer(CategoryListingSerializer):
             "back_link",
             "image",
             "mobile_service_settings",
+            "breadcrumbs",
+            "faqs",
         )
 
     def get_back_link(self, obj):
         return obj.get_back_link()
+
+    def get_breadcrumbs(self, obj):
+        chain = []
+        category = obj
+        while category:
+            chain.insert(
+                0, {"name": category.name, "full_path": category.get_full_path()}
+            )
+            category = category.parent
+        return chain
 
     def get_mobile_service_settings(self, obj):
         settings = getattr(obj, "mobile_service_settings", None)

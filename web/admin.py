@@ -6,7 +6,12 @@ from web.models.accounts import Profile
 
 # from web.models.carts import Cart, CartItem
 from web.models.articles import Article
-from web.models.categories import Category, MobileServiceSettings, ServiceLocality
+from web.models.categories import (
+    Category,
+    CategoryFAQ,
+    MobileServiceSettings,
+    ServiceLocality,
+)
 from web.models.deliveries import Delivery
 from web.models.footer_links import FooterLink
 from web.models.heros import Hero
@@ -136,8 +141,14 @@ class PriceGroupAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
+class CategoryFAQInline(admin.StackedInline):
+    model = CategoryFAQ
+    extra = 0
+
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    inlines = [CategoryFAQInline]
     list_display = (
         "id",
         "name",
