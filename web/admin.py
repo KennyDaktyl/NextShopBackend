@@ -22,6 +22,8 @@ from web.models.products import (
     ProductOption,
     ProductOptionItem,
     ProductReview,
+    ProductFAQ,
+    ProductSpecification,
     ProductVariant,
     Size,
     Tag,
@@ -199,6 +201,16 @@ class ProductVariantInline(admin.TabularInline):
     extra = 1
 
 
+class ProductSpecificationInline(admin.TabularInline):
+    model = ProductSpecification
+    extra = 0
+
+
+class ProductFAQInline(admin.StackedInline):
+    model = ProductFAQ
+    extra = 0
+
+
 @admin.register(ProductOption)
 class ProductOptionAdmin(admin.ModelAdmin):
     list_display = [f.name for f in ProductOption._meta.fields]
@@ -213,16 +225,22 @@ class ProductOptionItemAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    inlines = [ProductVariantInline, ProductPriceInline]
+    inlines = [
+        ProductVariantInline,
+        ProductPriceInline,
+        ProductSpecificationInline,
+        ProductFAQInline,
+    ]
     list_display = (
         "id",
         "name",
+        "sku",
         "qty",
         "category",
         "on_first_page",
     )
-    search_fields = ["name", "pk"]
-    list_filter = ["on_first_page", "is_service"]
+    search_fields = ["name", "pk", "sku"]
+    list_filter = ["on_first_page", "is_service", "brand"]
     readonly_fields = ("created_date", "modified_date")
 
     autocomplete_fields = ['category', 'prev_category']
@@ -590,8 +608,8 @@ class PhotoAdmin(admin.ModelAdmin):
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ("id", "name")
-    search_fields = ("name",)
+    list_display = ("id", "name", "slug", "website")
+    search_fields = ("name", "slug")
 
 
 @admin.register(Size)

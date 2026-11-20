@@ -28,6 +28,16 @@ class Tag(models.Model):
 
 class Brand(models.Model):
     name = models.CharField(verbose_name="Nazwa marki", max_length=255)
+    slug = models.SlugField(
+        verbose_name="Slug", max_length=255, unique=True, blank=True, null=True
+    )
+    description = models.TextField(
+        verbose_name="Krótki opis marki", blank=True, default=""
+    )
+    website = models.URLField(verbose_name="Strona www", blank=True, default="")
+    logo = models.ImageField(
+        verbose_name="Logo", upload_to="brands", blank=True
+    )
 
     def __str__(self):
         return self.name
@@ -175,6 +185,31 @@ class Product(models.Model):
         on_delete=models.CASCADE,
         blank=True,
         null=True,
+    )
+    compatible_brand = models.ForeignKey(
+        "Brand",
+        verbose_name="Pasuje do (producent oryginału)",
+        help_text="Dla zamienników: marka urządzenia, z którym produkt współpracuje.",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="compatible_products",
+    )
+    sku = models.CharField(
+        verbose_name="SKU", max_length=64, unique=True, blank=True, null=True
+    )
+    gtin = models.CharField(
+        verbose_name="EAN/GTIN",
+        max_length=14,
+        blank=True,
+        default="",
+        help_text="Tylko prawdziwy kod z opakowania – nie wymyślaj.",
+    )
+    short_description = models.CharField(
+        verbose_name="Krótki opis (listing)",
+        max_length=300,
+        blank=True,
+        default="",
     )
     material = models.ForeignKey(
         "Material",
@@ -473,6 +508,46 @@ class ProductVariant(models.Model):
         return self.variant_thumbnails.filter(
             width_expected=350, height_expected=350, is_variant=True, main=True
         ).first()
+
+
+class ProductSpecification(models.Model):
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="specifications",
+        verbose_name="Produkt",
+    )
+    name = models.CharField(verbose_name="Parametr", max_length=100)
+    value = models.CharField(verbose_name="Wartość", max_length=255)
+    order = models.PositiveIntegerField(verbose_name="Kolejność", default=0)
+
+    class Meta:
+        verbose_name = "Parametr produktu"
+        verbose_name_plural = "Parametry produktu"
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return f"{self.name}: {self.value}"
+
+
+class ProductFAQ(models.Model):
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="faqs",
+        verbose_name="Produkt",
+    )
+    question = models.CharField(verbose_name="Pytanie", max_length=255)
+    answer = models.TextField(verbose_name="Odpowiedź (tekst, dozwolony link <a>)")
+    order = models.PositiveIntegerField(verbose_name="Kolejność", default=0)
+
+    class Meta:
+        verbose_name = "FAQ produktu"
+        verbose_name_plural = "FAQ produktów"
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return self.question
 
 
 class ProductReview(models.Model):

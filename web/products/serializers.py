@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.html import strip_tags
 from rest_framework import serializers
 
 from django.db.models import Avg
@@ -8,7 +9,9 @@ from web.models.products import (
     Category,
     Material,
     Product,
+    ProductFAQ,
     ProductOptionItem,
+    ProductSpecification,
     ProductReview,
     ProductVariant,
     Size,
@@ -26,7 +29,19 @@ class TagSerializer(serializers.ModelSerializer):
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ("id", "name")
+        fields = ("id", "name", "slug")
+
+
+class ProductSpecificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductSpecification
+        fields = ("name", "value")
+
+
+class ProductFAQSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductFAQ
+        fields = ("question", "answer")
 
 
 class MaterialSerializer(serializers.ModelSerializer):
@@ -106,6 +121,23 @@ class ProductCategorySerializer(serializers.ModelSerializer):
         return obj.get_full_path()
 
 
+class ProductDetailsCategorySerializer(ProductCategorySerializer):
+    breadcrumbs = serializers.SerializerMethodField()
+
+    class Meta(ProductCategorySerializer.Meta):
+        fields = ProductCategorySerializer.Meta.fields + ("breadcrumbs",)
+
+    def get_breadcrumbs(self, obj):
+        chain = []
+        category = obj
+        while category:
+            chain.insert(
+                0, {"name": category.name, "full_path": category.get_full_path()}
+            )
+            category = category.parent
+        return chain
+
+
 class ProductsPathListSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -131,9 +163,12 @@ class ProductReviewSerializer(serializers.ModelSerializer):
 class ProductDetailsSerializer(serializers.ModelSerializer):
     images = ThumbnailSerializer(many=True)
     variants = ProductVariantSerializer(many=True)
-    category = ProductCategorySerializer()
+    category = ProductDetailsCategorySerializer()
     tags = TagSerializer(many=True)
     brand = BrandSerializer()
+    compatible_brand = BrandSerializer()
+    specifications = ProductSpecificationSerializer(many=True, read_only=True)
+    faqs = ProductFAQSerializer(many=True, read_only=True)
     material = MaterialSerializer()
     size = SizeSerializer()
     color = serializers.SerializerMethodField()
@@ -162,6 +197,12 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             "color",
             "tags",
             "brand",
+            "compatible_brand",
+            "sku",
+            "gtin",
+            "short_description",
+            "specifications",
+            "faqs",
             "material",
             "size",
             "current_price",
@@ -215,8 +256,10 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             "slug",
             "category",
             "description",
+            "short_description",
             "seo_text",
             "image",
+            "qty",
             "current_price",
             "min_price_last_30",
             "full_path",
@@ -295,7 +338,7 @@ class ProductGoogleMerchantSerializer(serializers.ModelSerializer):
     
     def get_description(self, obj):
         if obj.description:
-            return obj.description
+            return strip_tags(obj.description).strip()
         else:
             return "Produkt z kategorii " + obj.category.name
         
