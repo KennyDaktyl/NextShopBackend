@@ -141,6 +141,12 @@ class PrzebudujKluczeSamochodoweTests(TestCase):
                 "250.00",
                 {},
             ),
+            (
+                "usluga-wymiany-obudowy-pilota-id-617",
+                "Usługa wymiany obudowy pilota",
+                "99.00",
+                {},
+            ),
         ):
             product = make(
                 Product,
@@ -219,6 +225,12 @@ class PrzebudujKluczeSamochodoweTests(TestCase):
         )
         self.assertEqual(
             Product.objects.get(
+                slug="usluga-wymiany-obudowy-pilota-id-617"
+            ).current_price,
+            Decimal("100.00"),
+        )
+        self.assertEqual(
+            Product.objects.get(
                 slug="klucze-samochodowe-id-643"
             ).current_price,
             Decimal("100.00"),
@@ -237,7 +249,7 @@ class PrzebudujKluczeSamochodoweTests(TestCase):
         self.assertLessEqual(len(emergency.meta_description), 160)
 
         bodies = []
-        for brand in ("audi", "volkswagen", "seat"):
+        for brand in ("audi", "volkswagen", "seat", "skoda"):
             page = Category.objects.get(
                 slug=f"programowanie-kluczy-i-pilotow-samochodowych-{brand}"
             )
@@ -264,8 +276,8 @@ class PrzebudujKluczeSamochodoweTests(TestCase):
                 }
             )
         # Treści marek nie są kopią z podmienioną nazwą: wspólne może być najwyżej zdanie o urządzeniu VAG.
-        for i in range(3):
-            for j in range(i + 1, 3):
+        for i in range(len(bodies)):
+            for j in range(i + 1, len(bodies)):
                 shared = bodies[i] & bodies[j]
                 self.assertLessEqual(len(shared), 1, shared)
 

@@ -36,8 +36,8 @@ PRICE_SENTENCE = (
 )
 
 VAG_LINKS = (
-    f"{a(brand_path('audi'), 'Audi')}, {a(brand_path('volkswagen'), 'Volkswagen')} "
-    f"i {a(brand_path('seat'), 'Seat')}"
+    f"{a(brand_path('audi'), 'Audi')}, {a(brand_path('volkswagen'), 'Volkswagen')}, "
+    f"{a(brand_path('seat'), 'Seat')} i {a(brand_path('skoda'), 'Skoda')}"
 )
 
 APPOINTMENT_ANSWER = (
@@ -94,11 +94,11 @@ REPLACEMENTS = [
         'zwykle mogę wykonać <a href="/uslugi/klucze-samochodowe/kopiowanie-immobilizerow" '
         'class="underline">kopię immobilizera</a> — także w nowszych modelach. Zadzwoń z numerem VIN, '
         "a powiem, co da się zrobić.</p>",
-        '<h3 class="text-lg font-semibold mb-2">Audi, Volkswagen i Seat — także roczniki po 2016</h3>\n'
+        '<h3 class="text-lg font-semibold mb-2">Audi, Volkswagen, Seat i Skoda — także roczniki po 2016</h3>\n'
         '  <p class="mb-4">Mam nowe urządzenie do programowania kluczy i pilotów grupy VAG, więc '
         f"obsługuję także nowsze roczniki {VAG_LINKS}, które wcześniej wymagały wizyty w ASO. "
         "Możliwość wykonania potwierdzam przez telefon po modelu, roczniku i VIN.</p>\n"
-        '  <h3 class="text-lg font-semibold mb-2">Skoda, BMW i Volvo</h3>\n'
+        '  <h3 class="text-lg font-semibold mb-2">BMW i Volvo</h3>\n'
         '  <p class="mb-4">W nowszych rocznikach tych marek, jeśli masz jeden działający klucz, zwykle '
         f"mogę wykonać {a(COPYING, 'kopię immobilizera')}. Zadzwoń z numerem VIN, a powiem, co da się "
         "zrobić.</p>",
@@ -113,7 +113,7 @@ REPLACEMENTS = [
         "category", "kopiowanie-immobilizerow", "seo_text",
         "Kopiowanie wykonuję też w autach grupy VAG (Volkswagen, Skoda, Audi, Seat), BMW i Volvo",
         "Kopiowanie wykonuję też w autach grupy VAG ("
-        f"{a(brand_path('volkswagen'), 'Volkswagen')}, Skoda, {a(brand_path('audi'), 'Audi')}, "
+        f"{a(brand_path('volkswagen'), 'Volkswagen')}, {a(brand_path('skoda'), 'Skoda')}, {a(brand_path('audi'), 'Audi')}, "
         f"{a(brand_path('seat'), 'Seat')}), BMW i Volvo",
     ),
     # kategoria klucze-samochodowe: nowe marki + awaryjne otwieranie
@@ -171,6 +171,8 @@ REPLACEMENTS = [
 # Ceny pozycji usługowych ujednolicane do tabeli właściciela (slug -> cena brutto).
 PRODUCT_PRICES = {
     "kopiowanie-immobilizerow-id-620": "300.00",
+    # wymiana obudowy kluczyka/pilota: od 100 zł (było 99 zł)
+    "usluga-wymiany-obudowy-pilota-id-617": "100.00",
 }
 
 # Pola nadpisywane w całości (slug kategorii -> pola).
@@ -455,6 +457,60 @@ NEW_BRANDS = {
             ),
         ],
     },
+    "skoda": {
+        "name": "Programowanie Kluczy i Pilotów Samochodowych Skoda",
+        "item_label": "Programowanie Pilotów Skoda",
+        "order": 15,
+        "meta_title": "Klucze i piloty Skoda – programowanie z dojazdem, Kraków",
+        "meta_description": (
+            "Kluczyk do Skody z dojazdem: Octavia, Fabia, Superb, Kodiaq, Karoq, także roczniki "
+            "po 2016. Kopia immobilizera lub programowanie przez OBD. Kraków i okolice."
+        ),
+        "h1_tag": "Programowanie kluczy i pilotów Skoda z dojazdem — Kraków",
+        "description": (
+            "Dorabiam i programuję kluczyki oraz piloty do Skody z dojazdem do klienta — Octavia, "
+            "Fabia, Superb, Kodiaq, Karoq i inne modele, także po 2016. Kraków i okolice."
+        ),
+        "seo_text": f"""<section class="w-full mx-auto">
+  <h2 class="text-xl font-bold mb-4">Kluczyk do Skody bez holowania do ASO</h2>
+  <p class="mb-4">Skoda to jedna z najpopularniejszych marek w Polsce — Octavia i Fabia jeżdżą w rodzinach, Superb i Octavia kombi w firmach i na taksówkach. Te auta robią duże przebiegi, więc kluczyk często jest wytarty, pilot słabo łapie albo po zakupie z drugiej ręki został tylko jeden egzemplarz. Przyjeżdżam pod wskazany adres i robię klucz na miejscu.</p>
+  <h3 class="text-lg font-semibold mb-2">Zapasowy kluczyk do Skody</h3>
+  <p class="mb-4">Gdy masz jeden działający klucz, wykonuję {a(COPYING, 'kopię immobilizera')} i docinam grot — za taki klucz zapłacisz 300 zł. Jeśli pilot działa, a pękła tylko obudowa, wystarczy {a(CAR_KEYS + '/wymiana-obudowy', 'wymiana obudowy')} — od 100 zł, bez programowania.</p>
+  <h3 class="text-lg font-semibold mb-2">Wszystkie klucze zgubione</h3>
+  <p class="mb-4">Bez działającego klucza programuję nowy przez złącze OBD: od 300 zł plus koszt pilota lub klucza (np. od ok. 150 zł). Kluczyki zostały w zamkniętym aucie? Zacznę od {a(EMERGENCY, 'awaryjnego otwarcia samochodu')} — bez uszkadzania zamka.</p>
+  <h3 class="text-lg font-semibold mb-2">Skoda po 2016 roku</h3>
+  <p class="mb-4">{VAG_NEW_MACHINE.format(brand='Skody')}</p>
+  <h3 class="text-lg font-semibold mb-2">Modele Skoda, do których dzwonicie najczęściej</h3>
+  <ul class="list-disc list-inside mb-4">
+    <li>Skoda Octavia (liftback i kombi)</li>
+    <li>Skoda Fabia</li>
+    <li>Skoda Superb</li>
+    <li>Skoda Rapid i Scala</li>
+    <li>Skoda Kodiaq, Karoq i Kamiq</li>
+  </ul>
+  <h3 class="text-lg font-semibold mb-2">Skody we flotach i na taksówkach</h3>
+  <p class="mb-4">Przy autach firmowych liczy się czas: każdy dzień postoju to strata. Mogę przyjechać na parking firmy i zrobić zapasowe klucze do kilku aut podczas jednej wizyty. Podaj wcześniej numery VIN, a przed przyjazdem potwierdzę, które samochody obsłużę i ile to będzie kosztować. Kierowca nie musi nigdzie jechać — klucze sprawdzamy od razu przy każdym aucie: otwieranie, zamykanie i rozruch silnika.</p>
+  <h3 class="text-lg font-semibold mb-2">Pilot Skody przestał działać?</h3>
+  <p class="mb-4">Zanim zamówisz nowy klucz, sprawdź baterię. Gdy zasięg pilota spada stopniowo, a auto otwiera się dopiero z bliska, najczęściej wystarcza {a(CAR_KEYS + '/wymiana-baterii-w-pilotach-samochodowych', 'wymiana baterii')} — od 20 zł. Jeśli pilot nie reaguje mimo nowej baterii, sprawdzam, czy wystarczy ponowne zaprogramowanie, i dopiero wtedy proponuję nowy klucz. Na wizytę przygotuj dowód rejestracyjny, dowód osobisty i wszystkie klucze, które masz do tego auta.</p>
+{_brand_price_block('Skoda')}</section>""",
+        "faqs": [
+            (
+                "Czy zrobisz klucz do Skody Octavii z rocznika po 2016?",
+                "Tak, mam nowe urządzenie do programowania kluczy i pilotów grupy VAG. Możliwość "
+                "potwierdzam przez telefon po modelu, roczniku i VIN.",
+            ),
+            (
+                "Ile kosztuje drugi kluczyk do Skody?",
+                "Klucz z grotem i kopią immobilizera kosztuje 300 zł. Gdy nie masz działającego "
+                "klucza, programowanie przez OBD to od 300 zł plus koszt pilota lub klucza.",
+            ),
+            (
+                "Pęknięta obudowa pilota Skody – trzeba robić nowy klucz?",
+                "Zwykle nie. Jeśli elektronika działa, wymieniam samą obudowę — od 100 zł, bez "
+                "programowania.",
+            ),
+        ],
+    },
 }
 
 NEW_EMERGENCY = {
@@ -477,4 +533,3 @@ NEW_EMERGENCY = {
     "faqs": EMERGENCY_FAQS,
 }
 
-# TODO (właściciel): Skoda – dodać stronę marki dopiero po potwierdzeniu, że nowa maszyna ją obsługuje.
