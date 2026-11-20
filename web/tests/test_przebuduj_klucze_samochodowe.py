@@ -169,6 +169,23 @@ class PrzebudujKluczeSamochodoweTests(TestCase):
         Article.objects.filter(pk=article.pk).update(
             slug="zgubiony-kluczyk-do-auta-dorobienie-klucza-bez-oryginalu-z-dojazdem-id-10"
         )
+        Hero.objects.bulk_create(
+            [
+                Hero(
+                    title="Profesjonalne Pieczątki Firmowe i Imienne na Zamówienie Online",
+                    description="x",
+                    link="https://serwiswrybnej.pl/produkty/pieczatki",
+                    order=1,
+                ),
+                Hero(
+                    title="Dorabianie Kluczy Samochodowych i Mieszkaniowych – Szybko i Profesjonalnie",
+                    description="x",
+                    link="https://serwiswrybnej.pl/produkty/klucze",
+                    link_text="Zobacz usługi",
+                    order=2,
+                ),
+            ]
+        )
         self.slugs_before = set(
             Category.objects.values_list("slug", flat=True)
         ) | set(Product.objects.values_list("slug", flat=True))
@@ -307,6 +324,18 @@ class PrzebudujKluczeSamochodoweTests(TestCase):
                 "klucze",
                 "pieczatki",
             ],
+        )
+        keys_hero = Hero.objects.get(title__startswith="Dorabianie Kluczy")
+        self.assertEqual(
+            (keys_hero.order, keys_hero.link, keys_hero.link_text),
+            (
+                1,
+                "https://serwiswrybnej.pl/uslugi/klucze-samochodowe",
+                "Zobacz usługi kluczy samochodowych",
+            ),
+        )
+        self.assertEqual(
+            Hero.objects.get(title__startswith="Profesjonalne").order, 2
         )
         mobile = Category.objects.get(pk=self.mobile.pk)
         self.assertTrue(

@@ -177,6 +177,18 @@ PRODUCT_PRICES = {
 
 # Pola nadpisywane w całości (slug kategorii -> pola).
 CATEGORY_FIELDS = {
+    "klucze-samochodowe": {
+        "meta_description": (
+            "Dorabianie i programowanie kluczy samochodowych, kopiowanie immobilizerów, awaryjne "
+            "otwieranie aut. Audi, VW, Seat, Skoda po 2016. Dojazd – Kraków i okolice."
+        ),
+    },
+    "programowanie-kluczy-samochodowych": {
+        "meta_description": (
+            "Programowanie kluczy i pilotów z dojazdem: VW, Audi, Seat, Skoda (także po 2016), "
+            "Opel, Ford, Toyota i inne. Od 300 zł + pilot. Kraków i okolice."
+        ),
+    },
     "mobilne-dorabianie-kluczy": {
         "h1_tag": "Dorabianie kluczy samochodowych i mieszkaniowych z dojazdem — Kraków i okolice",
         "meta_title": "Dorabianie kluczy samochodowych z dojazdem – Kraków",
@@ -219,9 +231,14 @@ CATEGORY_ORDER = {
 }
 
 # Banery (Hero): klucze przed pieczątkami. Front i tak przenosi baner pieczątek na dół strony.
-HERO_ORDER_BY_LINK = {
-    "https://serwiswrybnej.pl/produkty/klucze": 1,
-    "https://serwiswrybnej.pl/produkty/pieczatki": 2,
+# Dopasowanie po tytule (link banera kluczy się zmienia, tytuł nie).
+HERO_FIELDS = {
+    "Dorabianie Kluczy Samochodowych i Mieszkaniowych – Szybko i Profesjonalnie": {
+        "order": 1,
+        "link": "https://serwiswrybnej.pl/uslugi/klucze-samochodowe",
+        "link_text": "Zobacz usługi kluczy samochodowych",
+    },
+    "Profesjonalne Pieczątki Firmowe i Imienne na Zamówienie Online": {"order": 2},
 }
 
 

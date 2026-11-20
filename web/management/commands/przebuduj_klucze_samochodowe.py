@@ -240,13 +240,17 @@ class Command(BaseCommand):
                     category.pk,
                     f"{slug}: kolejność {category.order} → {order}",
                 )
-        for link, order in data.HERO_ORDER_BY_LINK.items():
-            for hero in Hero.objects.filter(link=link).exclude(order=order):
-                Hero.objects.filter(pk=hero.pk).update(order=order)
+        for title, fields in data.HERO_FIELDS.items():
+            hero = Hero.objects.filter(title=title).first()
+            if hero is None:
+                self.warnings.append(f"Baner „{title}”: nie znaleziono")
+                continue
+            diff = {k: v for k, v in fields.items() if getattr(hero, k) != v}
+            if diff:
+                # update(): Hero.save() regeneruje miniatury.
+                Hero.objects.filter(pk=hero.pk).update(**diff)
                 self.change(
-                    "hero",
-                    hero.pk,
-                    f"Baner „{hero.title}”: kolejność {hero.order} → {order}",
+                    "hero", hero.pk, f"Baner „{title}”: {', '.join(diff)}"
                 )
 
     # --- po zapisie -------------------------------------------------------------------------
