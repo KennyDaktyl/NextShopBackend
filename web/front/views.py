@@ -2,7 +2,7 @@ from django.db.models import Prefetch
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import GenericAPIView, ListAPIView
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -85,6 +85,8 @@ class ContactView(GenericAPIView):
 class SendContactEmailView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = ContactEmailSerializer
+    # JSON (pieczątki) albo multipart (formularz kontaktowy ze zdjęciem).
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
 
     @swagger_auto_schema(
         operation_description="Retrieve contact details",
@@ -99,6 +101,7 @@ class SendContactEmailView(GenericAPIView):
             stamp_design = serializer.validated_data.get("stamp_design")
             stamp_image = serializer.validated_data.get("stamp_image")
             stamp_color = serializer.validated_data.get("stamp_color")
+            attachment = serializer.validated_data.get("attachment")
             send_email_by_django(
                 title,
                 email,
@@ -107,6 +110,7 @@ class SendContactEmailView(GenericAPIView):
                 stamp_design=stamp_design,
                 stamp_image=stamp_image,
                 stamp_color=stamp_color,
+                attachment=attachment,
             )
             return Response(
                 {"message": "Email sent successfully"},

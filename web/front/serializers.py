@@ -66,6 +66,10 @@ class ContactEmailSerializer(serializers.Serializer):
     stamp_color = serializers.ChoiceField(
         choices=["black", "red", "green", "blue"], required=False, default="black"
     )
+    # Opcjonalne zdjęcie z formularza kontaktowego (np. klucza) – tylko grafika, do 10 MB.
+    attachment = serializers.ImageField(
+        required=False, allow_null=True, validators=[validate_photo_size]
+    )
 
 
 class KeyPhotoInquirySerializer(serializers.ModelSerializer):

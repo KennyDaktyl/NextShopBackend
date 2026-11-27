@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.utils.text import get_valid_filename
 
 ALIGN_LABELS = {
     "left": "do lewej",
@@ -41,6 +42,7 @@ def send_email_by_django(
     stamp_design=None,
     stamp_image=None,
     stamp_color=None,
+    attachment=None,
 ):
     subject, from_email, to = (
         title,
@@ -79,6 +81,15 @@ def send_email_by_django(
             msg.attach("projekt-pieczatki.jpg", image_bytes, "image/jpeg")
         except (ValueError, TypeError) as e:
             print(f"Error attaching stamp image: {e}")
+
+    if attachment:
+        attachment.seek(0)
+        filename = get_valid_filename(attachment.name or "") or "zdjecie.jpg"
+        msg.attach(
+            f"zalacznik-{filename}",
+            attachment.read(),
+            getattr(attachment, "content_type", None) or "application/octet-stream",
+        )
 
     try:
         msg.send()
