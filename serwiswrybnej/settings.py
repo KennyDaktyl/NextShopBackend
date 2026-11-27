@@ -389,3 +389,9 @@ LOGGING = {
 
 GOOGLE_SERVICE_ACCOUNT_JSON_PATH = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON_PATH")
 GOOGLE_DRIVE_FOLDER_ID = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
+
+# Opinie z wizytówki Google (Places API New) – web/front/google_reviews.py
+GOOGLE_PLACES_API_KEY = os.environ.get("GOOGLE_PLACES_API_KEY", "")
+GOOGLE_PLACE_ID = os.environ.get("GOOGLE_PLACE_ID", "")
+# Twardy limit zapytań w miesiącu (darmowe 1000 w Google; zapas na różnicę stref czasowych).
+GOOGLE_PLACES_MONTHLY_LIMIT = int(os.environ.get("GOOGLE_PLACES_MONTHLY_LIMIT", "900"))

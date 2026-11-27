@@ -15,6 +15,7 @@ from web.models.categories import (
 from web.models.deliveries import Delivery
 from web.models.footer_links import FooterLink
 from web.models.heros import Hero
+from web.models.google_places import GooglePlacesApiUsage
 from web.models.images import Photo, Thumbnail
 from web.models.inquiries import KeyPhotoInquiry
 from web.models.orders import Invoice, Order, OrderItem
@@ -569,6 +570,15 @@ class InvoiceAdmin(admin.ModelAdmin):
     actions = [
         create_invoice,
     ]
+
+
+@admin.register(GooglePlacesApiUsage)
+class GooglePlacesApiUsageAdmin(admin.ModelAdmin):
+    list_display = ("month", "requests", "modified_date")
+    readonly_fields = ("month", "requests", "modified_date")
+
+    def has_add_permission(self, request):
+        return False
 
 
 @admin.register(Thumbnail)

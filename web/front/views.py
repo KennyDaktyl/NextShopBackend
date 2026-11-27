@@ -14,6 +14,7 @@ from web.front.serializers import (
     HeroSerializer,
     KeyPhotoInquirySerializer,
 )
+from web.front.google_reviews import get_google_reviews
 from web.functions import send_email_by_django, send_key_photo_inquiry_email
 from web.models.articles import Article
 from web.models.categories import Category
@@ -134,7 +135,18 @@ class KeyPhotoInquiryView(GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class GoogleReviewsView(GenericAPIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="Opinie 5★ z wizytówki Google (Places API, cache 1 h)",
+    )
+    def get(self, request, *args, **kwargs):
+        return Response(get_google_reviews(), status=status.HTTP_200_OK)
+
+
 first_page_view = FirstPageView.as_view()
+google_reviews_view = GoogleReviewsView.as_view()
 contact_view = ContactView.as_view()
 footer_links_view = FooterLinkListView.as_view()
 senf_contact_email = SendContactEmailView.as_view()
