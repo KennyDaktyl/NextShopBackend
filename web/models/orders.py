@@ -8,6 +8,7 @@ from django.db import models
 from django.utils import timezone
 
 from web.constants import ORDER_STATUS
+from web.models.accounts import client_accepts_order_emails
 from web.orders.functions import generate_order_number
 
 
@@ -236,6 +237,17 @@ class Order(models.Model):
                 + "koszyk/zamowienie-szczegoly?order_uid="
                 + str(self.uid)
             )
+        # Klient z wyłączonym „Wysyłać maile” w profilu nigdy nie dostaje maili o zamówieniu
+        # (konta z admina, np. tylko do faktury) – niezależnie od checkboxa na zamówieniu.
+        if (
+            self.client_id
+            and self.email_notification
+            and not client_accepts_order_emails(self.client_id)
+        ):
+            self.email_notification = False
+            update_fields = kwargs.get("update_fields")
+            if update_fields is not None and "email_notification" not in update_fields:
+                kwargs["update_fields"] = [*update_fields, "email_notification"]
         self.is_paid_changed = False
         self.is_status_changed = False
         self.is_discount_changed = False

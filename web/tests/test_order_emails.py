@@ -220,11 +220,63 @@ class OrderEmailTests(TestCase):
 
     # --- odbiorcy -------------------------------------------------------------------------------
 
-    def test_logged_in_client_without_marketing_consent_gets_confirmation(self):
-        user = User.objects.create_user("jan", CLIENT_EMAIL, "haslo-testowe-123")
-        Profile.objects.update_or_create(user=user, defaults={"send_emails": False})
-        order = self.place_order(self.pickup, self.transfer, client=user)
+    def make_client(self, username, send_emails):
+        user = User.objects.create_user(username, CLIENT_EMAIL, "haslo-testowe-123")
+        Profile.objects.update_or_create(user=user, defaults={"send_emails": send_emails})
+        return user
+
+    def test_registered_client_with_send_emails_gets_confirmation(self):
+        # Konto z rejestracji na stronie (send_emails=True).
+        order = self.place_order(self.pickup, self.transfer, client=self.make_client("jan", True))
         self.assert_confirmation_sent(order)
+        order.refresh_from_db()
+        self.assertTrue(order.email_notification)
+
+    def test_admin_account_without_send_emails_gets_no_client_email(self):
+        # Konto z admina tylko do faktury: zły adres, „Wysyłać maile” odznaczone.
+        order = self.place_order(self.courier, self.transfer, client=self.make_client("fv", False))
+        self.assertEqual(self.recipients(), [SHOP_EMAIL])
+        order.refresh_from_db()
+        self.assertFalse(order.email_notification)
+        self.assertTrue(order.confirmation_email_sent)  # sklep dostał „Nowe zamówienie”
+
+    def test_admin_account_order_ticked_by_hand_is_still_not_emailed(self):
+        order = self.place_order(self.courier, self.online, client=self.make_client("fv2", False))
+        order.email_notification = True  # np. zaznaczone ręcznie w adminie
+        self.save(order, status=3, is_paid=True)
+        order.refresh_from_db()
+        self.assertFalse(order.email_notification)
+        self.assertNotIn(CLIENT_EMAIL, self.recipients())
+
+    def test_old_order_of_admin_account_gets_no_status_email(self):
+        # Stare zamówienie zapisane z email_notification=True z pominięciem save().
+        user = self.make_client("fv3", False)
+        order = self.place_order(self.courier, self.transfer, client=user)
+        Order.objects.filter(pk=order.pk).update(email_notification=True)
+        mail.outbox = []
+        order.refresh_from_db()
+        self.save(order, status=9)  # wysłane
+        self.assertNotIn(CLIENT_EMAIL, self.recipients())
+
+    def test_pickup_completed_notifies_shop_only(self):
+        # Jak zamówienie 00009-11-2026: odbiór osobisty, gotówka, konto z admina -> „Zrealizowane”.
+        order = self.place_order(self.pickup, self.cash, client=self.make_client("fv4", False))
+        mail.outbox = []
+        self.save(order, status=13)
+        self.assertEqual(self.recipients(), [SHOP_EMAIL])
+        self.assertTrue(mail.outbox[0].subject)
+
+    def test_pickup_status_change_skips_client_even_with_emails_on(self):
+        order = self.place_order(self.pickup, self.cash)
+        mail.outbox = []
+        self.save(order, status=12)  # Gotowe do odbioru
+        self.assertEqual(self.recipients(), [SHOP_EMAIL])
+
+    def test_client_without_profile_gets_no_client_email(self):
+        user = User.objects.create_user("bezprofilu", CLIENT_EMAIL, "haslo-testowe-123")
+        Profile.objects.filter(user=user).delete()
+        self.place_order(self.courier, self.transfer, client=user)
+        self.assertEqual(self.recipients(), [SHOP_EMAIL])
 
     def test_email_notification_off_still_notifies_shop(self):
         order = self.place_order(self.courier, self.online)

@@ -71,3 +71,16 @@ class Profile(models.Model):
         verbose_name = "Profil użytkownika"
         verbose_name_plural = "Profile użytkowników"
         ordering = ["-user__pk"]
+
+
+def client_accepts_order_emails(user_id):
+    """Czy klientowi wolno wysyłać maile o zamówieniach (Profile.send_emails).
+
+    Rejestracja na stronie ustawia send_emails=True. Konta zakładane w adminie
+    (np. tylko do faktury, z niepoprawnym adresem) mają je wyłączone – albo nie mają
+    profilu – i nie dostają żadnych maili. Zamówienia anonimowe nie mają klienta
+    i tej funkcji nie dotyczą.
+    """
+    return bool(
+        Profile.objects.filter(user_id=user_id).values_list("send_emails", flat=True).first()
+    )

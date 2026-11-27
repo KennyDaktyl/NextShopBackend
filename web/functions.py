@@ -7,6 +7,8 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils.text import get_valid_filename
 
+from web.models.accounts import client_accepts_order_emails
+
 ALIGN_LABELS = {
     "left": "do lewej",
     "center": "do środka",
@@ -189,7 +191,16 @@ def send_email_order_status(order, status_changed=False, confirmation=False):
     recipients = [(email, shop_subject) for email in dict.fromkeys(shop_emails)]
     # E-maile o zamówieniu są transakcyjne - o wysyłce do klienta decyduje
     # przełącznik na zamówieniu, nie zgoda na maile w profilu.
-    if order.email_notification and order.client_email:
+    # Zmiana statusu przy odbiorze osobistym – klient jest na miejscu, mail tylko dla sklepu.
+    pickup_status_change = (
+        status_changed and not confirmation and order.delivery_method.in_store_pickup
+    )
+    if (
+        order.email_notification
+        and order.client_email
+        and not pickup_status_change
+        and (not order.client_id or client_accepts_order_emails(order.client_id))
+    ):
         recipients.append((order.client_email, client_subject))
 
     try:
