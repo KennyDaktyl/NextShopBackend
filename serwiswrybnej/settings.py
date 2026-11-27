@@ -276,6 +276,12 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "true").lower() == "true"
 EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "false").lower() == "true"
+# Adresy sklepu na powiadomienia o zamówieniach (po przecinku). Puste = tylko EMAIL_HOST_USER.
+ORDER_NOTIFICATION_EMAILS = [
+    address.strip()
+    for address in os.environ.get("ORDER_NOTIFICATION_EMAILS", "").split(",")
+    if address.strip()
+]
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 

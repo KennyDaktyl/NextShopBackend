@@ -122,6 +122,19 @@ class OrderEmailTests(TestCase):
                 self.frontend_status(order, 4 if payment.bank_transfer else 8)
                 self.assertEqual(len(mail.outbox), 2)
 
+    @override_settings(ORDER_NOTIFICATION_EMAILS=[SHOP_EMAIL, "wlasciciel@example.com"])
+    def test_bank_transfer_new_order_goes_to_every_shop_address(self):
+        # Przelew: „Nowe zamówienie” na każdy adres sklepu (admin@ + prywatny), osobne wiadomości.
+        order = self.place_order(self.courier, self.transfer)
+        new_order = [
+            m for m in mail.outbox if m.subject.startswith(f"Nowe zamówienie nr {order.order_number}")
+        ]
+        self.assertEqual(
+            sorted(m.to[0] for m in new_order), sorted([SHOP_EMAIL, "wlasciciel@example.com"])
+        )
+        self.assertTrue(all(len(m.to) == 1 for m in new_order))
+        self.assertIn(CLIENT_EMAIL, [to for m in mail.outbox for to in m.to])
+
     def test_bank_transfer_confirmation_contains_transfer_details(self):
         order = self.place_order(self.courier, self.transfer)
         client_mail = next(m for m in mail.outbox if m.to == [CLIENT_EMAIL])

@@ -183,7 +183,10 @@ def send_email_order_status(order, status_changed=False, confirmation=False):
         order, status_changed, confirmation
     )
     from_email = settings.EMAIL_HOST_USER
-    recipients = [(settings.EMAIL_HOST_USER, shop_subject)]
+    # Sklep: każdy adres z ORDER_NOTIFICATION_EMAILS (np. admin@ + prywatny), zawsze –
+    # niezależnie od formy płatności. Bez ustawienia: tylko EMAIL_HOST_USER.
+    shop_emails = getattr(settings, "ORDER_NOTIFICATION_EMAILS", None) or [settings.EMAIL_HOST_USER]
+    recipients = [(email, shop_subject) for email in dict.fromkeys(shop_emails)]
     # E-maile o zamówieniu są transakcyjne - o wysyłce do klienta decyduje
     # przełącznik na zamówieniu, nie zgoda na maile w profilu.
     if order.email_notification and order.client_email:
