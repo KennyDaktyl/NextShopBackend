@@ -74,12 +74,9 @@ def oder_create_or_update_signals(sender, instance, created, **kwargs):
         # Potwierdzenie złożenia zamówienia - dla każdej kombinacji dostawy
         # i płatności. Zastępuje mail o zmianie statusu w tym samym zapisie.
         transaction.on_commit(lambda: send_order_confirmation_email(order_pk))
-    elif (
-        is_status_changed
-        and instance.status in STATUS_FOR_SEND_EMAIL
-        and instance.email_notification
-        and not instance.delivery_method.in_store_pickup
-    ):
+    elif is_status_changed and instance.status in STATUS_FOR_SEND_EMAIL:
+        # Sklep dostaje każdą taką zmianę statusu; o mailu do klienta (wysyłka, zgoda,
+        # profil) decyduje send_email_order_status.
         transaction.on_commit(lambda: send_status_changed_email(order_pk))
 
 
