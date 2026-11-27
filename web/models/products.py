@@ -10,7 +10,11 @@ from django.utils.text import slugify
 
 from web.constants import VARIANT_COLORS
 from web.models.categories import Category
-from web.models.images import generate_thumbnails
+from web.models.images import (
+    effective_image_alt,
+    generate_thumbnails,
+    sync_thumbnail_texts,
+)
 from web.models.prices import ProductPrice
 
 
@@ -302,7 +306,7 @@ class Product(models.Model):
                     False,
                     "product",
                     self.oryg_image,
-                    alt=self.image_alt,
+                    alt=self.image_alt_text,
                     title=self.image_title,
                 )
 
@@ -326,6 +330,19 @@ class Product(models.Model):
                     raise
 
         super().save(*args, **kwargs)
+        # Zmiana samego tekstu alternatywnego/tytułu (bez nowego zdjęcia) trafia do miniatur.
+        if self.oryg_image:
+            sync_thumbnail_texts(
+                self.main_thumbnails, self.image_alt_text, self.image_title
+            )
+
+    @property
+    def image_alt_text(self):
+        return effective_image_alt(self.image_alt, self.name)
+
+    @property
+    def main_thumbnails(self):
+        return self.product_thumbnails.filter(main=True, is_variant=False)
 
     def __str__(self):
         return self.name
@@ -487,12 +504,24 @@ class ProductVariant(models.Model):
                     "variant",
                     self.oryg_image,
                     file_name=file_name,
-                    alt=self.image_alt,
+                    alt=self.image_alt_text,
                     title=self.image_title,
                 )
         if old_name != self.name:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
+        if self.oryg_image:
+            sync_thumbnail_texts(
+                self.variant_thumbnails.all(), self.image_alt_text, self.image_title
+            )
+
+    @property
+    def image_alt_text(self):
+        if self.is_main:
+            fallback = self.product.name
+        else:
+            fallback = f"{self.product.name} – {self.name}"
+        return effective_image_alt(self.image_alt, fallback)
 
     def __str__(self):
         return f"{self.product.name} - {self.name}"

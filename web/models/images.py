@@ -1,4 +1,5 @@
 import os
+import re
 from io import BytesIO
 
 from django.core.files.base import ContentFile
@@ -14,6 +15,43 @@ THUMBNAIL_SIZES = [
     (350, 350),
     (650, 650),
 ]
+
+
+TECHNICAL_ALTS = {"category image", "thumbnail", "large image", "image"}
+SLUG_LIKE_RE = re.compile(r"^[a-z0-9]+(?:[-_][a-z0-9]+)+$")
+FILE_NAME_RE = re.compile(r"\.(?:jpe?g|png|webp|gif|avif|svg)$", re.IGNORECASE)
+
+
+def is_technical_alt(alt):
+    """Pusty alt, slug, nazwa pliku albo angielski placeholder – nie nadaje się jako opis zdjęcia."""
+    alt = (alt or "").strip()
+    return (
+        not alt
+        or alt.lower() in TECHNICAL_ALTS
+        or "-id-" in alt
+        or bool(SLUG_LIKE_RE.match(alt))
+        or bool(FILE_NAME_RE.search(alt))
+    )
+
+
+def effective_image_alt(image_alt, fallback):
+    """Alt do miniatur: wpisany w adminie albo – gdy pusty/techniczny – nazwa obiektu."""
+    if is_technical_alt(image_alt):
+        return fallback
+    return image_alt.strip()
+
+
+def sync_thumbnail_texts(thumbnails, alt, title=None):
+    """Przepisuje alt/title do istniejących miniatur bez generowania plików.
+
+    QuerySet.update() nie odpala post_save miniatur – rewalidację frontu robi sygnał
+    modelu-rodzica (kategorii, produktu, artykułu). Pusty title nie kasuje istniejących.
+    """
+    changed = thumbnails.exclude(alt=alt).update(alt=alt)
+    title = (title or "").strip()
+    if title:
+        changed += thumbnails.exclude(title=title).update(title=title)
+    return changed
 
 
 def generate_thumbnails(

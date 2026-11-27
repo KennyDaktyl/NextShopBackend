@@ -3,7 +3,11 @@ from django.db import models
 from django.dispatch import receiver
 from django.utils.text import slugify
 
-from web.models.images import generate_thumbnails
+from web.models.images import (
+    effective_image_alt,
+    generate_thumbnails,
+    sync_thumbnail_texts,
+)
 
 
 class Article(models.Model):
@@ -113,11 +117,24 @@ class Article(models.Model):
                     False,
                     "article",
                     self.oryg_image,
-                    alt=self.image_alt,
+                    alt=self.image_alt_text,
                     title=self.image_title,
                 )
 
         super().save(*args, **kwargs)
+        # Zmiana samego tekstu alternatywnego/tytułu (bez nowego zdjęcia) trafia do miniatur.
+        if self.oryg_image:
+            sync_thumbnail_texts(
+                self.main_thumbnails, self.image_alt_text, self.image_title
+            )
+
+    @property
+    def image_alt_text(self):
+        return effective_image_alt(self.image_alt, self.name)
+
+    @property
+    def main_thumbnails(self):
+        return self.article_thumbnails.filter(main=True)
 
     def __str__(self):
         return self.name
