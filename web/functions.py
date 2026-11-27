@@ -208,6 +208,7 @@ def send_email_order_status(order, status_changed=False, confirmation=False):
                 if item.item_type == item.TYPE_PRODUCT
             ],
             "status_changed": status_changed and not confirmation,
+            "contact_email": settings.CONTACT_EMAIL,
         },
     )
     text_content = strip_tags(html_content)

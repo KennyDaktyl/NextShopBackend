@@ -276,6 +276,8 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "true").lower() == "true"
 EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "false").lower() == "true"
+# Publiczny adres kontaktowy firmy (widoczny dla klientów, np. w mailach o zamówieniu).
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "admin@serwiswrybnej.pl")
 # Adresy sklepu na powiadomienia o zamówieniach (po przecinku). Puste = tylko EMAIL_HOST_USER.
 ORDER_NOTIFICATION_EMAILS = [
     address.strip()

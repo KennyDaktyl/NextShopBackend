@@ -135,6 +135,14 @@ class OrderEmailTests(TestCase):
         self.assertTrue(all(len(m.to) == 1 for m in new_order))
         self.assertIn(CLIENT_EMAIL, [to for m in mail.outbox for to in m.to])
 
+    def test_client_email_shows_company_contact_address(self):
+        self.place_order(self.courier, self.transfer)
+        client_mail = next(m for m in mail.outbox if m.to == [CLIENT_EMAIL])
+        html = client_mail.alternatives[0][0]
+        self.assertIn('href="mailto:admin@serwiswrybnej.pl"', html)
+        self.assertNotIn("gmail.com", html)
+        self.assertNotIn("gmail.com", client_mail.body)
+
     def test_bank_transfer_confirmation_contains_transfer_details(self):
         order = self.place_order(self.courier, self.transfer)
         client_mail = next(m for m in mail.outbox if m.to == [CLIENT_EMAIL])
