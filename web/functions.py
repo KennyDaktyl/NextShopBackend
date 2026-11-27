@@ -52,9 +52,12 @@ def send_email_by_django(
 
     phone_html = f"<p>Telefon: <strong>{phone}</strong></p>" if phone else ""
     stamp_design_html = render_stamp_design_html(stamp_design) if stamp_design else ""
+    # Kolor tuszu tylko przy zamówieniu pieczątki – serializer ma domyślnie "black",
+    # więc bez tego warunku trafiał też do zwykłych wiadomości z formularza kontaktowego.
+    is_stamp_order = bool(stamp_design or stamp_image)
     stamp_color_html = (
         f"<p>Kolor tuszu: <strong>{COLOR_LABELS.get(stamp_color, stamp_color)}</strong></p>"
-        if stamp_color
+        if stamp_color and is_stamp_order
         else ""
     )
 

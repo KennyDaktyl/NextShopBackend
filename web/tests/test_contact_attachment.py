@@ -67,3 +67,15 @@ class ContactAttachmentTests(TestCase):
         filename = mail.outbox[0].attachments[0][0]
         self.assertNotIn("/", filename)
         self.assertTrue(filename.startswith("zalacznik-"))
+
+    def test_plain_contact_message_has_no_ink_color(self):
+        self.client.post(URL, FORM)
+        message = mail.outbox[0]
+        self.assertNotIn("Kolor tuszu", message.body)
+        self.assertNotIn("Kolor tuszu", message.alternatives[0][0])
+
+    def test_stamp_order_keeps_ink_color(self):
+        stamp = {**FORM, "stamp_design": [{"text": "FIRMA SP. Z O.O.", "font": "Arial", "size": 12, "bold": True, "italic": False}], "stamp_color": "red"}
+        response = self.client.post(URL, stamp, content_type="application/json")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertIn("Kolor tuszu", mail.outbox[0].alternatives[0][0])
